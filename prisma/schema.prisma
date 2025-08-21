@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+  enum UserStatus {
+    ALLOWED
+    PENDING
+    BANNED
+  }
+
+  enum UserRoles {
+    ADMIN
+    USER
+  }
+
+
+  enum PrismaTokenType {
+    REFRESH
+    FORGOT_PASSWORD
+    CONFIRM_ACCOUNT
+    GOOGLE
+    GITHUB
+  }
+
+  enum Civility {
+    MISS
+    MISTER
+    NOT_SPECIFY
+  }
+
+  enum  FileType {
+      AVATAR
+  }
+
+  enum TableNameTypeForFile {
+    PERSONALINFO
+
+  }
+
+
+model User {
+    @@map("user")
+    id              Int                @id @default(autoincrement())
+    email           String             @unique 
+    status          UserStatus             @default(ALLOWED)
+    password        String?             
+    createdAt       DateTime           @default(now()) @map("created_at")
+    updatedAt       DateTime?          @updatedAt      @map("updated_at")
+    roles           UserRoles        
+    tokens          UserToken[] 
+  }
+
+model UserToken {
+    @@map("user_token")
+    id              Int                @id @default(autoincrement())
+    token           String             @db.Text
+    type            PrismaTokenType
+    expiresIn       DateTime           @map("expires_in")
+    uuid            String?             @unique
+    createdAt       DateTime           @default(now()) @map("created_at")
+    userId          Int                @map("user_id")
+    user  User @relation(fields: [userId], references: [id])
+  }
+
+
+
+model PersonalInfo {
+    @@map("personnal_info")
+    id            Int   @id @default(autoincrement())
+    lastName      String   
+    firstName     String   
+    civility      Civility @default(NOT_SPECIFY)
+    phone         String?  
+    description   String?    @db.VarChar(250)
+    createdAt     DateTime @default(now())  @map("created_at")
+    updatedAt     DateTime? @updatedAt      @map("updated_at")
+}
+
+
+
+model File {
+
+  @@map("file")
+  id            Int   @id @default(autoincrement())
+  name          String
+  type          FileType
+  msId          Int
+  createdAt     DateTime @default(now())  @map("created_at")
+  tableName     TableNameTypeForFile      @map("table_name")
+  tableId       Int                       @map("table_id")
+
+}
+
+
+
+model Address {
+
+  @@map("address")
+  id            Int   @id @default(autoincrement())
+  street        String
+  city          String
+  postalCode    Int                       @map("postal_code")
+  departement   String
+  createdAt     DateTime @default(now())  @map("created_at")
+  updatedAt     DateTime? @updatedAt      @map("updated_at")
+  tableName     TableNameTypeForFile      @map("table_name")
+  tableId       Int                       @map("table_id")
+
+}
+
+
