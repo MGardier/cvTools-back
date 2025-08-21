@@ -29,8 +29,10 @@ datasource db {
     REFRESH
     FORGOT_PASSWORD
     CONFIRM_ACCOUNT
-    GOOGLE
-    GITHUB
+    GOOGLE_ACCESS
+    GOOGLE_REFRESH
+    GITHUB_ACCESS
+    GITHUB_REFRESH
   }
 
   enum Civility {
@@ -48,17 +50,27 @@ datasource db {
 
   }
 
+ enum LoginMethod {
+    CLASSIC
+    GITHUB
+    GOOGLE
+
+  }
 
 model User {
     @@map("user")
     id              Int                @id @default(autoincrement())
     email           String             @unique 
-    status          UserStatus             @default(ALLOWED)
+    status          UserStatus         @default(ALLOWED)
     password        String?             
     createdAt       DateTime           @default(now()) @map("created_at")
     updatedAt       DateTime?          @updatedAt      @map("updated_at")
     roles           UserRoles        
     tokens          UserToken[] 
+    loginMethod     LoginMethod
+    id_oauth        String?
+
+    @@unique([loginMethod, id_oauth], name: "unique_oauth_user")
   }
 
 model UserToken {
@@ -67,7 +79,7 @@ model UserToken {
     token           String             @db.Text
     type            PrismaTokenType
     expiresIn       DateTime           @map("expires_in")
-    uuid            String?             @unique
+    uuid            String?            @unique
     createdAt       DateTime           @default(now()) @map("created_at")
     userId          Int                @map("user_id")
     user  User @relation(fields: [userId], references: [id])
