@@ -2,10 +2,13 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   Patch,
   Post,
   Req,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from '../auth/dto/sign-up.dto';
@@ -19,10 +22,12 @@ import { ConfirmAccountDto } from './dto/confirm-account.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Token_Type } from 'src/decorators/token-type.decorator';
 import { TokenType } from 'src/user-token/enum/token-type.enum';
+import { AuthGuard } from '@nestjs/passport';
+import { GoogleOauthGuard } from './guards/google-oauth.guard';
 
 
 
-//TODO : void to boolean 
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -53,9 +58,9 @@ export class AuthController {
   @Token_Type(TokenType.REFRESH)
   @Delete('logout')
   async logout(
-    @Req() request: Request,
+    @Req() req: Request,
   ): Promise<boolean> {
-    const token = request['token'];
+    const token = req['token'];
     return await this.authService.logout(token);
     ;
   }
@@ -63,12 +68,12 @@ export class AuthController {
   @Token_Type(TokenType.REFRESH)
   @HttpCode(201)
   @Post('refresh')
-  async refresh(@Req() request: Request) : Promise<SignInOutputInterface> {
-    const token = request['token'];
+  async refresh(@Req() req: Request) : Promise<SignInOutputInterface> {
+    const token = req['token'];
     return await this.authService.refresh(token);
   }
 
-  /* ----------  ACCOUNT MANAGEMENT ------------------------------------------------------- */
+  /********************************************** ACCOUNT MANAGEMENT *************************************************************/
 
   @Public()
   @Post('sendConfirmAccount')
@@ -90,6 +95,9 @@ export class AuthController {
 
   }
 
+
+    /************************************  PASSWORD ****************************************************/
+
   @Public()
   @Post('forgotPassword')
   async forgotPassword(
@@ -107,4 +115,24 @@ export class AuthController {
     return await this.authService.resetPassword(resetPasswordDto);
 
   }
+
+  /************************************  GOOGLE ****************************************************/
+
+
+  @Public()
+  @Get('google')
+  @UseGuards(GoogleOauthGuard)
+  googleAuth() {
+    // Redirection manage by Passport
+  }
+
+
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(GoogleOauthGuard)
+  async googleAuthCallback(@Req() req) {
+    
+      return await this.authService.signInWithGoogleUser(req.user,['id','email']);
+   }
 }

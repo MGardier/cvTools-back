@@ -29,10 +29,6 @@ datasource db {
     REFRESH
     FORGOT_PASSWORD
     CONFIRM_ACCOUNT
-    GOOGLE_ACCESS
-    GOOGLE_REFRESH
-    GITHUB_ACCESS
-    GITHUB_REFRESH
   }
 
   enum Civility {
@@ -54,7 +50,6 @@ datasource db {
     CLASSIC
     GITHUB
     GOOGLE
-
   }
 
 model User {
@@ -68,9 +63,9 @@ model User {
     roles           UserRoles        
     tokens          UserToken[] 
     loginMethod     LoginMethod
-    id_oauth        String?
+    oauthId         String?            @map("oauth_id")
 
-    @@unique([loginMethod, id_oauth], name: "unique_oauth_user")
+    @@unique([loginMethod, oauthId], name: "unique_oauth_user")
   }
 
 model UserToken {

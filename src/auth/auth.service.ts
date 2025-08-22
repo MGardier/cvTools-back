@@ -1,6 +1,7 @@
 import {
+  ConflictException,
   Injectable,
- 
+
   NotFoundException,
   UnauthorizedException,
 
@@ -16,7 +17,7 @@ import { SignUpDto } from './dto/sign-up.dto';
 
 
 import { TokenType } from 'src/user-token/enum/token-type.enum';
-import { User, UserStatus } from '@prisma/client';
+import { LoginMethod, User, UserStatus } from '@prisma/client';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignInOutputInterface } from './interfaces/sign-in.output.interface';
 import { ConfirmAccountDto } from './dto/confirm-account.dto';
@@ -38,7 +39,7 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
   ) {
-  
+
   }
 
 
@@ -53,6 +54,7 @@ export class AuthService {
       {
         email: data.email,
         password: hashedPassword,
+        loginMethod: LoginMethod.CLASSIC
       },
       userSelectedColumn
     );
@@ -71,9 +73,9 @@ export class AuthService {
   }
 
 
-  async signIn(data: SignInDto,userSelectedColumn?: (keyof User)[]): Promise<SignInOutputInterface> {
+  async signIn(data: SignInDto, userSelectedColumn?: (keyof User)[]): Promise<SignInOutputInterface> {
 
-    const user = await this.userService.findOneByEmail(data.email,userSelectedColumn );
+    const user = await this.userService.findOneByEmail(data.email, userSelectedColumn);
     if (
       !user ||
       !user?.password ||
@@ -103,10 +105,10 @@ export class AuthService {
       ['token']
     );
 
-    const {password,...responseUser} = user;
+    const { password, ...responseUser } = user;
 
 
-    return { tokens : {accessToken: access.token, refreshToken: refresh.token!}, user: responseUser as  Omit<User,"password"> };
+    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user: responseUser as Omit<User, "password"> };
   }
 
 
@@ -148,11 +150,11 @@ export class AuthService {
     const refreshToken = await this.userTokenService.generateAndSave(newPayload, TokenType.REFRESH);
 
     await this.userTokenService.remove(userToken.id);
-    const {password,...responseUser} = user;
-    return { tokens:{accessToken: accessToken.token, refreshToken: refreshToken.token!}, user: responseUser as  Omit<User,"password">};
+    const { password, ...responseUser } = user;
+    return { tokens: { accessToken: accessToken.token, refreshToken: refreshToken.token! }, user: responseUser as Omit<User, "password"> };
   }
 
-  // /* ----------  ACCOUNT MANAGEMENT ------------------------------------------------------- */
+  /************************ ACCOUNT MANAGEMENT **********************************************************/
 
 
 
@@ -188,7 +190,7 @@ export class AuthService {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       confirmAccountDto.token,
       TokenType.CONFIRM_ACCOUNT,
-      ['id','token']
+      ['id', 'token']
     );
     if (!userToken.id || !payload.sub)
       throw new NotFoundException(ErrorCodeEnum.TOKEN_EXPIRED);
@@ -199,7 +201,7 @@ export class AuthService {
 
     await this.userTokenService.remove(userToken.id);
     return true;
-    
+
   }
 
   async forgotPassword(email: string): Promise<Boolean> {
@@ -228,7 +230,7 @@ export class AuthService {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       data.token,
       TokenType.FORGOT_PASSWORD,
-      ['id','token']
+      ['id', 'token']
     );
 
     if (!userToken.id) throw new NotFoundException();
@@ -249,9 +251,67 @@ export class AuthService {
 
   /********************************************* GOOGLE METHOD *********************************************************************************************** */
 
-  async validateOrCreateGoogleUser (googleUser: any){
-    
+
+    async signInWithGoogleUser(googleUser: any, selectedColumn?: (keyof User)[]): Promise<any> {
+
+     const user = await this.userService.findOneByOauthId({ oauthId: googleUser.googleId, loginMethod: LoginMethod.GOOGLE }, selectedColumn)
+    if (
+      !user 
+    )
+      throw new UnauthorizedException('Invalid credentials');
+
+    const access = await this.userTokenService.generate({
+      email: user.email!,
+      sub: user.id!,
+    },
+      TokenType.ACCESS
+    );
+
+    const refresh = await this.userTokenService.generateAndSave(
+      {
+        email: user.email!,
+        sub: user.id!,
+      },
+      TokenType.REFRESH,
+      ['token']
+    );
+
+  
+
+
+    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user};
   }
+
+
+  async validateOrCreateGoogleUser(googleId: string ,googleEmail: string, selectedColumn?: (keyof User)[]) {
+
+    const user = await this.userService.findOneByOauthId({ oauthId: googleId, loginMethod: LoginMethod.GOOGLE }, selectedColumn)
+    if (user)
+      return user;
+    
+    const existingUser = await this.userService.findOneByEmail(googleEmail,selectedColumn);
+    if (existingUser) {
+      //If user have a already a account , he can't create another 
+      if (existingUser?.password)
+        throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR)
+      if (existingUser?.loginMethod !== LoginMethod.GOOGLE)
+        throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR)
+
+      const {password, ...returnUser} = existingUser;
+      return returnUser;
+    }
+    else{
+      const newUser  = await this.userService.create( {
+        email: googleEmail,
+        loginMethod: LoginMethod.GOOGLE,
+        oauthId : googleId
+      },selectedColumn)
+      return newUser;
+    }
+  }
+
+
+
 
 
   /********************************************* PRIVATE METHOD *********************************************************************************************** */

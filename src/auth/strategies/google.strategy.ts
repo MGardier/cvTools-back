@@ -1,8 +1,9 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
+import { email } from 'zod';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -16,12 +17,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret: configService.get('GOOGLE_CLIENT_SECRET'),
       callbackURL: configService.get('GOOGLE_CALLBACK_URL'),
 
-      scope: ['email', 'profile'],
-      // // Options supplémentaires
-      // passReqToCallback: true,
-      // prompt: 'select_account',
-      // accessType: 'offline',
-      // state: true, // CSRF PROTECTION
+      scope: ['openid','email', 'profile'],
+      // Options supplémentaires
+      passReqToCallback: true,
+      prompt: 'select_account',
+      accessType: 'offline',
+      state: true, // CSRF PROTECTION
     });
     
 
@@ -29,25 +30,24 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(
-    request: any,
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-    done: VerifyCallback,
+  req: any,
+  accessToken: string,
+  refreshToken: string,
+  profile: any,
+  done: VerifyCallback,
   ): Promise<any> {
     try {
 
-      const {  id,emails } = profile;
-      const user = await this.authService.validateOrCreateGoogleUser({
-        googleId: id,
-        email: emails[0].value,
-  
-        accessToken,
-        refreshToken,
-      });
+      const { id,emails } = profile;
+      console.log(id)
+      const user = await this.authService.validateOrCreateGoogleUser(
+        id,
+        emails[0].value,
+      );
+
       done(null, user);
     } catch (error) {
-     
+      console.info(error)
       done(error, null);
     }
   }
