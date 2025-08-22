@@ -26,6 +26,7 @@ import { TokenType } from 'src/user-token/enum/token-type.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { GoogleOauthGuard } from './guards/google-oauth.guard';
 import { ErrorCodeEnum } from '../enums/error-codes.enum';
+import { GithubOauthGuard } from './guards/github-oauth.guard';
 
 
 
@@ -44,7 +45,7 @@ export class AuthController {
   async signUp(
     @Body() signUpDto: SignUpDto,
   ): Promise<Pick<User, "id" | 'email'>> {
-    
+
     return await this.authService.signUp(signUpDto, ["id", "email"]);
   }
 
@@ -53,7 +54,7 @@ export class AuthController {
   async signIn(
     @Body() signInDto: SignInDto,
   ): Promise<SignInOutputInterface> {
-    return await this.authService.signIn(signInDto,['id', 'email', 'password', 'status', 'roles']);
+    return await this.authService.signIn(signInDto, ['id', 'email', 'password', 'status', 'roles']);
 
   }
 
@@ -70,7 +71,7 @@ export class AuthController {
   @Token_Type(TokenType.REFRESH)
   @HttpCode(201)
   @Post('refresh')
-  async refresh(@Req() req: Request) : Promise<SignInOutputInterface> {
+  async refresh(@Req() req: Request): Promise<SignInOutputInterface> {
     const token = req['token'];
     return await this.authService.refresh(token);
   }
@@ -83,7 +84,7 @@ export class AuthController {
     @Body() sendConfirmAccountDto: ForgotPasswordDTO,
   ): Promise<Pick<User, "id" | "email" | "status">> {
 
-    return await this.authService.sendConfirmAccount(sendConfirmAccountDto.email, ['id', 'email','status']);
+    return await this.authService.sendConfirmAccount(sendConfirmAccountDto.email, ['id', 'email', 'status']);
 
   }
 
@@ -98,7 +99,7 @@ export class AuthController {
   }
 
 
-    /************************************  PASSWORD ****************************************************/
+  /************************************  PASSWORD ****************************************************/
 
   @Public()
   @Post('forgotPassword')
@@ -134,8 +135,28 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleOauthGuard)
   async googleAuthCallback(@Req() req) {
-      if(!req.user.oauthId)
-        throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
-      return await this.authService.signInWithGoogleUser(req.user.oauthId);
-   }
+    if (!req.user.oauthId)
+      throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
+    return await this.authService.signInWithGoogleUser(req.user.oauthId);
+  }
+
+  /************************************  GOOGLE ****************************************************/
+
+  @Public()
+  @Get("github")
+  @UseGuards(GithubOauthGuard)
+  async githubAuth() {
+    //
+  }
+
+   @Public()
+  @Get('github/callback')
+  @UseGuards(GithubOauthGuard)
+  async githubAuthCallback(@Req() req) {
+    if (!req.user.oauthId)
+      throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
+    return await this.authService.signInWithGithubUser(req.user.oauthId);
+  }
 }
+
+

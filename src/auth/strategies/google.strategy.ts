@@ -1,6 +1,6 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
-import { BadRequestException, Injectable, PreconditionFailedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
 import { ErrorCodeEnum } from '../../enums/error-codes.enum';

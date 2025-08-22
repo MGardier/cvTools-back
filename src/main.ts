@@ -42,7 +42,7 @@ async function bootstrap() {
 
   app.use(
     session({
-      secret: process.env.JWT_REFRESH_SECRET ?? "z",
+      secret: process.env.JWT_DEFAULT_SECRET ?? "",
       resave: false,
       saveUninitialized: false,
       cookie: {

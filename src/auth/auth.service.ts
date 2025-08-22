@@ -273,9 +273,6 @@ export class AuthService {
       ['token']
     );
 
-
-
-
     return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user };
   }
 
@@ -307,8 +304,6 @@ export class AuthService {
 
      }
 
-
-
       return await this.userService.create({
         email: googleEmail,
         loginMethod: LoginMethod.GOOGLE,
@@ -317,6 +312,72 @@ export class AuthService {
       
 
   }
+
+  /********************************************* GITHUB METHOD *********************************************************************************************** */
+
+  
+
+    async signInWithGithubUser(oauthId: string, selectedColumn?: (keyof User)[]): Promise<any> {
+
+    const user = await this.userService.findOneByOauthId({ oauthId, loginMethod: LoginMethod.GITHUB }, selectedColumn)
+    if (!user)
+      throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
+    const access = await this.userTokenService.generate({
+      email: user.email!,
+      sub: user.id!,
+    },
+      TokenType.ACCESS
+    );
+
+    const refresh = await this.userTokenService.generateAndSave(
+      {
+        email: user.email!,
+        sub: user.id!,
+      },
+      TokenType.REFRESH,
+      ['token']
+    );
+
+    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user };
+  }
+
+
+  async validateOrCreateGithubUser(githubId: string, githubEmail: string) {
+
+    const existingUser = await this.userService.findOneByOauthId({ oauthId: githubId, loginMethod: LoginMethod.GITHUB },['id', 'email','status','oauthId'])
+
+    if(existingUser)
+      return existingUser;
+
+     const existingEmailUser = await this.userService.findOneByEmail(githubEmail);
+  
+     if(existingEmailUser){
+      if (existingEmailUser?.password)
+        throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR)
+      if (existingEmailUser?.loginMethod !== LoginMethod.GITHUB)
+        throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR)
+
+
+       return await this.userService.update(existingEmailUser.id!,{
+        email: githubEmail,
+        loginMethod: LoginMethod.GITHUB,
+        oauthId: githubId
+      }, ['id', 'email','status','oauthId'])
+
+  
+     }
+
+
+      return await this.userService.create({
+        email: githubEmail,
+        loginMethod: LoginMethod.GITHUB,
+        oauthId: githubId
+      }, ['id', 'email','status','oauthId'])
+      
+
+  }
+
+
 
   /********************************************* PRIVATE METHOD *********************************************************************************************** */
 
