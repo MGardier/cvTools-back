@@ -134,7 +134,6 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleOauthGuard)
   async googleAuthCallback(@Req() req) {
-    
       if(!req.user.oauthId)
         throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
       return await this.authService.signInWithGoogleUser(req.user.oauthId);

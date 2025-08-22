@@ -282,7 +282,7 @@ export class AuthService {
 
   async validateOrCreateGoogleUser(googleId: string, googleEmail: string) {
 
-    const existingUser = await this.userService.findOneByOauthId({ oauthId: googleId, loginMethod: LoginMethod.GOOGLE },['id', 'email','status'])
+    const existingUser = await this.userService.findOneByOauthId({ oauthId: googleId, loginMethod: LoginMethod.GOOGLE },['id', 'email','status','oauthId'])
 
     if(existingUser)
       return existingUser;
@@ -300,7 +300,7 @@ export class AuthService {
         email: googleEmail,
         loginMethod: LoginMethod.GOOGLE,
         oauthId: googleId
-      }, ['id', 'email','status'])
+      }, ['id', 'email','status','oauthId'])
 
   
     
@@ -313,7 +313,7 @@ export class AuthService {
         email: googleEmail,
         loginMethod: LoginMethod.GOOGLE,
         oauthId: googleId
-      }, ['id', 'email','status'])
+      }, ['id', 'email','status','oauthId'])
       
 
   }
