@@ -252,14 +252,11 @@ export class AuthService {
   /********************************************* GOOGLE METHOD *********************************************************************************************** */
 
 
-    async signInWithGoogleUser(googleUser: any, selectedColumn?: (keyof User)[]): Promise<any> {
+  async signInWithGoogleUser(oauthId: string, selectedColumn?: (keyof User)[]): Promise<any> {
 
-     const user = await this.userService.findOneByOauthId({ oauthId: googleUser.googleId, loginMethod: LoginMethod.GOOGLE }, selectedColumn)
-    if (
-      !user 
-    )
-      throw new UnauthorizedException('Invalid credentials');
-
+    const user = await this.userService.findOneByOauthId({ oauthId, loginMethod: LoginMethod.GOOGLE }, selectedColumn)
+    if (!user)
+      throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
     const access = await this.userTokenService.generate({
       email: user.email!,
       sub: user.id!,
@@ -276,43 +273,50 @@ export class AuthService {
       ['token']
     );
 
-  
 
 
-    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user};
+
+    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user };
   }
 
 
-  async validateOrCreateGoogleUser(googleId: string ,googleEmail: string, selectedColumn?: (keyof User)[]) {
+  async validateOrCreateGoogleUser(googleId: string, googleEmail: string) {
 
-    const user = await this.userService.findOneByOauthId({ oauthId: googleId, loginMethod: LoginMethod.GOOGLE }, selectedColumn)
-    if (user)
-      return user;
-    
-    const existingUser = await this.userService.findOneByEmail(googleEmail,selectedColumn);
-    if (existingUser) {
-      //If user have a already a account , he can't create another 
-      if (existingUser?.password)
+    const existingUser = await this.userService.findOneByOauthId({ oauthId: googleId, loginMethod: LoginMethod.GOOGLE },['id', 'email','status'])
+
+    if(existingUser)
+      return existingUser;
+
+     const existingEmailUser = await this.userService.findOneByEmail(googleEmail);
+  
+     if(existingEmailUser){
+      if (existingEmailUser?.password)
         throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR)
-      if (existingUser?.loginMethod !== LoginMethod.GOOGLE)
+      if (existingEmailUser?.loginMethod !== LoginMethod.GOOGLE)
         throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR)
 
-      const {password, ...returnUser} = existingUser;
-      return returnUser;
-    }
-    else{
-      const newUser  = await this.userService.create( {
+
+       return await this.userService.update(existingEmailUser.id!,{
         email: googleEmail,
         loginMethod: LoginMethod.GOOGLE,
-        oauthId : googleId
-      },selectedColumn)
-      return newUser;
-    }
+        oauthId: googleId
+      }, ['id', 'email','status'])
+
+  
+    
+
+     }
+
+
+
+      return await this.userService.create({
+        email: googleEmail,
+        loginMethod: LoginMethod.GOOGLE,
+        oauthId: googleId
+      }, ['id', 'email','status'])
+      
+
   }
-
-
-
-
 
   /********************************************* PRIVATE METHOD *********************************************************************************************** */
 

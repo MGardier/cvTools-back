@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -24,6 +25,7 @@ import { Token_Type } from 'src/decorators/token-type.decorator';
 import { TokenType } from 'src/user-token/enum/token-type.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { GoogleOauthGuard } from './guards/google-oauth.guard';
+import { ErrorCodeEnum } from '../enums/error-codes.enum';
 
 
 
@@ -133,6 +135,8 @@ export class AuthController {
   @UseGuards(GoogleOauthGuard)
   async googleAuthCallback(@Req() req) {
     
-      return await this.authService.signInWithGoogleUser(req.user,['id','email']);
+      if(!req.user.oauthId)
+        throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
+      return await this.authService.signInWithGoogleUser(req.user.oauthId);
    }
 }
