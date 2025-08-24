@@ -24,6 +24,7 @@ import { ConfirmAccountDto } from './dto/confirm-account.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ErrorCode } from 'nats';
 import { ErrorCodeEnum } from 'src/enums/error-codes.enum';
+import { SignInOauthOutputInterface } from './interfaces/sign-in-oauth.output.interface';
 
 
 //Todo : rajouter les codes d'erreurs pour les messages 
@@ -252,9 +253,9 @@ export class AuthService {
   /********************************************* GOOGLE METHOD *********************************************************************************************** */
 
 
-  async signInWithGoogleUser(oauthId: string, selectedColumn?: (keyof User)[]): Promise<any> {
+  async signInWithGoogleUser(oauthId: string): Promise<SignInOauthOutputInterface> {
 
-    const user = await this.userService.findOneByOauthId({ oauthId, loginMethod: LoginMethod.GOOGLE }, selectedColumn)
+    const user = await this.userService.findOneByOauthId({ oauthId, loginMethod: LoginMethod.GOOGLE })
     if (!user)
       throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
     const access = await this.userTokenService.generate({
@@ -273,7 +274,7 @@ export class AuthService {
       ['token']
     );
 
-    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user };
+    return { tokens: { accessToken: access.token, refreshToken: refresh.token! } };
   }
 
 
@@ -317,7 +318,7 @@ export class AuthService {
 
   
 
-    async signInWithGithubUser(oauthId: string, selectedColumn?: (keyof User)[]): Promise<any> {
+    async signInWithGithubUser(oauthId: string, selectedColumn?: (keyof User)[]): Promise<SignInOauthOutputInterface> {
 
     const user = await this.userService.findOneByOauthId({ oauthId, loginMethod: LoginMethod.GITHUB }, selectedColumn)
     if (!user)
@@ -338,7 +339,7 @@ export class AuthService {
       ['token']
     );
 
-    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user };
+    return { tokens: { accessToken: access.token, refreshToken: refresh.token! } };
   }
 
 

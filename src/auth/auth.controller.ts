@@ -27,6 +27,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { GoogleOauthGuard } from './guards/google-oauth.guard';
 import { ErrorCodeEnum } from '../enums/error-codes.enum';
 import { GithubOauthGuard } from './guards/github-oauth.guard';
+import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
 
 
 
@@ -35,6 +37,7 @@ import { GithubOauthGuard } from './guards/github-oauth.guard';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly configService: ConfigService
 
   ) { }
 
@@ -134,10 +137,21 @@ export class AuthController {
   @Public()
   @Get('google/callback')
   @UseGuards(GoogleOauthGuard)
-  async googleAuthCallback(@Req() req) {
-    if (!req.user.oauthId)
-      throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
-    return await this.authService.signInWithGoogleUser(req.user.oauthId);
+  async googleAuthCallback(@Req() req, @Res() res: Response) {
+    try {
+      if (!req.user.oauthId)
+        throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
+      const { tokens } = await this.authService.signInWithGoogleUser(req.user.oauthId);
+
+      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?accessToken=${encodeURIComponent(tokens.accessToken)}&refreshToken=${encodeURIComponent(tokens.refreshToken)}`;
+      res.redirect(redirectUrl)
+      
+    }
+    catch (error) {
+      const errorCode = Object.values(ErrorCodeEnum).includes(error.message) ? error.message : ErrorCodeEnum.INTERNAL_SERVER_ERROR
+      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?error=${encodeURIComponent(errorCode)}`;
+      res.redirect(redirectUrl);
+    }
   }
 
   /************************************  GOOGLE ****************************************************/
@@ -149,13 +163,25 @@ export class AuthController {
     //
   }
 
-   @Public()
+  @Public()
   @Get('github/callback')
   @UseGuards(GithubOauthGuard)
-  async githubAuthCallback(@Req() req) {
-    if (!req.user.oauthId)
-      throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
-    return await this.authService.signInWithGithubUser(req.user.oauthId);
+  async githubAuthCallback(@Req() req, @Res() res: Response) {
+
+    try {
+      if (!req.user.oauthId)
+        throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
+      const { tokens } = await this.authService.signInWithGithubUser(req.user.oauthId);
+      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?accessToken=${encodeURIComponent(tokens.accessToken)}&refreshToken=${encodeURIComponent(tokens.refreshToken)}`;
+      res.redirect(redirectUrl)
+    }
+    catch (error) {
+      const errorCode = Object.values(ErrorCodeEnum).includes(error.message) ? error.message : ErrorCodeEnum.INTERNAL_SERVER_ERROR
+      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?error=${encodeURIComponent(errorCode)}`;
+      res.redirect(redirectUrl);
+    }
+
+
   }
 }
 

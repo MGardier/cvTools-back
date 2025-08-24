@@ -33,11 +33,10 @@ export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
 
     let email = profile.emails?.[0]?.value
 
-    if (!email){
-     // email = await this.authService.getGithubUserEmail(accessToken);
+    
       if(!email)
          throw new BadRequestException(ErrorCodeEnum.GITHUB_EMAIL_MISSING_ERROR)
-    }
+
      
     const user = await this.authService.validateOrCreateGithubUser(
       profile.id,
