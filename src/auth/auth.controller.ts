@@ -23,13 +23,12 @@ import { ConfirmAccountDto } from './dto/confirm-account.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Token_Type } from 'src/decorators/token-type.decorator';
 import { TokenType } from 'src/user-token/enum/token-type.enum';
-import { AuthGuard } from '@nestjs/passport';
 import { GoogleOauthGuard } from './guards/google-oauth.guard';
 import { ErrorCodeEnum } from '../enums/error-codes.enum';
 import { GithubOauthGuard } from './guards/github-oauth.guard';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
-import { CompletedOauthDto } from './dto/completed-oauth.dto';
+import {  CompleteOauthDto } from './dto/complete-oauth.dto';
 
 
 
@@ -185,9 +184,9 @@ export class AuthController {
    /************************************  OAUTH ****************************************************/
 
    @Public()
-   @Post('completedOauth')
-   async completedOauth(completedOauthDto :CompletedOauthDto): Promise<SignInOutputInterface>{
-    return await this.authService.completedOauth(completedOauthDto,['id', 'email','status','oauthId','roles','loginMethod']);
+   @Post('completeOauth')
+   async completeOauth(completeOauthDto :CompleteOauthDto): Promise<SignInOutputInterface>{
+    return await this.authService.completeOauth(completeOauthDto,['id', 'email','status','oauthId','roles','loginMethod']);
    }
 }
 

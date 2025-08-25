@@ -22,10 +22,8 @@ import { SignInDto } from './dto/sign-in.dto';
 import { SignInOutputInterface } from './interfaces/sign-in.output.interface';
 import { ConfirmAccountDto } from './dto/confirm-account.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ErrorCode } from 'nats';
 import { ErrorCodeEnum } from 'src/enums/error-codes.enum';
-import { SignInOauthOutputInterface } from './interfaces/sign-in-oauth.output.interface';
-import { CompletedOauthDto } from './dto/completed-oauth.dto';
+import { CompleteOauthDto } from './dto/complete-oauth.dto';
 
 
 //Todo : rajouter les codes d'erreurs pour les messages 
@@ -328,9 +326,9 @@ export class AuthService {
 
   /********************************************* OAUTH METHOD *********************************************************************************************** */
 
-  async completedOauth (completedOauthDto: CompletedOauthDto,selectedColumn?: (keyof User)[]): Promise<SignInOutputInterface>{
+  async completeOauth (completeOauthDto: CompleteOauthDto,selectedColumn?: (keyof User)[]): Promise<SignInOutputInterface>{
 
-    const user = await this.userService.findOneByOauthId(completedOauthDto,['id', 'email','status','oauthId','roles','loginMethod']) as Omit<User,"password" | "createdAt"|"updatedAt">
+    const user = await this.userService.findOneByOauthId(completeOauthDto,['id', 'email','status','oauthId','roles','loginMethod']) as Omit<User,"password" | "createdAt"|"updatedAt">
 
     if(!user)
       throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
