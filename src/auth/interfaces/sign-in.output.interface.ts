@@ -5,6 +5,6 @@ export interface SignInOutputInterface {
   accessToken: string;
   refreshToken: string;
   }
-  user : Omit<User,"password">
+  user : Omit<User,"password" | "createdAt"|"updatedAt">
 
 }

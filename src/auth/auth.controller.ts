@@ -15,7 +15,7 @@ import { AuthService } from './auth.service';
 import { SignUpDto } from '../auth/dto/sign-up.dto';
 
 import { Public } from '../decorators/public.decorator';
-import { User } from '@prisma/client';
+import { LoginMethod, User } from '@prisma/client';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignInOutputInterface } from './interfaces/sign-in.output.interface';
 import { ForgotPasswordDTO } from './dto/forgot-password.dto';
@@ -29,6 +29,7 @@ import { ErrorCodeEnum } from '../enums/error-codes.enum';
 import { GithubOauthGuard } from './guards/github-oauth.guard';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
+import { CompletedOauthDto } from './dto/completed-oauth.dto';
 
 
 
@@ -141,9 +142,8 @@ export class AuthController {
     try {
       if (!req.user.oauthId)
         throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
-      const { tokens } = await this.authService.signInWithGoogleUser(req.user.oauthId);
 
-      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?accessToken=${encodeURIComponent(tokens.accessToken)}&refreshToken=${encodeURIComponent(tokens.refreshToken)}`;
+      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?oauthId=${encodeURIComponent(req.user.oauthId)}&loginMethod=${encodeURIComponent(LoginMethod.GOOGLE)}`;
       res.redirect(redirectUrl)
       
     }
@@ -171,8 +171,8 @@ export class AuthController {
     try {
       if (!req.user.oauthId)
         throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
-      const { tokens } = await this.authService.signInWithGithubUser(req.user.oauthId);
-      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?accessToken=${encodeURIComponent(tokens.accessToken)}&refreshToken=${encodeURIComponent(tokens.refreshToken)}`;
+
+      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?oauthId=${encodeURIComponent(req.user.oauthId)}&loginMethod=${encodeURIComponent(LoginMethod.GITHUB)}`;
       res.redirect(redirectUrl)
     }
     catch (error) {
@@ -180,9 +180,15 @@ export class AuthController {
       const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?error=${encodeURIComponent(errorCode)}`;
       res.redirect(redirectUrl);
     }
-
-
   }
+
+   /************************************  OAUTH ****************************************************/
+
+   @Public()
+   @Post('completedOauth')
+   async completedOauth(completedOauthDto :CompletedOauthDto): Promise<SignInOutputInterface>{
+    return await this.authService.completedOauth(completedOauthDto,['id', 'email','status','oauthId','roles','loginMethod']);
+   }
 }
 
 

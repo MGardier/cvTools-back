@@ -25,6 +25,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ErrorCode } from 'nats';
 import { ErrorCodeEnum } from 'src/enums/error-codes.enum';
 import { SignInOauthOutputInterface } from './interfaces/sign-in-oauth.output.interface';
+import { CompletedOauthDto } from './dto/completed-oauth.dto';
 
 
 //Todo : rajouter les codes d'erreurs pour les messages 
@@ -253,31 +254,6 @@ export class AuthService {
   /********************************************* GOOGLE METHOD *********************************************************************************************** */
 
 
-  async signInWithGoogleUser(oauthId: string): Promise<SignInOauthOutputInterface> {
-
-    const user = await this.userService.findOneByOauthId({ oauthId, loginMethod: LoginMethod.GOOGLE })
-    if (!user)
-      throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
-    const access = await this.userTokenService.generate({
-      email: user.email!,
-      sub: user.id!,
-    },
-      TokenType.ACCESS
-    );
-
-    const refresh = await this.userTokenService.generateAndSave(
-      {
-        email: user.email!,
-        sub: user.id!,
-      },
-      TokenType.REFRESH,
-      ['token']
-    );
-
-    return { tokens: { accessToken: access.token, refreshToken: refresh.token! } };
-  }
-
-
   async validateOrCreateGoogleUser(googleId: string, googleEmail: string) {
 
     const existingUser = await this.userService.findOneByOauthId({ oauthId: googleId, loginMethod: LoginMethod.GOOGLE },['id', 'email','status','oauthId'])
@@ -300,9 +276,6 @@ export class AuthService {
         oauthId: googleId
       }, ['id', 'email','status','oauthId'])
 
-  
-    
-
      }
 
       return await this.userService.create({
@@ -316,31 +289,6 @@ export class AuthService {
 
   /********************************************* GITHUB METHOD *********************************************************************************************** */
 
-  
-
-    async signInWithGithubUser(oauthId: string, selectedColumn?: (keyof User)[]): Promise<SignInOauthOutputInterface> {
-
-    const user = await this.userService.findOneByOauthId({ oauthId, loginMethod: LoginMethod.GITHUB }, selectedColumn)
-    if (!user)
-      throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
-    const access = await this.userTokenService.generate({
-      email: user.email!,
-      sub: user.id!,
-    },
-      TokenType.ACCESS
-    );
-
-    const refresh = await this.userTokenService.generateAndSave(
-      {
-        email: user.email!,
-        sub: user.id!,
-      },
-      TokenType.REFRESH,
-      ['token']
-    );
-
-    return { tokens: { accessToken: access.token, refreshToken: refresh.token! } };
-  }
 
 
   async validateOrCreateGithubUser(githubId: string, githubEmail: string) {
@@ -378,6 +326,33 @@ export class AuthService {
 
   }
 
+  /********************************************* OAUTH METHOD *********************************************************************************************** */
+
+  async completedOauth (completedOauthDto: CompletedOauthDto,selectedColumn?: (keyof User)[]): Promise<SignInOutputInterface>{
+
+    const user = await this.userService.findOneByOauthId(completedOauthDto,['id', 'email','status','oauthId','roles','loginMethod']) as Omit<User,"password" | "createdAt"|"updatedAt">
+
+    if(!user)
+      throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
+
+     const access = await this.userTokenService.generate({
+      email: user.email!,
+      sub: user.id!,
+    },
+      TokenType.ACCESS
+    );
+
+    const refresh = await this.userTokenService.generateAndSave(
+      {
+        email: user.email!,
+        sub: user.id!,
+      },
+      TokenType.REFRESH,
+      ['token']
+    );
+
+    return { tokens: { accessToken: access.token, refreshToken: refresh.token! } ,user};
+  }
 
 
   /********************************************* PRIVATE METHOD *********************************************************************************************** */
