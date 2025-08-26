@@ -185,7 +185,7 @@ export class AuthController {
 
    @Public()
    @Post('completeOauth')
-   async completeOauth(completeOauthDto :CompleteOauthDto): Promise<SignInOutputInterface>{
+   async completeOauth(@Body() completeOauthDto :CompleteOauthDto): Promise<SignInOutputInterface>{
     return await this.authService.completeOauth(completeOauthDto,['id', 'email','status','oauthId','roles','loginMethod']);
    }
 }

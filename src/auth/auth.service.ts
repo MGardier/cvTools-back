@@ -328,7 +328,8 @@ export class AuthService {
 
   async completeOauth (completeOauthDto: CompleteOauthDto,selectedColumn?: (keyof User)[]): Promise<SignInOutputInterface>{
 
-    const user = await this.userService.findOneByOauthId(completeOauthDto,['id', 'email','status','oauthId','roles','loginMethod']) as Omit<User,"password" | "createdAt"|"updatedAt">
+    console.log("data => ", completeOauthDto)
+    const user = await this.userService.findOneByOauthId(completeOauthDto,selectedColumn) as Omit<User,"password" | "createdAt"|"updatedAt">
 
     if(!user)
       throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
