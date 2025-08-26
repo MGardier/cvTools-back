@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { Inject, Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from 'prisma/prisma.module';
 import { PrismaService } from 'prisma/prisma.service';
@@ -16,14 +16,33 @@ import { HttpExceptionFilter } from './filters/httpException.filter';
 import { PrismaClientExceptionFilter } from './filters/prismaException.filter';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { AuthGuard } from './auth/guards/auth.guard';
+import { CacheModule } from '@nestjs/cache-manager';
+import KeyvRedis, { createKeyv, Keyv } from '@keyv/redis';
+import { CacheableMemory } from 'cacheable';
 
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      validate : validateEnv,
+      validate: validateEnv,
 
+    }),
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        const redisUrl = configService.get<string>('REDIS_URL');
+        const redisStore = new Keyv({
+          store: new KeyvRedis(redisUrl),
+          namespace: 'app',
+        });
+        return {
+          stores: redisStore,
+          ttl: configService.get<number>('CACHE_TTL', 300000),
+          isGlobal: true,
+        };
+      },
+      Inject: 
     }),
     UserModule,
     PrismaModule,
@@ -47,13 +66,13 @@ import { AuthGuard } from './auth/guards/auth.guard';
       useValue: 'ACCESS',
     },
     {
-      provide: APP_FILTER, useClass : GlobalExceptionFilter
+      provide: APP_FILTER, useClass: GlobalExceptionFilter
     },
-     {
+    {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
-    
+
   ],
 })
-export class AppModule {}
+export class AppModule { }

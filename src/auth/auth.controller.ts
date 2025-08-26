@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Inject,
   Patch,
   Post,
   Req,
@@ -29,6 +30,8 @@ import { GithubOauthGuard } from './guards/github-oauth.guard';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import {  CompleteOauthDto } from './dto/complete-oauth.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { v4 as uuidv4 } from 'uuid';
 
 
 
@@ -37,7 +40,8 @@ import {  CompleteOauthDto } from './dto/complete-oauth.dto';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
 
   ) { }
 
@@ -141,7 +145,8 @@ export class AuthController {
     try {
       if (!req.user.oauthId)
         throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
-
+      const uuid: string = uuidv4();
+      await this.cacheManager.add
       const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?oauthId=${encodeURIComponent(req.user.oauthId)}&loginMethod=${encodeURIComponent(LoginMethod.GOOGLE)}`;
       res.redirect(redirectUrl)
       
@@ -176,7 +181,7 @@ export class AuthController {
     }
     catch (error) {
       const errorCode = Object.values(ErrorCodeEnum).includes(error.message) ? error.message : ErrorCodeEnum.INTERNAL_SERVER_ERROR
-      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?error=${encodeURIComponent(errorCode)}`;
+      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_ERROR")}?error=${encodeURIComponent(errorCode)}`;
       res.redirect(redirectUrl);
     }
   }

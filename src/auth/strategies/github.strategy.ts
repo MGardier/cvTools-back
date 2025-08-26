@@ -33,7 +33,7 @@ export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
 
     let email = profile.emails?.[0]?.value
 
-      if(!email)
+      if(!email || !email.includes('@'))
          throw new BadRequestException(ErrorCodeEnum.GITHUB_EMAIL_MISSING_ERROR)
 
      

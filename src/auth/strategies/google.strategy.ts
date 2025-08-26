@@ -39,14 +39,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ): Promise<any> {
     try {
 
-      const { id, emails } = profile;
-      if (!id)
+      const email = profile.emails[0]?.value;
+      if (!profile.id)
         throw new BadRequestException(ErrorCodeEnum.GOOGLE_ID_MISSING_ERROR)
-      if (!emails[0]?.value)
+      if (!email ||  !email.includes('@'))
         throw new BadRequestException(ErrorCodeEnum.GOOGLE_EMAIL_MISSING_ERROR)
       const user = await this.authService.validateOrCreateGoogleUser(
-        id,
-        emails[0].value
+        profile.id,
+        email
       );
 
       done(null, user);
