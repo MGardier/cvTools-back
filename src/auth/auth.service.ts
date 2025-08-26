@@ -254,34 +254,36 @@ export class AuthService {
 
   async validateOrCreateGoogleUser(googleId: string, googleEmail: string) {
 
-    const existingUser = await this.userService.findOneByOauthId({ oauthId: googleId, loginMethod: LoginMethod.GOOGLE },['id', 'email','status','oauthId'])
+    const existingUser = await this.userService.findOneByOauthId({ oauthId: googleId, loginMethod: LoginMethod.GOOGLE }, ['id', 'email', 'status', 'oauthId'])
 
-    if(existingUser)
+    if (existingUser)
       return existingUser;
 
-     const existingEmailUser = await this.userService.findOneByEmail(googleEmail);
-  
-     if(existingEmailUser){
+    const existingEmailUser = await this.userService.findOneByEmail(googleEmail);
+
+    if (existingEmailUser) {
       if (existingEmailUser?.password)
         throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR)
       if (existingEmailUser?.loginMethod !== LoginMethod.GOOGLE)
         throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR)
 
 
-       return await this.userService.update(existingEmailUser.id!,{
+      return await this.userService.update(existingEmailUser.id!, {
         email: googleEmail,
         loginMethod: LoginMethod.GOOGLE,
+        status: UserStatus.ALLOWED,
         oauthId: googleId
-      }, ['id', 'email','status','oauthId'])
+      }, ['id', 'email', 'status', 'oauthId'])
 
-     }
+    }
 
-      return await this.userService.create({
-        email: googleEmail,
-        loginMethod: LoginMethod.GOOGLE,
-        oauthId: googleId
-      }, ['id', 'email','status','oauthId'])
-      
+    return await this.userService.create({
+      email: googleEmail,
+      loginMethod: LoginMethod.GOOGLE,
+      status: UserStatus.ALLOWED,
+      oauthId: googleId
+    }, ['id', 'email', 'status', 'oauthId'])
+
 
   }
 
@@ -291,50 +293,51 @@ export class AuthService {
 
   async validateOrCreateGithubUser(githubId: string, githubEmail: string) {
 
-    const existingUser = await this.userService.findOneByOauthId({ oauthId: githubId, loginMethod: LoginMethod.GITHUB },['id', 'email','status','oauthId'])
+    const existingUser = await this.userService.findOneByOauthId({ oauthId: githubId, loginMethod: LoginMethod.GITHUB }, ['id', 'email', 'status', 'oauthId'])
 
-    if(existingUser)
+    if (existingUser)
       return existingUser;
 
-     const existingEmailUser = await this.userService.findOneByEmail(githubEmail);
-  
-     if(existingEmailUser){
+    const existingEmailUser = await this.userService.findOneByEmail(githubEmail);
+
+    if (existingEmailUser) {
       if (existingEmailUser?.password)
         throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR)
       if (existingEmailUser?.loginMethod !== LoginMethod.GITHUB)
         throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR)
 
 
-       return await this.userService.update(existingEmailUser.id!,{
+      return await this.userService.update(existingEmailUser.id!, {
         email: githubEmail,
+        status: UserStatus.ALLOWED,
         loginMethod: LoginMethod.GITHUB,
         oauthId: githubId
-      }, ['id', 'email','status','oauthId'])
-
-  
-     }
+      }, ['id', 'email', 'status', 'oauthId'])
 
 
-      return await this.userService.create({
-        email: githubEmail,
-        loginMethod: LoginMethod.GITHUB,
-        oauthId: githubId
-      }, ['id', 'email','status','oauthId'])
-      
+    }
+
+
+    return await this.userService.create({
+      email: githubEmail,
+      loginMethod: LoginMethod.GITHUB,
+      status: UserStatus.ALLOWED,
+      oauthId: githubId
+    }, ['id', 'email', 'status', 'oauthId'])
+
 
   }
 
   /********************************************* OAUTH METHOD *********************************************************************************************** */
 
-  async completeOauth (completeOauthDto: CompleteOauthDto,selectedColumn?: (keyof User)[]): Promise<SignInOutputInterface>{
+  async completeOauth(completeOauthDto: CompleteOauthDto, selectedColumn?: (keyof User)[]): Promise<SignInOutputInterface> {
 
-    console.log("data => ", completeOauthDto)
-    const user = await this.userService.findOneByOauthId(completeOauthDto,selectedColumn) as Omit<User,"password" | "createdAt"|"updatedAt">
+    const user = await this.userService.findOneByOauthId(completeOauthDto, selectedColumn) as Omit<User, "password" | "createdAt" | "updatedAt">
 
-    if(!user)
+    if (!user)
       throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
 
-     const access = await this.userTokenService.generate({
+    const access = await this.userTokenService.generate({
       email: user.email!,
       sub: user.id!,
     },
@@ -350,7 +353,7 @@ export class AuthService {
       ['token']
     );
 
-    return { tokens: { accessToken: access.token, refreshToken: refresh.token! } ,user};
+    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user };
   }
 
 

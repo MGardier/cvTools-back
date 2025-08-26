@@ -3,15 +3,16 @@ import { User } from '@prisma/client';
 import { SignUpDto } from 'src/auth/dto/sign-up.dto';
 import { UserRepository } from './user.repository';
 import { UpdateUserInterface } from './interfaces/update-user.interface';
-import { SignUpInterface } from './interfaces/sign-up.interface';
+
 import { FindOneByOauthIdInterface } from './interfaces/find-one-by-oauth-id.interface';
+import { CreateUserInterface } from './interfaces/create-user.interface';
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) { }
 
   async create(
-    data: SignUpInterface,
+    data: CreateUserInterface,
     selectedColumn?: (keyof User)[]
   ): Promise<User> {
     return await this.userRepository.create(data, selectedColumn)

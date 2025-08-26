@@ -1,12 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from '../../prisma/prisma.service';
-import { Prisma, User, UserRoles, UserStatus } from "@prisma/client";
+import {  User, UserRoles, UserStatus } from "@prisma/client";
 
-import { SignUpDto } from "src/auth/dto/sign-up.dto";
 import { UtilRepository } from "src/utils/UtilRepository";
 import { UpdateUserInterface } from "./interfaces/update-user.interface";
-import { LoginMethod } from '../../node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/.prisma/client/index.d';
-import { SignUpInterface } from "./interfaces/sign-up.interface";
+import { CreateUserInterface } from "./interfaces/create-user.interface";
 import { FindOneByOauthIdInterface } from "./interfaces/find-one-by-oauth-id.interface";
 
 @Injectable()
@@ -18,7 +16,7 @@ export class UserRepository {
 
 
   async create(
-    data: SignUpInterface,
+    data: CreateUserInterface,
     selectedColumns?: (keyof User)[],
   ): Promise<User> {
     const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
