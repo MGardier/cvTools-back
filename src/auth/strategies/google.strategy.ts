@@ -40,10 +40,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     try {
 
       const email = profile.emails[0]?.value;
-      if (!profile.id)
-        throw new BadRequestException(ErrorCodeEnum.GOOGLE_ID_MISSING_ERROR)
-      if (!email ||  !email.includes('@'))
-        throw new BadRequestException(ErrorCodeEnum.GOOGLE_EMAIL_MISSING_ERROR)
+      if (!profile.id || !email || !email.includes('@'))
+        throw new BadRequestException(ErrorCodeEnum.GOOGLE_COMPLETED_OAUTH_FAILED)
+
+
       const user = await this.authService.validateOrCreateGoogleUser(
         profile.id,
         email

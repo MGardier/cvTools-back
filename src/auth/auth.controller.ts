@@ -6,10 +6,12 @@ import {
   Get,
   HttpCode,
   Inject,
+  Param,
   Patch,
   Post,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -29,9 +31,9 @@ import { ErrorCodeEnum } from '../enums/error-codes.enum';
 import { GithubOauthGuard } from './guards/github-oauth.guard';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
-import {  CompleteOauthDto } from './dto/complete-oauth.dto';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+
 import { v4 as uuidv4 } from 'uuid';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 
 
@@ -144,12 +146,19 @@ export class AuthController {
   async googleAuthCallback(@Req() req, @Res() res: Response) {
     try {
       if (!req.user.oauthId)
-        throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
-      const uuid: string = uuidv4();
-      await this.cacheManager.add
-      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?oauthId=${encodeURIComponent(req.user.oauthId)}&loginMethod=${encodeURIComponent(LoginMethod.GOOGLE)}`;
+        throw new BadRequestException(ErrorCodeEnum.GOOGLE_COMPLETED_OAUTH_FAILED)
+      const sessionId: string = uuidv4();
+
+
+      const data: SignInOutputInterface = await this.authService.signInOauth(req.user.oauthId, LoginMethod.GOOGLE, ['id', 'email', 'status', 'oauthId', 'roles', 'loginMethod']);
+
+      await this.cacheManager.set(sessionId, {
+        ...data
+      })
+
+      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?sessionId=${encodeURIComponent(sessionId)}&loginMethod=${encodeURIComponent(LoginMethod.GITHUB)}`;
       res.redirect(redirectUrl)
-      
+
     }
     catch (error) {
       const errorCode = Object.values(ErrorCodeEnum).includes(error.message) ? error.message : ErrorCodeEnum.INTERNAL_SERVER_ERROR
@@ -174,9 +183,15 @@ export class AuthController {
 
     try {
       if (!req.user.oauthId)
-        throw new BadRequestException(ErrorCodeEnum.OAUTH_ID_MISSING_ERROR)
+        throw new BadRequestException(ErrorCodeEnum.GITHUB_COMPLETED_OAUTH_FAILED)
+      const sessionId: string = uuidv4();
 
-      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?oauthId=${encodeURIComponent(req.user.oauthId)}&loginMethod=${encodeURIComponent(LoginMethod.GITHUB)}`;
+      const data: SignInOutputInterface = await this.authService.signInOauth(req.user.oauthId, LoginMethod.GITHUB, ['id', 'email', 'status', 'oauthId', 'roles', 'loginMethod']);
+
+      await this.cacheManager.set(sessionId, {
+        ...data
+      })
+      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?sessionId=${encodeURIComponent(sessionId)}&loginMethod=${encodeURIComponent(LoginMethod.GITHUB)}`;
       res.redirect(redirectUrl)
     }
     catch (error) {
@@ -186,13 +201,16 @@ export class AuthController {
     }
   }
 
-   /************************************  OAUTH ****************************************************/
+  /************************************  OAUTH ****************************************************/
 
-   @Public()
-   @Post('completeOauth')
-   async completeOauth(@Body() completeOauthDto :CompleteOauthDto): Promise<SignInOutputInterface>{
-    return await this.authService.completeOauth(completeOauthDto,['id', 'email','status','oauthId','roles','loginMethod']);
-   }
+  @Public()
+  @Get('oauthSession/:id')
+  async getOauthSession(@Param('id') sessionId: string): Promise<SignInOutputInterface> {
+    const session: SignInOutputInterface | undefined = await this.cacheManager.get(sessionId);
+    if (!session)
+      throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED)
+    return session;
+  }
 }
 
 

@@ -6,16 +6,12 @@ import {
   UnauthorizedException,
 
 } from '@nestjs/common';
-
-
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserTokenService } from '../user-token/user-token.service';
 import { EmailService } from '../email/email.service';
 import { ConfigService } from '@nestjs/config';
 import { SignUpDto } from './dto/sign-up.dto';
-
-
 import { TokenType } from 'src/user-token/enum/token-type.enum';
 import { LoginMethod, User, UserStatus } from '@prisma/client';
 import { SignInDto } from './dto/sign-in.dto';
@@ -23,7 +19,7 @@ import { SignInOutputInterface } from './interfaces/sign-in.output.interface';
 import { ConfirmAccountDto } from './dto/confirm-account.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ErrorCodeEnum } from 'src/enums/error-codes.enum';
-import { CompleteOauthDto } from './dto/complete-oauth.dto';
+
 
 
 //Todo : rajouter les codes d'erreurs pour les messages 
@@ -330,12 +326,12 @@ export class AuthService {
 
   /********************************************* OAUTH METHOD *********************************************************************************************** */
 
-  async completeOauth(completeOauthDto: CompleteOauthDto, selectedColumn?: (keyof User)[]): Promise<SignInOutputInterface> {
+  async signInOauth(oauthId: string, loginMethod: LoginMethod, selectedColumn?: (keyof User)[]): Promise<SignInOutputInterface> {
 
-    const user = await this.userService.findOneByOauthId(completeOauthDto, selectedColumn) as Omit<User, "password" | "createdAt" | "updatedAt">
+    const user = await this.userService.findOneByOauthId({ oauthId, loginMethod }, selectedColumn) as Omit<User, "password" | "createdAt" | "updatedAt">
 
     if (!user)
-      throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
+      throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED);
 
     const access = await this.userTokenService.generate({
       email: user.email!,

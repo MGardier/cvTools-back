@@ -27,16 +27,12 @@ export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
 
 
     try{
+        let email = profile.emails?.[0]?.value
 
-    if (!profile.id)
-      throw new BadRequestException(ErrorCodeEnum.GITHUB_ID_MISSING_ERROR)
+    if (!profile.id || (!email || !email.includes('@')))
+      throw new BadRequestException(ErrorCodeEnum.GITHUB_COMPLETED_OAUTH_FAILED)
 
-    let email = profile.emails?.[0]?.value
 
-      if(!email || !email.includes('@'))
-         throw new BadRequestException(ErrorCodeEnum.GITHUB_EMAIL_MISSING_ERROR)
-
-     
     const user = await this.authService.validateOrCreateGithubUser(
       profile.id,
       email

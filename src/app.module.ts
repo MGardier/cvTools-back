@@ -16,9 +16,8 @@ import { HttpExceptionFilter } from './filters/httpException.filter';
 import { PrismaClientExceptionFilter } from './filters/prismaException.filter';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { AuthGuard } from './auth/guards/auth.guard';
-import { CacheModule } from '@nestjs/cache-manager';
-import KeyvRedis, { createKeyv, Keyv } from '@keyv/redis';
-import { CacheableMemory } from 'cacheable';
+import { CacheManagerModule } from './cache/cache-manager.module';
+
 
 
 @Module({
@@ -28,22 +27,7 @@ import { CacheableMemory } from 'cacheable';
       validate: validateEnv,
 
     }),
-    CacheModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        const redisUrl = configService.get<string>('REDIS_URL');
-        const redisStore = new Keyv({
-          store: new KeyvRedis(redisUrl),
-          namespace: 'app',
-        });
-        return {
-          stores: redisStore,
-          ttl: configService.get<number>('CACHE_TTL', 300000),
-          isGlobal: true,
-        };
-      },
-      Inject: 
-    }),
+    CacheManagerModule,
     UserModule,
     PrismaModule,
     AuthModule,
