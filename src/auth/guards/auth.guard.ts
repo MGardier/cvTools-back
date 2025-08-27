@@ -6,10 +6,11 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { UserTokenService } from '../user-token/user-token.service';
+import { IS_PUBLIC_KEY } from 'src/decorators/public.decorator';
+
 import { TOKEN_TYPE } from 'src/decorators/token-type.decorator';
 import { TokenType } from 'src/user-token/enum/token-type.enum';
+import { UserTokenService } from 'src/user-token/user-token.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

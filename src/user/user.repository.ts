@@ -1,10 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from '../../prisma/prisma.service';
-import { Prisma, User, UserRoles, UserStatus } from "@prisma/client";
+import {  User, UserRoles, UserStatus } from "@prisma/client";
 
-import { SignUpDto } from "src/auth/dto/sign-up.dto";
 import { UtilRepository } from "src/utils/UtilRepository";
 import { UpdateUserInterface } from "./interfaces/update-user.interface";
+import { CreateUserInterface } from "./interfaces/create-user.interface";
+import { FindOneByOauthIdInterface } from "./interfaces/find-one-by-oauth-id.interface";
 
 @Injectable()
 export class UserRepository {
@@ -12,22 +13,15 @@ export class UserRepository {
 
   constructor(private readonly prismaService: PrismaService) { }
 
-  static readonly DEFAULT_SELECT: Prisma.UserSelect = {
-    id: true,
-    email: true,
-    status: true,
-    createdAt: true,
-    updatedAt: true,
-    roles: true
-  };
+
 
   async create(
-    data: SignUpDto,
+    data: CreateUserInterface,
     selectedColumns?: (keyof User)[],
   ): Promise<User> {
     const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
     return await this.prismaService.user.create({
-      select: select ?? UserRepository.DEFAULT_SELECT,
+      select: select ,
       data: {
         ...data,
         roles: UserRoles.USER,
@@ -44,7 +38,7 @@ export class UserRepository {
   ): Promise<User> {
     const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
     return await this.prismaService.user.update({
-      select: select ?? UserRepository.DEFAULT_SELECT,
+      select: select ,
       where: { id },
       data,
     });
@@ -58,7 +52,7 @@ export class UserRepository {
   ): Promise<User[]> {
     const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
     return await this.prismaService.user.findMany({
-      select: select ?? UserRepository.DEFAULT_SELECT,
+      select: select ,
     });
 
   }
@@ -70,7 +64,7 @@ export class UserRepository {
   ): Promise<User | null> {
     const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
     return await this.prismaService.user.findUnique({
-      select: select ?? UserRepository.DEFAULT_SELECT,
+      select: select ,
       where: { id },
     });
 
@@ -82,8 +76,23 @@ export class UserRepository {
   ): Promise<User | null> {
     const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
     return await this.prismaService.user.findUnique({
-      select: select ?? UserRepository.DEFAULT_SELECT,
+      select: select ,
       where: { email },
+    });
+
+  }
+
+    async findOneByOauthId(
+    data : FindOneByOauthIdInterface,
+    selectedColumns?: (keyof User)[],
+  ): Promise<User | null> {
+  
+    const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
+    return await this.prismaService.user.findUnique({
+      select: select ,
+      where: { unique_oauth_user :{
+        ...data
+      }},
     });
 
   }
