@@ -1,28 +1,25 @@
 import {
+  ConflictException,
   Injectable,
- 
+
   NotFoundException,
   UnauthorizedException,
 
 } from '@nestjs/common';
-
-
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserTokenService } from '../user-token/user-token.service';
 import { EmailService } from '../email/email.service';
 import { ConfigService } from '@nestjs/config';
 import { SignUpDto } from './dto/sign-up.dto';
-
-
 import { TokenType } from 'src/user-token/enum/token-type.enum';
-import { User, UserStatus } from '@prisma/client';
+import { LoginMethod, User, UserStatus } from '@prisma/client';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignInOutputInterface } from './interfaces/sign-in.output.interface';
 import { ConfirmAccountDto } from './dto/confirm-account.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ErrorCode } from 'nats';
 import { ErrorCodeEnum } from 'src/enums/error-codes.enum';
+
 
 
 //Todo : rajouter les codes d'erreurs pour les messages 
@@ -38,7 +35,7 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
   ) {
-  
+
   }
 
 
@@ -53,6 +50,7 @@ export class AuthService {
       {
         email: data.email,
         password: hashedPassword,
+        loginMethod: LoginMethod.CLASSIC
       },
       userSelectedColumn
     );
@@ -71,9 +69,9 @@ export class AuthService {
   }
 
 
-  async signIn(data: SignInDto,userSelectedColumn?: (keyof User)[]): Promise<SignInOutputInterface> {
+  async signIn(data: SignInDto, userSelectedColumn?: (keyof User)[]): Promise<SignInOutputInterface> {
 
-    const user = await this.userService.findOneByEmail(data.email,userSelectedColumn );
+    const user = await this.userService.findOneByEmail(data.email, userSelectedColumn);
     if (
       !user ||
       !user?.password ||
@@ -103,10 +101,10 @@ export class AuthService {
       ['token']
     );
 
-    const {password,...responseUser} = user;
+    const { password, ...responseUser } = user;
 
 
-    return { tokens : {accessToken: access.token, refreshToken: refresh.token!}, user: responseUser as  Omit<User,"password"> };
+    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user: responseUser as Omit<User, "password"> };
   }
 
 
@@ -148,11 +146,11 @@ export class AuthService {
     const refreshToken = await this.userTokenService.generateAndSave(newPayload, TokenType.REFRESH);
 
     await this.userTokenService.remove(userToken.id);
-    const {password,...responseUser} = user;
-    return { tokens:{accessToken: accessToken.token, refreshToken: refreshToken.token!}, user: responseUser as  Omit<User,"password">};
+    const { password, ...responseUser } = user;
+    return { tokens: { accessToken: accessToken.token, refreshToken: refreshToken.token! }, user: responseUser as Omit<User, "password"> };
   }
 
-  // /* ----------  ACCOUNT MANAGEMENT ------------------------------------------------------- */
+  /************************ ACCOUNT MANAGEMENT **********************************************************/
 
 
 
@@ -188,7 +186,7 @@ export class AuthService {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       confirmAccountDto.token,
       TokenType.CONFIRM_ACCOUNT,
-      ['id','token']
+      ['id', 'token']
     );
     if (!userToken.id || !payload.sub)
       throw new NotFoundException(ErrorCodeEnum.TOKEN_EXPIRED);
@@ -199,7 +197,7 @@ export class AuthService {
 
     await this.userTokenService.remove(userToken.id);
     return true;
-    
+
   }
 
   async forgotPassword(email: string): Promise<Boolean> {
@@ -228,7 +226,7 @@ export class AuthService {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       data.token,
       TokenType.FORGOT_PASSWORD,
-      ['id','token']
+      ['id', 'token']
     );
 
     if (!userToken.id) throw new NotFoundException();
@@ -245,6 +243,114 @@ export class AuthService {
     return true;
   }
 
+
+
+  /********************************************* GOOGLE METHOD *********************************************************************************************** */
+
+
+  async validateOrCreateGoogleUser(googleId: string, googleEmail: string) {
+
+    const existingUser = await this.userService.findOneByOauthId({ oauthId: googleId, loginMethod: LoginMethod.GOOGLE }, ['id', 'email', 'status', 'oauthId'])
+
+    if (existingUser)
+      return existingUser;
+
+    const existingEmailUser = await this.userService.findOneByEmail(googleEmail);
+
+    if (existingEmailUser) {
+      if (existingEmailUser?.password)
+        throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR)
+      if (existingEmailUser?.loginMethod !== LoginMethod.GOOGLE)
+        throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR)
+
+
+      return await this.userService.update(existingEmailUser.id!, {
+        email: googleEmail,
+        loginMethod: LoginMethod.GOOGLE,
+        status: UserStatus.ALLOWED,
+        oauthId: googleId
+      }, ['id', 'email', 'status', 'oauthId'])
+
+    }
+
+    return await this.userService.create({
+      email: googleEmail,
+      loginMethod: LoginMethod.GOOGLE,
+      status: UserStatus.ALLOWED,
+      oauthId: googleId
+    }, ['id', 'email', 'status', 'oauthId'])
+
+
+  }
+
+  /********************************************* GITHUB METHOD *********************************************************************************************** */
+
+
+
+  async validateOrCreateGithubUser(githubId: string, githubEmail: string) {
+
+    const existingUser = await this.userService.findOneByOauthId({ oauthId: githubId, loginMethod: LoginMethod.GITHUB }, ['id', 'email', 'status', 'oauthId'])
+
+    if (existingUser)
+      return existingUser;
+
+    const existingEmailUser = await this.userService.findOneByEmail(githubEmail);
+
+    if (existingEmailUser) {
+      if (existingEmailUser?.password)
+        throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR)
+      if (existingEmailUser?.loginMethod !== LoginMethod.GITHUB)
+        throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR)
+
+
+      return await this.userService.update(existingEmailUser.id!, {
+        email: githubEmail,
+        status: UserStatus.ALLOWED,
+        loginMethod: LoginMethod.GITHUB,
+        oauthId: githubId
+      }, ['id', 'email', 'status', 'oauthId'])
+
+
+    }
+
+
+    return await this.userService.create({
+      email: githubEmail,
+      loginMethod: LoginMethod.GITHUB,
+      status: UserStatus.ALLOWED,
+      oauthId: githubId
+    }, ['id', 'email', 'status', 'oauthId'])
+
+
+  }
+
+  /********************************************* OAUTH METHOD *********************************************************************************************** */
+
+  async signInOauth(oauthId: string, loginMethod: LoginMethod, selectedColumn?: (keyof User)[]): Promise<SignInOutputInterface> {
+
+    const user = await this.userService.findOneByOauthId({ oauthId, loginMethod }, selectedColumn) as Omit<User, "password" | "createdAt" | "updatedAt">
+
+    if (!user)
+      throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED);
+
+    const access = await this.userTokenService.generate({
+      email: user.email!,
+      sub: user.id!,
+    },
+      TokenType.ACCESS
+    );
+
+    const refresh = await this.userTokenService.generateAndSave(
+      {
+        email: user.email!,
+        sub: user.id!,
+      },
+      TokenType.REFRESH,
+      ['token']
+    );
+
+    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user };
+  }
 
 
   /********************************************* PRIVATE METHOD *********************************************************************************************** */

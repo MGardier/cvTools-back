@@ -4,12 +4,15 @@ import { SignUpDto } from 'src/auth/dto/sign-up.dto';
 import { UserRepository } from './user.repository';
 import { UpdateUserInterface } from './interfaces/update-user.interface';
 
+import { FindOneByOauthIdInterface } from './interfaces/find-one-by-oauth-id.interface';
+import { CreateUserInterface } from './interfaces/create-user.interface';
+
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) { }
 
   async create(
-    data: SignUpDto,
+    data: CreateUserInterface,
     selectedColumn?: (keyof User)[]
   ): Promise<User> {
     return await this.userRepository.create(data, selectedColumn)
@@ -18,7 +21,7 @@ export class UserService {
 
   async update(
     id: number,
-    data : UpdateUserInterface,
+    data: UpdateUserInterface,
     selectedColumns?: (keyof User)[],
   ): Promise<Partial<User | null>> {
     return await this.userRepository.update(id, data, selectedColumns)
@@ -44,6 +47,10 @@ export class UserService {
   ): Promise<Partial<User | null>> {
     return await this.userRepository.findOneByEmail(email, selectedColumns)
 
+  }
+
+  async findOneByOauthId(data: FindOneByOauthIdInterface, selectedColumns?: (keyof User)[]): Promise<Partial<User | null>> {
+    return await this.userRepository.findOneByOauthId(data, selectedColumns)
   }
 
 }
