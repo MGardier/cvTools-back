@@ -75,7 +75,7 @@ model UserToken {
 
   }
 
-  enum TableNameTypeForAddress {
+  enum EntityTypeForAddress {
     PERSONALINFO
     JOB
 
@@ -86,17 +86,14 @@ model Address {
   @@map("address")
 
   id            Int                       @id @default(autoincrement())
-  street        String
   city          String
   postalCode    String                    @map("postal_code")
-  departement   String
   createdAt     DateTime                  @default(now())  @map("created_at")
   updatedAt     DateTime?                 @updatedAt        @map("updated_at")
-  tableName     TableNameTypeForAddress   @map("table_name")
-  tableId       Int                       @map("table_id")
+  entityType    EntityTypeForAddress      @map("entity_type")
+  entityId      Int                       @map("table_id")
 
 }
-
 
 
 
@@ -150,10 +147,8 @@ model Job {
   type                  TypeEnterprise
   link                  String
   jobTitle              String           @map("job_title")
-  managerName           String           @map("manager_name")
-  managerEmail          String           @map("manager_email")
-  detailsToRemember     String?
-  linkLinkedin          String?          @db.Text @map("link_linkedin")
+  managerName           String?          @map("manager_name")
+  managerEmail          String?          @map("manager_email")
   salaryMin             Int?             @map("salary_min")
   salaryMax             Int?             @map("salary_max")
   salaryCurrency        String?          @default("EUR") @map("salary_currency")
@@ -162,6 +157,7 @@ model Job {
   status                JobStatus
   priority              PriorityJob
   description           String?           @db.Text
+  detailsToRemember     String?           @db.Text
   applicationMethod     ApplicationMethod
   interviewCount        Int               @default(0) @map("interview_count")
   rejectionReason       String?           @map("rejection_reason")
@@ -170,7 +166,7 @@ model Job {
 
   createdAt             DateTime          @default(now())   @map("created_at")
   updatedAt             DateTime?         @updatedAt        @map("updated_at")
-  appliedAt             DateTime?         @map("applied_at")
+  appliedAt             DateTime          @map("applied_at")
   lastContactAt         DateTime?         @map("last_contact_at")
 
   technologies          Technology[]
