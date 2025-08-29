@@ -31,17 +31,6 @@ datasource db {
     CONFIRM_ACCOUNT
   }
 
-  // enum Civility {
-  //   MISS
-  //   MISTER
-  //   NOT_SPECIFY
-  // }
-
-  // enum  FileType {
-  //     AVATAR
-  // }
-
-
 
  enum LoginMethod {
     CLASSIC
@@ -85,36 +74,6 @@ model UserToken {
     JOB
 
   }
-
-// model PersonalInfo {
-//     @@map("personnal_info")
-
-//     id            Int                  @id @default(autoincrement())
-//     lastName      String   
-//     firstName     String   
-//     civility      Civility             @default(NOT_SPECIFY)
-//     phone         String?  
-//     description   String?              @db.VarChar(250)
-//     createdAt     DateTime             @default(now())  @map("created_at")
-//     updatedAt     DateTime?            @updatedAt      @map("updated_at")
-// }
-
-
-
-// model File {
-
-//   @@map("file")
-
-//   id            Int                       @id @default(autoincrement())
-//   name          String
-//   type          FileType
-//   msId          Int
-//   createdAt     DateTime                  @default(now())  @map("created_at")
-//   tableName     TableNameTypeForFile      @map("table_name")
-//   tableId       Int                       @map("table_id")
-
-// }
-
 
   enum TableNameTypeForAddress {
     PERSONALINFO
@@ -173,19 +132,8 @@ enum PriorityJob {
   WHY_NOT
 }
 
-enum ContractType {
-  CDI
-  CDD  
-}
-
-enum RemotePolicy {
-  FULL_REMOTE
-  HYBRID
-  ON_SITE
-}
 
 
-//TODO : Voir et optimiser avec des index
 
 enum ApplicationMethod {
   LINKEDIN
@@ -209,7 +157,7 @@ model Job {
   salaryMin             Int?             @map("salary_min")
   salaryMax             Int?             @map("salary_max")
   salaryCurrency        String?          @default("EUR") @map("salary_currency")
-  remotePolicy          RemotePolicy    @map("remote_policy")
+
 
   status                JobStatus
   priority              PriorityJob
@@ -225,11 +173,10 @@ model Job {
   appliedAt             DateTime?         @map("applied_at")
   lastContactAt         DateTime?         @map("last_contact_at")
 
-  contractType          ContractType?
   technologies          Technology[]
   userId                Int               @map("user_id")
   user                  User              @relation(fields: [userId], references: [id])
 
   @@index([userId])
-  
+
 }
