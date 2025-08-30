@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { JobRepository } from './job.repository';
 
 @Injectable()
 export class JobService {
-  create(createJobDto: CreateJobDto) {
-    return 'This action adds a new job';
+
+  constructor(private readonly jobRepository: JobRepository) { }
+  
+  async create(createJobDto: CreateJobDto) {
+    const{address, ...rest} = createJobDto;
+    return await this.jobRepository.create(rest);
   }
 
   findAll() {

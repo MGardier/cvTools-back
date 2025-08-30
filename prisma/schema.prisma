@@ -88,10 +88,9 @@ model Address {
   id            Int                       @id @default(autoincrement())
   city          String
   postalCode    String                    @map("postal_code")
+  street        String
   createdAt     DateTime                  @default(now())  @map("created_at")
   updatedAt     DateTime?                 @updatedAt        @map("updated_at")
-  entityType    EntityTypeForAddress      @map("entity_type")
-  entityId      Int                       @map("table_id")
 
 }
 
@@ -102,7 +101,7 @@ model Technology {
 
   id          Int     @id @default(autoincrement())
   name        String  @unique()
-  jobs        Job[]
+  jobHasTechnology        JobHasTechnology[]   
 }
 
 
@@ -151,7 +150,7 @@ model Job {
   managerEmail          String?          @map("manager_email")
   salaryMin             Int?             @map("salary_min")
   salaryMax             Int?             @map("salary_max")
-  salaryCurrency        String?          @default("EUR") @map("salary_currency")
+  salaryCurrency        Int?             @map("salary_currency")
 
 
   status                JobStatus
@@ -169,10 +168,23 @@ model Job {
   appliedAt             DateTime          @map("applied_at")
   lastContactAt         DateTime?         @map("last_contact_at")
 
-  technologies          Technology[]
+  jobHasTechnology          JobHasTechnology[]
   userId                Int               @map("user_id")
   user                  User              @relation(fields: [userId], references: [id])
+  
 
   @@index([userId])
 
+}
+
+model JobHasTechnology {
+  @@map("job_has_technology")
+  
+  jobId                Int                @map("job_id")
+  job                  Job                @relation(fields: [jobId], references: [id])
+
+  technologyId         Int                @map("technology_id")
+  technology           Technology         @relation(fields: [technologyId], references: [id])
+
+  @@id([jobId, technologyId])
 }

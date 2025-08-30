@@ -18,6 +18,8 @@ import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { CacheManagerModule } from './cache/cache-manager.module';
 import { JobModule } from './job/job.module';
+import { TechnologyModule } from './technology/technology.module';
+import { AddressModule } from './address/address.module';
 
 
 
@@ -36,6 +38,8 @@ import { JobModule } from './job/job.module';
     UserTokenModule,
     JwtManagerModule,
     JobModule,
+    TechnologyModule,
+    AddressModule,
 
   ],
   controllers: [],

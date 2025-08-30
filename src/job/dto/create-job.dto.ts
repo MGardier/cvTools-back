@@ -1,23 +1,84 @@
 import { Address, ApplicationMethod, JobStatus, PriorityJob, Technology, TypeEnterprise } from "@prisma/client";
+import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { CreateTechnologyDto } from "./create-technology.dto";
+import { CreateAddressDto } from "./create-address.dto";
+import { Transform, Type } from "class-transformer";
 
 export class CreateJobDto {
 
-  enterprise : string;
+  @IsNotEmpty()
+  @IsString()
+  enterprise: string;
+
+  @IsNotEmpty()
+  @IsEnum(TypeEnterprise)
   type: TypeEnterprise;
+
+  @IsNotEmpty()
+  @IsString()
   link: string;
-  jobTitle : string;
-  managerName ?: string;
-  managerEmail ?: string;
-  detailsToRemember ?: string;
-  salaryMin ?: number;
-  salaryMax ?: number;
-  salaryCurrency ?: number;
-  status:JobStatus ;
+
+  @IsNotEmpty()
+  @IsString()
+  jobTitle: string;
+
+  @IsOptional()
+  @IsString()
+  managerName?: string;
+
+  @IsOptional()
+  @IsEmail()
+  managerEmail?: string;
+
+  @IsOptional()
+  @IsString()
+  detailsToRemember?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  salaryMin?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  salaryMax?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  salaryCurrency?: number;
+
+  @IsNotEmpty()
+  @IsEnum(JobStatus)
+  status: JobStatus;
+
+  @IsNotEmpty()
+  @IsEnum(PriorityJob)
   priority: PriorityJob;
-  applicationMethod : ApplicationMethod;
-  appliedAt: Date; 
-  technologies : Omit<Technology,"id">[];
-  address : Omit<Address,"id">
-  userId : number;
-  
+
+  @IsNotEmpty()
+  @IsEnum(ApplicationMethod)
+  applicationMethod: ApplicationMethod;
+
+  @IsNotEmpty()
+  @Transform(({ value }) => new Date(value))
+  @IsDate()
+  appliedAt: Date;
+
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => CreateTechnologyDto)
+  technologies: CreateTechnologyDto[];
+
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => CreateAddressDto)
+  address: CreateAddressDto
+
+  @IsNotEmpty()
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  userId: number;
+
 }
