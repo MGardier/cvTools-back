@@ -8,9 +8,8 @@ export class JobService {
 
   constructor(private readonly jobRepository: JobRepository) { }
   
-  async create(createJobDto: CreateJobDto) {
-    const{address, ...rest} = createJobDto;
-    return await this.jobRepository.create(rest);
+  async create(data: CreateJobDto) {
+    return await this.jobRepository.create(data);
   }
 
   findAll() {

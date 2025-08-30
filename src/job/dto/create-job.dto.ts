@@ -1,7 +1,7 @@
 import { Address, ApplicationMethod, JobStatus, PriorityJob, Technology, TypeEnterprise } from "@prisma/client";
 import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
-import { CreateTechnologyDto } from "./create-technology.dto";
-import { CreateAddressDto } from "./create-address.dto";
+import { CreateTechnologyDto } from "../../technology/dto/create-technology.dto";
+import { CreateAddressDto } from "../../address/dto/create-address.dto";
 import { Transform, Type } from "class-transformer";
 
 export class CreateJobDto {
@@ -44,11 +44,6 @@ export class CreateJobDto {
   @IsNumber()
   salaryMax?: number;
 
-  @IsOptional()
-  @Transform(({ value }) => Number(value))
-  @IsNumber()
-  salaryCurrency?: number;
-
   @IsNotEmpty()
   @IsEnum(JobStatus)
   status: JobStatus;
@@ -61,10 +56,10 @@ export class CreateJobDto {
   @IsEnum(ApplicationMethod)
   applicationMethod: ApplicationMethod;
 
-  @IsNotEmpty()
+  @IsOptional()
   @Transform(({ value }) => new Date(value))
   @IsDate()
-  appliedAt: Date;
+  appliedAt?: Date;
 
   @IsNotEmpty()
   @ValidateNested()

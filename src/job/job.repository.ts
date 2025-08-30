@@ -14,12 +14,14 @@ export class JobRepository {
     selectedColumns?: (keyof Job)[],
   ): Promise<Job> {
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
-    const {userId,technologies,...rest} = data;
+    const {userId,address, technologies,...rest} = data;
     const connectOrCreateTechnologies = technologies.map((tech)=> {
-      return { where : {name: tech.name},
+      return { where : tech,
         create: tech
       }
+    
     });
+
     return await this.prismaService.job.create({
       select: select ,
       data: {
@@ -29,6 +31,7 @@ export class JobRepository {
             id: userId
           }
         },
+        address 
         technologies: {
           connectOrCreate : 
           connectOrCreateTechnologies
