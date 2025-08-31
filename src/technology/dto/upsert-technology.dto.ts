@@ -1,7 +1,7 @@
 
 import {  IsNotEmpty, IsString } from "class-validator";
 
-export class CreateTechnologyDto {
+export class UpsertTechnologyDto {
 
   @IsNotEmpty()
   @IsString()

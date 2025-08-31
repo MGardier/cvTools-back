@@ -1,6 +1,6 @@
 import { Address, ApplicationMethod, JobStatus, PriorityJob, Technology, TypeEnterprise } from "@prisma/client";
 import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
-import { CreateTechnologyDto } from "../../technology/dto/create-technology.dto";
+import {  UpsertTechnologyDto } from "../../technology/dto/upsert-technology.dto";
 import { CreateAddressDto } from "../../address/dto/create-address.dto";
 import { Transform, Type } from "class-transformer";
 
@@ -35,12 +35,12 @@ export class CreateJobDto {
   detailsToRemember?: string;
 
   @IsOptional()
-  @Transform(({ value }) => Number(value))
+  @Transform(({ value }) => (value ? Number(value) : undefined)) 
   @IsNumber()
   salaryMin?: number;
 
   @IsOptional()
-  @Transform(({ value }) => Number(value))
+  @Transform(({ value }) => (value ? Number(value) : undefined)) 
   @IsNumber()
   salaryMax?: number;
 
@@ -57,14 +57,14 @@ export class CreateJobDto {
   applicationMethod: ApplicationMethod;
 
   @IsOptional()
-  @Transform(({ value }) => new Date(value))
+  @Transform(({ value }) => (value ? new Date(value) : undefined)) 
   @IsDate()
   appliedAt?: Date;
 
   @IsNotEmpty()
   @ValidateNested()
-  @Type(() => CreateTechnologyDto)
-  technologies: CreateTechnologyDto[];
+  @Type(() => UpsertTechnologyDto)
+  technologies: UpsertTechnologyDto[];
 
   @IsNotEmpty()
   @ValidateNested()
@@ -72,7 +72,7 @@ export class CreateJobDto {
   address: CreateAddressDto
 
   @IsNotEmpty()
-  @Transform(({ value }) => Number(value))
+  @Transform(({ value }) => (value ? Number(value) : undefined)) 
   @IsNumber()
   userId: number;
 
