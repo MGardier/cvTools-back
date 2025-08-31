@@ -81,7 +81,7 @@ model Address {
   createdAt         DateTime                  @default(now())  @map("created_at")
   updatedAt         DateTime?                 @updatedAt        @map("updated_at")
   job               Job[]
-  @@unique([city, street,postalCode])
+  @@unique([city, street,postalCode],name: "city_street_postalCode")
 
 }
 

@@ -1,9 +1,10 @@
 import { ApplicationMethod, JobStatus, PriorityJob, TypeEnterprise } from "@prisma/client";
 import { CreateAddressDto } from "src/address/dto/create-address.dto";
-import { UpsertTechnologyDto } from "src/technology/dto/upsert-technology.dto";
+
 
 export interface UpdateJobInterface {
 
+  id: number;
   enterprise?: string;
   type?: TypeEnterprise;
   link?: string;
@@ -19,6 +20,7 @@ export interface UpdateJobInterface {
   appliedAt?: Date;
   technologiesId?: number[];
   address?: CreateAddressDto
+  userId: number
 
  
 }

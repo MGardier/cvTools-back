@@ -18,7 +18,10 @@ import { CreateJobDto } from 'src/job/dto/create-job.dto';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService, private readonly jobService: JobService) { }
+  constructor(
+    private readonly userService: UserService, 
+    private readonly jobService: JobService
+  ) { }
 
 
   @Public()
@@ -37,23 +40,23 @@ export class UserController {
 
 
   @Public()
-  @Get('/:userId/job/:jobId')
-  async findJobForUser(@Param('userId') userId: string, @Param('jobId') jobId: string,) {
+  @Get('/:id/job/:jobId')
+  async findJobForUser(@Param('id') userId: string, @Param('jobId') jobId: string,) {
     return await this.jobService.findJobForUser(+userId, +jobId);
   }
 
 
 
   @Public()
-  @Patch('/:userId/job/:jobId')
-  async updateJobForUser(@Param('userId') userId: string, @Param('jobId') jobId: string, @Body() udateJobDto: UpdateJobDto) {
+  @Patch('/:id/job/:jobId')
+  async updateJobForUser(@Param('id') userId: string, @Param('jobId') jobId: string, @Body() udateJobDto: UpdateJobDto) {
     return await this.jobService.updateJobForUser(+userId, +jobId, udateJobDto);
   }
 
 
   @Public()
-  @Delete('/:userId/job/:jobId')
-  async deleteJobForUser(@Param('userId') userId: string, @Param('jobId') jobId: string) {
+  @Delete('/:id/job/:jobId')
+  async deleteJobForUser(@Param('id') userId: string, @Param('jobId') jobId: string) {
     return await this.jobService.deleteJobForUser(+userId, +jobId);
   }
 
