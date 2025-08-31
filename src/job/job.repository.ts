@@ -10,13 +10,14 @@ export class JobRepository {
 
   constructor(private readonly prismaService: PrismaService) { }
 
-  async create(
-    data: Omit<CreateJobDto, "technologies">,
+  async createJobForUser(
+    userId : number,
     technologiesId: number[],
+    data: Omit<CreateJobDto, "technologies">,
     selectedColumns?: (keyof Job)[],
   ): Promise<Job> {
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
-    const { userId, address, ...rest } = data;
+    const { address, ...rest } = data;
     const connectTechnologies = technologiesId.map((id) => ({
       technology: {
         connect: { id }
@@ -115,7 +116,16 @@ export class JobRepository {
     });
   }
 
-
+  async delete(id: number,userId: number,selectedColumns?: (keyof Job)[]){
+    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
+    return await this.prismaService.job.delete({
+      select,
+      where: {
+        id,
+        userId
+      }
+    })
+  }
 
 
 

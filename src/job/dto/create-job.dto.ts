@@ -71,9 +71,4 @@ export class CreateJobDto {
   @Type(() => CreateAddressDto)
   address: CreateAddressDto
 
-  @IsNotEmpty()
-  @Transform(({ value }) => (value ? Number(value) : undefined)) 
-  @IsNumber()
-  userId: number;
-
 }

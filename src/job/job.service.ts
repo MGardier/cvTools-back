@@ -10,11 +10,11 @@ export class JobService {
 
   constructor(private readonly jobRepository: JobRepository, private readonly technologyService: TechnologyService) { }
   
-  async create(data: CreateJobDto,selectedColumns?: (keyof Job)[]) {
+  async createJobForUser(userId: number,data: CreateJobDto,selectedColumns?: (keyof Job)[]) {
     const {technologies, ...rest} = data
     const technologiesId = (await this.technologyService.upsertMany(data.technologies)).map((tech)=> tech.id)
     
-    return await this.jobRepository.create(rest,technologiesId);
+    return await this.jobRepository.createJobForUser(userId,technologiesId,rest);
   }
 
  async findAllForUser(id: number,selectedColumns?: (keyof Job)[]) {
@@ -28,7 +28,7 @@ export class JobService {
     return job;
   }
 
-  async updateJobForUser(jobId: number,userId: number, data: UpdateJobDto) {
+  async updateJobForUser(jobId: number,userId: number, data: UpdateJobDto, selectedColumns?: (keyof Job)[]) {
     const {technologies, ...rest} = data
     let job : Job | undefined ; 
     if(technologies)
@@ -41,13 +41,12 @@ export class JobService {
     else  
        job = await this.jobRepository.updateJobForUser(jobId,userId,rest)
 
-    
-   
-
-    
+    if(!job)
+      throw new NotFoundException();
+    return job;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} job`;
+  async deleteJobForUser(id: number,userId: number, selectedColumns?: (keyof Job)[]) {
+    return await this.jobRepository.delete(id,userId);
   }
 }
