@@ -20,6 +20,7 @@ import { CacheManagerModule } from './cache/cache-manager.module';
 import { JobModule } from './job/job.module';
 import { TechnologyModule } from './technology/technology.module';
 import { AddressModule } from './address/address.module';
+import { JobHasTechnologyModule } from './job-has-technology/job-has-technology.module';
 
 
 
@@ -40,6 +41,7 @@ import { AddressModule } from './address/address.module';
     JobModule,
     TechnologyModule,
     AddressModule,
+    JobHasTechnologyModule,
 
   ],
   controllers: [],

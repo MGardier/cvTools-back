@@ -4,11 +4,11 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { Public } from 'src/decorators/public.decorator';
 import { JobService } from 'src/job/job.service';
 import { UpdateJobDto } from 'src/job/dto/update-job.dto';
@@ -34,8 +34,8 @@ export class UserController {
 
   @Public()
   @Get('/:id/job')
-  async findJobsForUser(@Param('id') id: string) {
-    return await this.jobService.findAllForUser(+id);
+  async findJobsForUser(@Param('id', ParseIntPipe) id: number) {
+    return await this.jobService.findAllForUser(id);
   }
 
 

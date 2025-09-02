@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "prisma/prisma.service";
 import { UpsertTechnologyDto } from "./dto/upsert-technology.dto";
-import { Technology } from "@prisma/client";
-import { RepositoryOptionsInterface } from "src/interfaces/repository-options.interface";
+import { Prisma, Technology } from "@prisma/client";
 import { UtilRepository } from "src/utils/UtilRepository";
+import { OptionRepositoryInterface } from "src/interfaces/options-repository.interface";
+import { FindManyTechnologyInterface } from "./interfaces/find-many-technology.interface";
 
 
 @Injectable()
@@ -11,21 +12,62 @@ export class TechnologyRepository {
   constructor(private readonly prismaService: PrismaService) { }
 
 
-  async upsert(data: UpsertTechnologyDto, options?: RepositoryOptionsInterface<Technology>): Promise<Technology> {
-    const prisma = options?.tx || this.prismaService;
-    const select: Record<keyof Technology, boolean> | undefined = UtilRepository.getSelectedColumns<Technology>(options?.selectedColumns);
 
-    return await prisma.technology.upsert({
-      select,
-      where: data,
-      create: data,
-      update: {}
+
+  async findOrCreateMany(technologies: UpsertTechnologyDto[], options?: OptionRepositoryInterface<Technology>): Promise<Technology[]> {
+
+    const select: Record<keyof Technology, boolean> | undefined = UtilRepository.getSelectedColumns<Technology>(options?.selectedColumns);
+    const prisma = options?.tx || this.prismaService;
+    const existingTechnology = await prisma.technology.findMany({
+      select, where: {
+        name: {
+          in: technologies.map((tech) => tech.name)
+        }
+      }
+    });
+
+    const existingTechnologiesNames = new Set(existingTechnology.map((tech) => tech.name))
+    const technologiesToCreate = technologies.filter((tech) => !existingTechnologiesNames.has(tech.name));
+
+    await this.createMany(technologiesToCreate, options?.tx);
+
+    const newTechnologies = await this.findMany({
+      tx :options?.tx,
+      technologiesName: technologiesToCreate.map((tech) => tech.name)
+    });
+    return [...existingTechnology, ...newTechnologies];
+
+  }
+
+  async findMany(options?: FindManyTechnologyInterface) {
+    const select: Record<keyof Technology, boolean> | undefined = UtilRepository.getSelectedColumns<Technology>(options?.selectedColumns);
+    const prisma = options?.tx || this.prismaService;
+    return await prisma.technology.findMany({
+      select, where: {
+        id: {
+          in: options?.technologiesId || []
+        },
+        name: {
+          in: options?.technologiesName || []
+        }
+      }
+    })
+
+  }
+
+  async createMany(technologies: UpsertTechnologyDto[], tx?: Prisma.TransactionClient) {
+    const prisma = tx || this.prismaService;
+    return await prisma.technology.createMany({
+      data: technologies
     });
   }
 
-
-  async upsertMany(technologies: UpsertTechnologyDto[], options?: RepositoryOptionsInterface<Technology>): Promise<Technology[]> {
-    return await Promise.all(technologies.map(tech => this.upsert(tech, options)));
+  async deleteMany(technologies: UpsertTechnologyDto[]) {
+    const data = technologies.map((tech) => { return { name: tech.name } });
+    return await this.prismaService.technology.deleteMany({
+      where: {
+        OR: technologies
+      }
+    })
   }
-
 }

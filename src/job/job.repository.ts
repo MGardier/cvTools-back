@@ -3,8 +3,6 @@ import { PrismaService } from "prisma/prisma.service";
 import { Job, Prisma} from "@prisma/client";
 import { UtilRepository } from "src/utils/UtilRepository";
 import { UpdateJobInterface } from "./interfaces/update-job.interface";
-import { RepositoryOptionsInterface } from "../interfaces/repository-options.interface";
-import { PrismaTransactionClientType } from "src/types/prisma-transaction-client.type";
 import { CreateJobInterface } from "./interfaces/create-job.interface";
 
 @Injectable()
@@ -14,10 +12,9 @@ export class JobRepository {
 
   async createJobForUser(
     data: CreateJobInterface,
-    options?: RepositoryOptionsInterface<Job>
+    selectedColumns?: (keyof Job)[]
   ): Promise<Job> {
-    const prisma = options?.tx || this.prismaService;
-    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(options?.selectedColumns);
+    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
     const { userId,technologiesId,address, ...rest } = data;
     const connectTechnologies = technologiesId.map((id) => ({
       technology: {
@@ -25,7 +22,7 @@ export class JobRepository {
       }
     }));
 
-    return await prisma.job.create({
+    return await this.prismaService.job.create({
       select: select,
       data: {
         ...rest,
@@ -70,9 +67,9 @@ export class JobRepository {
   }
 
 
-  async deleteAllTechnologies(jobId: number, tx?:  PrismaTransactionClientType): Promise<Prisma.BatchPayload> {
-    const prisma = tx || this.prismaService;
-    return await prisma.jobHasTechnology.deleteMany({
+  async deleteAllTechnologies(jobId: number): Promise<Prisma.BatchPayload> {
+   
+    return await this.prismaService.jobHasTechnology.deleteMany({
       where: {
         jobId,
       }
@@ -81,9 +78,9 @@ export class JobRepository {
 
 
 
-  async updateJobForUser( data: UpdateJobInterface, options?: RepositoryOptionsInterface<Job>): Promise<Job> {
-    const prisma = options?.tx || this.prismaService;
-    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(options?.selectedColumns);
+  async updateJobForUser( data: UpdateJobInterface,  selectedColumns?: (keyof Job)[]): Promise<Job> {
+
+    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
     const { id, userId, address, technologiesId, ...rest } = data;
     const connectTechnologies = technologiesId ? technologiesId.map((id) => ({
       technology: {
@@ -91,7 +88,7 @@ export class JobRepository {
       }
     })) : undefined ;
 
-    return await prisma.job.update({
+    return await this.prismaService.job.update({
       select,
       data: {
         ...rest,

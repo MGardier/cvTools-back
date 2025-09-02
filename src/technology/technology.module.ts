@@ -4,7 +4,8 @@ import { TechnologyRepository } from './technology.repository';
 
 
 @Module({
-  exports:[TechnologyService],
+  
+  exports:[TechnologyService,TechnologyRepository],
   providers: [TechnologyService,TechnologyRepository],
 })
 export class TechnologyModule {}
