@@ -19,6 +19,9 @@ export class JobService {
     private readonly prismaTransactionService: PrismaTransactionService,
   ) { }
 
+  //TODO : Voir le crud des technos et leurs appels 
+  //TODO : Revoir les nommages 
+  //TODO : Search + auto complete
 
   async createJobForUser(userId: number, data: CreateJobDto, selectedColumns?: (keyof Job)[]) {
 
@@ -45,13 +48,11 @@ export class JobService {
   async updateJobForUser(userId: number, id: number, data: UpdateJobDto, selectedColumns?: (keyof Job)[]) {
     const { technologies, ...rest } = data
 
+  let existingTechnologies ;
+    if(technologies)
+      existingTechnologies = (await this.JhTService.syncJobTechnologies(id,technologies));
 
-    const existingTechnologies = (await this.JhTService.findAllByJobId(id));
-
-    //celle à créer
-
-    //celle à supprimer
-
+ 
 
 
     return;

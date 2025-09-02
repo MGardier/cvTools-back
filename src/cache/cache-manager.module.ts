@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 
-import KeyvRedis, { createKeyv, Keyv } from '@keyv/redis';
+import KeyvRedis, {  Keyv } from '@keyv/redis';
 import { CacheModule } from "@nestjs/cache-manager";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 

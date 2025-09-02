@@ -12,7 +12,10 @@ export class TechnologyRepository {
   constructor(private readonly prismaService: PrismaService) { }
 
 
-
+//TODO: Typage
+//Todo : case sensitive lowercase
+//TODO : Faire par fonctionnazlité pback puis front
+//TODO : Voir la pertinence renvoie de données
 
   async findOrCreateMany(technologies: UpsertTechnologyDto[], options?: OptionRepositoryInterface<Technology>): Promise<Technology[]> {
 
@@ -39,6 +42,7 @@ export class TechnologyRepository {
 
   }
 
+  //filter
   async findMany(options?: FindManyTechnologyInterface) {
     const select: Record<keyof Technology, boolean> | undefined = UtilRepository.getSelectedColumns<Technology>(options?.selectedColumns);
     const prisma = options?.tx || this.prismaService;
@@ -56,18 +60,20 @@ export class TechnologyRepository {
   }
 
   async createMany(technologies: UpsertTechnologyDto[], tx?: Prisma.TransactionClient) {
-    const prisma = tx || this.prismaService;
     return await prisma.technology.createMany({
       data: technologies
     });
   }
 
-  async deleteMany(technologies: UpsertTechnologyDto[]) {
-    const data = technologies.map((tech) => { return { name: tech.name } });
+  async deleteManyById(technologyIds: number[]) {
     return await this.prismaService.technology.deleteMany({
       where: {
-        OR: technologies
+        id: {
+          in : technologyIds
+        }
       }
     })
   }
+
+  
 }

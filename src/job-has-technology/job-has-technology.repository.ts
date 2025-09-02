@@ -22,7 +22,7 @@ export class JobHasTechnologyRepository {
   }
 
 
-  async findOrCreateManyByJob(jobId: number, technologies: UpsertTechnologyDto[], tx?: Prisma.TransactionClient) {
+  async findOrCreateManyByJobId(jobId: number, technologies: UpsertTechnologyDto[], tx?: Prisma.TransactionClient) {
 
     const existingTechnology = (await this.findAllByJobId(jobId,tx)).map((jht) => jht.technology);
     const existingTechnologiesNames = new Set(existingTechnology.map((tech) => tech.name));
