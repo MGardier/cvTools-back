@@ -259,9 +259,9 @@ export class AuthService {
 
     if (existingEmailUser) {
       if (existingEmailUser?.password)
-        throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR)
+        throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR);
       if (existingEmailUser?.loginMethod !== LoginMethod.GOOGLE)
-        throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR)
+        throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR);
 
 
       return await this.userService.update(existingEmailUser.id!, {
@@ -269,7 +269,7 @@ export class AuthService {
         loginMethod: LoginMethod.GOOGLE,
         status: UserStatus.ALLOWED,
         oauthId: googleId
-      }, ['id', 'email', 'status', 'oauthId'])
+      }, ['id', 'email', 'status', 'oauthId']);
 
     }
 
@@ -278,7 +278,7 @@ export class AuthService {
       loginMethod: LoginMethod.GOOGLE,
       status: UserStatus.ALLOWED,
       oauthId: googleId
-    }, ['id', 'email', 'status', 'oauthId'])
+    }, ['id', 'email', 'status', 'oauthId']);
 
 
   }

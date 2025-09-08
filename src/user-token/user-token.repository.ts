@@ -20,7 +20,7 @@ export class UserTokenRepository {
   ): Promise<Partial<UserToken>> {
     const select: Record<keyof UserToken, boolean> | undefined = UtilRepository.getSelectedColumns<UserToken>(selectedColumns);
     return await this.prismaService.userToken.create({
-       ...(select && { select }),
+      select,
       data: {
         ...data,
         user: { connect: { id: userId } },
@@ -35,7 +35,7 @@ export class UserTokenRepository {
   ): Promise<Partial<UserToken>> {
     const select: Record<keyof UserToken, boolean> | undefined = UtilRepository.getSelectedColumns<UserToken>(selectedColumns);
     return await this.prismaService.userToken.delete({
-       ...(select && { select }),
+       select,
       where: {
         id,
       },
@@ -46,7 +46,7 @@ export class UserTokenRepository {
   async findByUuid(uuid: string, selectedColumns?: (keyof UserToken)[]): Promise<Partial<UserToken> | null> {
     const select: Record<keyof UserToken, boolean> | undefined = UtilRepository.getSelectedColumns<UserToken>(selectedColumns);
     return await this.prismaService.userToken.findUnique({
-       ...(select && { select }),
+      select,
       where: {
         uuid,
       },

@@ -31,20 +31,6 @@ datasource db {
     CONFIRM_ACCOUNT
   }
 
-  enum Civility {
-    MISS
-    MISTER
-    NOT_SPECIFY
-  }
-
-  enum  FileType {
-      AVATAR
-  }
-
-  enum TableNameTypeForFile {
-    PERSONALINFO
-
-  }
 
  enum LoginMethod {
     CLASSIC
@@ -54,76 +40,148 @@ datasource db {
 
 model User {
     @@map("user")
-    id              Int                @id @default(autoincrement())
-    email           String             @unique 
-    status          UserStatus         @default(ALLOWED)
+
+    id              Int                     @id @default(autoincrement())
+    email           String                  @unique 
+    status          UserStatus              @default(ALLOWED)
     password        String?             
-    createdAt       DateTime           @default(now()) @map("created_at")
-    updatedAt       DateTime?          @updatedAt      @map("updated_at")
+    createdAt       DateTime                @default(now()) @map("created_at")
+    updatedAt       DateTime?               @updatedAt      @map("updated_at")
     roles           UserRoles        
     tokens          UserToken[] 
+    jobs            Job[] 
     loginMethod     LoginMethod
-    oauthId         String?            @map("oauth_id")
+    oauthId         String?                 @map("oauth_id")
 
     @@unique([loginMethod, oauthId], name: "unique_oauth_user")
   }
 
 model UserToken {
     @@map("user_token")
-    id              Int                @id @default(autoincrement())
-    token           String             @db.Text
+
+    id              Int                    @id @default(autoincrement())
+    token           String                 @db.Text
     type            PrismaTokenType
-    expiresIn       DateTime           @map("expires_in")
-    uuid            String?            @unique
-    createdAt       DateTime           @default(now()) @map("created_at")
-    userId          Int                @map("user_id")
-    user  User @relation(fields: [userId], references: [id])
+    expiresIn       DateTime               @map("expires_in")
+    uuid            String?                @unique
+    createdAt       DateTime               @default(now()) @map("created_at")
+    userId          Int                    @map("user_id")
+    user            User                   @relation(fields: [userId], references: [id])
   }
-
-
-
-model PersonalInfo {
-    @@map("personnal_info")
-    id            Int   @id @default(autoincrement())
-    lastName      String   
-    firstName     String   
-    civility      Civility @default(NOT_SPECIFY)
-    phone         String?  
-    description   String?    @db.VarChar(250)
-    createdAt     DateTime @default(now())  @map("created_at")
-    updatedAt     DateTime? @updatedAt      @map("updated_at")
-}
-
-
-
-model File {
-
-  @@map("file")
-  id            Int   @id @default(autoincrement())
-  name          String
-  type          FileType
-  msId          Int
-  createdAt     DateTime @default(now())  @map("created_at")
-  tableName     TableNameTypeForFile      @map("table_name")
-  tableId       Int                       @map("table_id")
-
-}
-
 
 
 model Address {
 
   @@map("address")
-  id            Int   @id @default(autoincrement())
-  street        String
-  city          String
-  postalCode    Int                       @map("postal_code")
-  departement   String
-  createdAt     DateTime @default(now())  @map("created_at")
-  updatedAt     DateTime? @updatedAt      @map("updated_at")
-  tableName     TableNameTypeForFile      @map("table_name")
-  tableId       Int                       @map("table_id")
+
+  id                Int                       @id @default(autoincrement())
+  city              String
+  postalCode        String                    @map("postal_code")
+  street            String
+  createdAt         DateTime                  @default(now())  @map("created_at")
+  updatedAt         DateTime?                 @updatedAt        @map("updated_at")
+  job               Job[]
+  @@unique([city, street,postalCode],name: "city_street_postalCode")
 
 }
+
+
+
+model Technology {
+  @@map("technology")
+
+  id          Int     @id @default(autoincrement())
+  name        String  @unique()
+  jobHasTechnology        JobHasTechnology[]   
+}
+
+
+enum TypeEnterprise {
+  ESN
+  START_UP
+  ENTERPRISE
+}
+
+enum JobStatus {
+  NEED_TO_CONTACT
+  NEED_TO_VALIDATE_MESSAGE
+  NEED_TO_SEND_MESSAGE
+  INTERVIEWS
+  TECHNICAL_TEST
+  NEED_TO_SEND_THANKS_AFTER_INTERVIEW
+  NEED_TO_SEND_MAIL_REMINDER
+}
+
+
+enum PriorityJob {
+  PERFECT
+  ATTAINABLE
+  WHY_NOT
+}
+
+
+
+
+enum ApplicationMethod {
+  LINKEDIN
+  SITE_WEB
+  EMAIL
+  AUTRE
+}
+
+model Job {
+  @@map("job")
+  
+  id                     Int             @id @default(autoincrement())
+  enterprise            String 
+  type                  TypeEnterprise
+  link                  String
+  jobTitle              String           @map("job_title")
+  managerName           String?          @map("manager_name")
+  managerEmail          String?          @map("manager_email")
+  salaryMin             Int?             @map("salary_min")
+  salaryMax             Int?             @map("salary_max")
+
+
+
+  status                JobStatus
+  priority              PriorityJob
+  description           String?             @db.Text
+  detailsToRemember     String?             @db.Text
+  applicationMethod     ApplicationMethod
+  interviewCount        Int                 @default(0) @map("interview_count")
+  rejectionReason       String?             @map("rejection_reason")
+  rating                Int?
+  archived              Boolean             @default(false)
+
+  createdAt             DateTime            @default(now())   @map("created_at")
+  updatedAt             DateTime?           @updatedAt        @map("updated_at")
+  appliedAt             DateTime?           @map("applied_at")
+  lastContactAt         DateTime?           @map("last_contact_at")
+
+  jobHasTechnology      JobHasTechnology[]
+  addressId             Int                 @map("address_id")
+  address               Address             @relation(fields: [addressId], references: [id])
+  
+  userId                Int                 @map("user_id")
+  user                  User                @relation(fields: [userId], references: [id])
+  
+
+  @@index([userId])
+
+}
+
+model JobHasTechnology {
+  @@map("job_has_technology")
+  
+  jobId                Int                @map("job_id")
+  job                  Job                @relation(fields: [jobId], references: [id])
+
+  technologyId         Int                @map("technology_id")
+  technology           Technology         @relation(fields: [technologyId], references: [id])
+
+  @@id([jobId, technologyId])
+}
+
 
 
