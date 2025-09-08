@@ -13,12 +13,7 @@ export abstract class UtilRepository {
     }
 
 
-    /* TODO :l à changer */
-    static addColumnsToSelectedColumns<T>(addColumns: (keyof T)[],columns?: (keyof T)[], ) : (keyof T)[] | undefined {
-        return columns
-            ? [...new Set([...columns, ...addColumns])]
-            : undefined;
-    }
+
 
     static toPrismaTokenType(tokenType: TokenType): PrismaTokenType {
         const mapping = {
