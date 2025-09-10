@@ -60,6 +60,7 @@ export class TechnologyRepository {
   }
 
   async createMany(technologies: UpsertTechnologyDto[], tx?: Prisma.TransactionClient) {
+     const prisma = tx || this.prismaService;
     return await prisma.technology.createMany({
       data: technologies
     });

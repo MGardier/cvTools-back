@@ -8,13 +8,15 @@ export interface CreateJobInterface {
   jobTitle: string;
   managerName?: string;
   managerEmail?: string;
-  detailsToRemember?: string;
-  salaryMin?: number;
-  salaryMax?: number;
   status: JobStatus;
   priority: PriorityJob;
   applicationMethod: ApplicationMethod;
+  interviewCount: number;
+  rejectedReason?: string;
+  rating: number;
+  archived : boolean;
   appliedAt?: Date;
+  lastContactAt ? :Date;
   technologiesId: number[];
   address: Omit<Address, 'id' |"createdAt" | "updatedAt">;
   userId: number;

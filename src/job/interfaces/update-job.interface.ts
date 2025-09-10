@@ -11,9 +11,6 @@ export interface UpdateJobInterface {
   jobTitle?: string;
   managerName?: string;
   managerEmail?: string;
-  detailsToRemember?: string;
-  salaryMin?: number;
-  salaryMax?: number;
   status?: JobStatus;
   priority?: PriorityJob;
   applicationMethod?: ApplicationMethod;

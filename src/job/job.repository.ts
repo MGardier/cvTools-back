@@ -33,7 +33,7 @@ export class JobRepository {
         },
         address: {
           connectOrCreate: {
-            where: { city_street_postalCode: address },
+            where: { city_postalCode: address },
             create: address
           }
         },
@@ -95,7 +95,7 @@ export class JobRepository {
         ...(address ? {
           address: {
             connectOrCreate: {
-              where: { city_street_postalCode: address },
+              where: { city_postalCode: address },
               create: address
             }
           },
