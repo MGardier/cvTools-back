@@ -19,7 +19,6 @@ export class JobService {
     private readonly prismaTransactionService: PrismaTransactionService,
   ) { }
 
-  //TODO : Voir le crud des technos et leurs appels 
   //TODO : Revoir les nommages 
   //TODO : Search + auto complete
 
@@ -28,8 +27,12 @@ export class JobService {
     const { technologies, ...rest } = data
     return await this.prismaTransactionService.execute(async (tx: Prisma.TransactionClient) => {
 
-      const technologiesId = (await this.technologyService.findOrCreateMany(data.technologies, { tx, selectedColumns: ["id", "name"] })).map((tech) => tech.id)
-      return await this.jobRepository.createJobForUser({ userId, technologiesId, ...rest }, selectedColumns);
+
+      const technologies = await this.technologyService.findOrCreateMany(data.technologies, { tx, selectedColumns: ["id", "name"] });
+
+      const job = await this.jobRepository.createJobForUser({ userId, ...rest }, { tx, selectedColumns });
+
+      await this.JhTService.createMany(job.id, technologies.map((tech) => tech.id), tx)
 
     })
   }
@@ -38,36 +41,11 @@ export class JobService {
     return await this.jobRepository.findAllForUser(id, selectedColumns);
   }
 
-  async findJobForUser(jobId: number, userId: number, selectedColumns?: (keyof Job)[]) {
-    const job = await this.jobRepository.findJobForUser(jobId, userId, selectedColumns);
+  async findJobForUser(userId: number,jobId: number) {
+    const job = await this.jobRepository.findJobForUser(jobId, userId);
     if (!job)
       throw new NotFoundException();
     return job;
   }
 
-  async updateJobForUser(userId: number, id: number, data: UpdateJobDto, selectedColumns?: (keyof Job)[]) {
-    const { technologies, ...rest } = data
-
-  let existingTechnologies ;
-    if(technologies)
-      existingTechnologies = (await this.JhTService.syncJobTechnologies(id,technologies));
-
- 
-
-
-    return;
-
-    // await this.jobRepository.deleteAllTechnologies(id);
-    // let technologiesId: number[] | undefined;
-    // if (technologies)
-    //   technologiesId = (await this.technologyService.findOrCreateMany(technologies,)).map((tech) => tech.id)
-
-    // return await this.jobRepository.updateJobForUser({ id, userId, technologiesId, ...rest }, selectedColumns )
-
-
-  }
-
-  async deleteJobForUser(id: number, userId: number, selectedColumns?: (keyof Job)[]) {
-    return await this.jobRepository.delete(id, userId, selectedColumns);
-  }
 }

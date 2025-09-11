@@ -35,7 +35,7 @@ export class UserController {
   @Public()
   @Get('/:id/job')
   async findJobsForUser(@Param('id', ParseIntPipe) id: number) {
-    return await this.jobService.findAllForUser(id);
+    return await this.jobService.findAllForUser(id,['id','jobTitle',"enterprise","status","applicationMethod","appliedAt"]);
   }
 
 
@@ -47,17 +47,6 @@ export class UserController {
 
 
 
-  @Public()
-  @Patch('/:id/job/:jobId')
-  async updateJobForUser(@Param('id') userId: string, @Param('jobId') jobId: string, @Body() udateJobDto: UpdateJobDto) {
-    return await this.jobService.updateJobForUser(+userId, +jobId, udateJobDto);
-  }
 
-
-  @Public()
-  @Delete('/:id/job/:jobId')
-  async deleteJobForUser(@Param('id') userId: string, @Param('jobId') jobId: string) {
-    return await this.jobService.deleteJobForUser(+userId, +jobId);
-  }
 
 }
