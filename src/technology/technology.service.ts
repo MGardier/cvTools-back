@@ -18,8 +18,8 @@ export class TechnologyService {
       return  await this.technologyRepository.createMany(technologies);
   }
   
-  async deleteMany(technologies: UpsertTechnologyDto[]){
-      return  await this.technologyRepository.deleteMany(technologies);
-  }
+  // async deleteMany(technologies: UpsertTechnologyDto[]){
+  //     return  await this.technologyRepository.deleteManyById(technologies);
+  // }
 
 }
