@@ -35,7 +35,7 @@ export class UserController {
   @Public()
   @Get('/:id/job')
   async findJobsForUser(@Param('id', ParseIntPipe) id: number) {
-    return await this.jobService.findAllForUser(id);
+    return await this.jobService.findAllForUser(id,['id','jobTitle',"enterprise","status","applicationMethod","appliedAt"]);
   }
 
 

@@ -27,12 +27,12 @@ export class JobService {
     const { technologies, ...rest } = data
     return await this.prismaTransactionService.execute(async (tx: Prisma.TransactionClient) => {
 
-      
+
       const technologies = await this.technologyService.findOrCreateMany(data.technologies, { tx, selectedColumns: ["id", "name"] });
 
-      const job = await this.jobRepository.createJobForUser({ userId, ...rest }, {tx,selectedColumns});
+      const job = await this.jobRepository.createJobForUser({ userId, ...rest }, { tx, selectedColumns });
 
-      await this.JhTService.createMany(job.id,technologies.map((tech)=>tech.id),tx)
+      await this.JhTService.createMany(job.id, technologies.map((tech) => tech.id), tx)
 
     })
   }

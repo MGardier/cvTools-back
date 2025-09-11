@@ -42,7 +42,8 @@ export class JobRepository {
   async findAllForUser(userId: number, selectedColumns?: (keyof Job)[]): Promise<Job[]> {
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
     return await this.prismaService.job.findMany({
-      select, where: {
+      select,
+       where: {
         userId
       }
     });
@@ -68,65 +69,6 @@ export class JobRepository {
   }
 
 
-  async deleteAllTechnologies(jobId: number): Promise<Prisma.BatchPayload> {
-
-    return await this.prismaService.jobHasTechnology.deleteMany({
-      where: {
-        jobId,
-      }
-    })
-  }
-
-
-
-  async updateJobForUser(data: UpdateJobInterface, selectedColumns?: (keyof Job)[]): Promise<Job> {
-
-    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
-    const { id, userId, address, technologiesId, ...rest } = data;
-    const connectTechnologies = technologiesId ? technologiesId.map((id) => ({
-      technology: {
-        connect: { id }
-      }
-    })) : undefined;
-
-    return await this.prismaService.job.update({
-      select,
-      data: {
-        ...rest,
-        ...(address ? {
-          address: {
-            connectOrCreate: {
-              where: { city_postalCode: address },
-              create: address
-            }
-          },
-        } : {}),
-        ...(connectTechnologies ? {
-          jobHasTechnology: {
-
-            create: connectTechnologies,
-
-          },
-        } : {}),
-
-      },
-      where: {
-        id,
-        userId
-      },
-    });
-  }
-
-  async delete(id: number, userId: number, selectedColumns?: (keyof Job)[]): Promise<Job> {
-    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
-    return await this.prismaService.job.delete({
-      select,
-      where: {
-        id,
-        userId
-      }
-    })
-  }
 
 
 
