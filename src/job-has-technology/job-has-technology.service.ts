@@ -25,7 +25,7 @@ export class JobHasTechnologyService {
     const technologiesToDelete = existingTechnology.filter((tech) => !updatingTechnologiesNames.has(tech.name));
 
     await this.technologyService.createMany(technologiesToCreate);
-    await this.technologyService.deleteMany(technologiesToDelete);
+    //await this.technologyService.deleteMany(technologiesToDelete);
 
     return;
   }
