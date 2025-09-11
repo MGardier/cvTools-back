@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "prisma/prisma.service";
-import { Job, Prisma} from "@prisma/client";
+import { Job, Prisma } from "@prisma/client";
 import { UtilRepository } from "src/utils/UtilRepository";
 import { UpdateJobInterface } from "./interfaces/update-job.interface";
 import { CreateJobInterface } from "./interfaces/create-job.interface";
+import { OptionRepositoryInterface } from "src/interfaces/options-repository.interface";
 
 @Injectable()
 export class JobRepository {
@@ -11,18 +12,14 @@ export class JobRepository {
   constructor(private readonly prismaService: PrismaService) { }
 
   async createJobForUser(
-    data: CreateJobInterface,
-    selectedColumns?: (keyof Job)[]
+    data: Omit<CreateJobInterface,'technologiesId'>,
+   options : OptionRepositoryInterface<Job>
   ): Promise<Job> {
-    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
-    const { userId,technologiesId,address, ...rest } = data;
-    const connectTechnologies = technologiesId.map((id) => ({
-      technology: {
-        connect: { id }
-      }
-    }));
+        const prisma = options?.tx || this.prismaService;
+    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(options?.selectedColumns);
+    const { userId, address, ...rest } = data;
 
-    return await this.prismaService.job.create({
+    return await prisma.job.create({
       select: select,
       data: {
         ...rest,
@@ -37,16 +34,12 @@ export class JobRepository {
             create: address
           }
         },
-        jobHasTechnology:
-        {
-          create: connectTechnologies,
-        }
 
       }
     });
   }
 
-  async findAllForUser(userId: number, selectedColumns?: (keyof Job)[]) :Promise<Job[]> {
+  async findAllForUser(userId: number, selectedColumns?: (keyof Job)[]): Promise<Job[]> {
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
     return await this.prismaService.job.findMany({
       select, where: {
@@ -56,19 +49,27 @@ export class JobRepository {
   }
 
 
-  async findJobForUser(id: number, userId: number, selectedColumns?: (keyof Job)[]):Promise<Job | null> {
+  async findJobForUser(id: number, userId: number, selectedColumns?: (keyof Job)[]): Promise<Job | null> {
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
     return await this.prismaService.job.findFirst({
-      select, where: {
+      where: {
         id,
         userId
+      },
+      include: {
+        jobHasTechnology: {
+          select: {
+            technology: true,
+            job: { select }
+          }
+        }
       }
     });
   }
 
 
   async deleteAllTechnologies(jobId: number): Promise<Prisma.BatchPayload> {
-   
+
     return await this.prismaService.jobHasTechnology.deleteMany({
       where: {
         jobId,
@@ -78,7 +79,7 @@ export class JobRepository {
 
 
 
-  async updateJobForUser( data: UpdateJobInterface,  selectedColumns?: (keyof Job)[]): Promise<Job> {
+  async updateJobForUser(data: UpdateJobInterface, selectedColumns?: (keyof Job)[]): Promise<Job> {
 
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
     const { id, userId, address, technologiesId, ...rest } = data;
@@ -86,7 +87,7 @@ export class JobRepository {
       technology: {
         connect: { id }
       }
-    })) : undefined ;
+    })) : undefined;
 
     return await this.prismaService.job.update({
       select,
@@ -116,7 +117,7 @@ export class JobRepository {
     });
   }
 
-  async delete(id: number,userId: number,selectedColumns?: (keyof Job)[]): Promise<Job>{
+  async delete(id: number, userId: number, selectedColumns?: (keyof Job)[]): Promise<Job> {
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
     return await this.prismaService.job.delete({
       select,

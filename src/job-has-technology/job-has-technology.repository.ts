@@ -18,33 +18,16 @@ export class JobHasTechnologyRepository {
 
   async findAllByJobId(jobId: number,tx?: Prisma.TransactionClient) {
     const prisma = tx || this.prismaService;
-    return await prisma.jobHasTechnology.findMany({ where: { jobId }, include: { technology: true } })
+    return await prisma.jobHasTechnology.findMany({ where: { jobId }, include: {job:true, technology: true } })
   }
 
 
-  async findOrCreateManyByJobId(jobId: number, technologies: UpsertTechnologyDto[], tx?: Prisma.TransactionClient) {
+  async createMany(jobId: number, technologiesId: number[],tx?: Prisma.TransactionClient) :Promise<Prisma.BatchPayload> {
 
-    const existingTechnology = (await this.findAllByJobId(jobId,tx)).map((jht) => jht.technology);
-    const existingTechnologiesNames = new Set(existingTechnology.map((tech) => tech.name));
-
-
-    const technologiesToCreate = technologies.filter((tech) => !existingTechnologiesNames.has(tech.name));
-
-    await this.technologyRepository.createMany(technologiesToCreate);
-
-    const newTechnologies = await this.findAllByJobId(jobId);
-    return [...existingTechnology, ...newTechnologies];
-
-  }
-
-  //findAllBy
-
-
-  async createMany(jobId: number, technologiesId: number[]) {
-
+    const prisma = tx || this.prismaService;
     const data = technologiesId.map((technologyId) => { return { jobId, technologyId } });
 
-    return await this.prismaService.jobHasTechnology.createMany({
+    return await prisma.jobHasTechnology.createMany({
       data
     })
   }

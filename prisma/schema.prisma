@@ -89,8 +89,8 @@ model Address {
 model Technology {
   @@map("technology")
 
-  id          Int     @id @default(autoincrement())
-  name        String  @unique()
+  id                      Int     @id @default(autoincrement())
+  name                    String  @unique()
   jobHasTechnology        JobHasTechnology[]   
 }
 
