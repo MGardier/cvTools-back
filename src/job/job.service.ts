@@ -41,7 +41,7 @@ export class JobService {
     return await this.jobRepository.findAllForUser(id, selectedColumns);
   }
 
-  async findJobForUser(jobId: number, userId: number, selectedColumns?: (keyof Job)[]) {
+  async findJobForUser(userId: number,jobId: number) {
     const job = await this.jobRepository.findJobForUser(jobId, userId);
     if (!job)
       throw new NotFoundException();

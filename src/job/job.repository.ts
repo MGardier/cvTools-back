@@ -50,21 +50,24 @@ export class JobRepository {
   }
 
 
-  async findJobForUser(id: number, userId: number, selectedColumns?: (keyof Job)[]): Promise<Job | null> {
-    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
+  async findJobForUser(id: number, userId: number): Promise<any | null> {
+
     return await this.prismaService.job.findFirst({
+      include: {
+
+        jobHasTechnology:{
+          select :{ 
+            technology: true,
+           
+          }
+        },
+        address :true
+      },
       where: {
         id,
         userId
       },
-      include: {
-        jobHasTechnology: {
-          select: {
-            technology: true,
-            job: { select }
-          }
-        }
-      }
+      
     });
   }
 
