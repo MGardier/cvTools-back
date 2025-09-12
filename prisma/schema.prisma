@@ -112,7 +112,7 @@ enum JobStatus {
 }
 
 
-enum PriorityJob {
+enum CompatibilityJob {
   PERFECT
   ATTAINABLE
   WHY_NOT
@@ -140,7 +140,7 @@ model Job {
   managerEmail          String?          @map("manager_email")
 
   status                JobStatus
-  priority              PriorityJob
+  compatibility         CompatibilityJob
   description           String?             @db.Text
   applicationMethod     ApplicationMethod
   interviewCount        Int                 @default(0) @map("interview_count")

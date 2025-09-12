@@ -1,4 +1,4 @@
-import { Address, ApplicationMethod, JobStatus, PriorityJob, TypeEnterprise } from "@prisma/client";
+import { Address, ApplicationMethod, JobStatus, CompatibilityJob, TypeEnterprise } from "@prisma/client";
 
 export interface CreateJobInterface {
   
@@ -9,7 +9,7 @@ export interface CreateJobInterface {
   managerName?: string;
   managerEmail?: string;
   status: JobStatus;
-  priority: PriorityJob;
+  compatibility: CompatibilityJob;
   applicationMethod: ApplicationMethod;
   interviewCount: number;
   rejectedReason?: string;

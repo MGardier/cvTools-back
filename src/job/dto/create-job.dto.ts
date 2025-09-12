@@ -1,4 +1,4 @@
-import { Address, ApplicationMethod, JobStatus, PriorityJob, Technology, TypeEnterprise } from "@prisma/client";
+import { Address, ApplicationMethod, JobStatus, CompatibilityJob, Technology, TypeEnterprise } from "@prisma/client";
 import { IsBoolean, IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 import {  UpsertTechnologyDto } from "../../technology/dto/upsert-technology.dto";
 import { CreateAddressDto } from "../../address/dto/create-address.dto";
@@ -35,8 +35,8 @@ export class CreateJobDto {
   status: JobStatus;
 
   @IsNotEmpty()
-  @IsEnum(PriorityJob)
-  priority: PriorityJob;
+  @IsEnum(CompatibilityJob)
+  compatibility: CompatibilityJob;
 
   @IsOptional()
   @IsString()

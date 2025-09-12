@@ -1,4 +1,4 @@
-import { ApplicationMethod, JobStatus, PriorityJob, TypeEnterprise } from "@prisma/client";
+import { ApplicationMethod, JobStatus, CompatibilityJob, TypeEnterprise } from "@prisma/client";
 import { CreateAddressDto } from "src/address/dto/create-address.dto";
 
 
@@ -12,7 +12,7 @@ export interface UpdateJobInterface {
   managerName?: string;
   managerEmail?: string;
   status?: JobStatus;
-  priority?: PriorityJob;
+  compatibility?: CompatibilityJob;
   applicationMethod?: ApplicationMethod;
   appliedAt?: Date;
   technologiesId?: number[];

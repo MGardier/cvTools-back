@@ -15,7 +15,7 @@ export class JobService {
   constructor(
     private readonly jobRepository: JobRepository,
     private readonly technologyService: TechnologyService,
-    private readonly JhTService: JobHasTechnologyService,
+    private readonly jhtService: JobHasTechnologyService,
     private readonly prismaTransactionService: PrismaTransactionService,
   ) { }
 
@@ -28,11 +28,12 @@ export class JobService {
     return await this.prismaTransactionService.execute(async (tx: Prisma.TransactionClient) => {
 
 
-      const technologies = await this.technologyService.findOrCreateMany(data.technologies, { tx, selectedColumns: ["id", "name"] });
+     const  technologies = await this.technologyService.findOrCreateMany(data.technologies, { tx, selectedColumns: ["id", "name"] });
 
       const job = await this.jobRepository.createJobForUser({ userId, ...rest }, { tx, selectedColumns });
 
-      await this.JhTService.createMany(job.id, technologies.map((tech) => tech.id), tx)
+      await this.jhtService.createMany(job.id, technologies.map((tech) => tech.id), tx)
+      return job;
 
     })
   }
@@ -41,11 +42,14 @@ export class JobService {
     return await this.jobRepository.findAllForUser(id, selectedColumns);
   }
 
-  async findJobForUser(userId: number,jobId: number) {
-    const job = await this.jobRepository.findJobForUser(jobId, userId);
+  async findJobForUser(userId: number,jobId: number, selectedColumns?: (keyof Job)[]) {
+    const job = await this.jobRepository.findJobForUser(jobId, userId,selectedColumns);
     if (!job)
       throw new NotFoundException();
-    return job;
+
+    const {jobHasTechnology,...rest} = job;
+    const technologies = jobHasTechnology.map((tech)=> {return tech.technology });
+    return {...rest,technologies};
   }
 
 }
