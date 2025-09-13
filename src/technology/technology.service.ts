@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Technology } from '@prisma/client';
-import { UpsertTechnologyDto } from './dto/upsert-technology.dto';
+import { CreateTechnologyDto } from './dto/create-technology.dto';
 import { TechnologyRepository } from './technology.repository';
 import { OptionRepositoryInterface } from 'src/interfaces/options-repository.interface';
 
@@ -10,7 +10,7 @@ export class TechnologyService {
   constructor(private readonly technologyRepository: TechnologyRepository) { }
 
 
-  async findOrCreateMany(technologies: UpsertTechnologyDto[], options?: OptionRepositoryInterface<Technology>): Promise<Technology[]> {
+  async findOrCreateMany(technologies: CreateTechnologyDto[], options?: OptionRepositoryInterface<Technology>): Promise<Technology[]> {
 
     const existingTechnology = await this.technologyRepository.findManyByName(
       technologies.map((tech) => tech.name.toLowerCase()), 
@@ -27,7 +27,7 @@ export class TechnologyService {
 
   }
 
-  async createMany(technologies: UpsertTechnologyDto[]) {
+  async createMany(technologies: CreateTechnologyDto[]) {
     return await this.technologyRepository.createMany(technologies);
   }
 

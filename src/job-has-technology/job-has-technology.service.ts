@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { JobHasTechnologyRepository } from './job-has-technology.repository';
-import { UpsertTechnologyDto } from 'src/technology/dto/upsert-technology.dto';
 import { TechnologyService } from 'src/technology/technology.service';
 import { Prisma, Technology } from '@prisma/client';
 

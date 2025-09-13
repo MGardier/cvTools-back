@@ -46,22 +46,28 @@ export class UserController {
   async findJobForUser(@Param('id') userId: string, @Param('jobId') jobId: string,) {
     const selectedColumns: (keyof Job)[] = [
       "id",
-      "enterprise",
-      "type",
-      "link",
+      "interviewCount",
+      "rating",
+
       "jobTitle",
+      "enterprise",
+      "link",
       "managerName",
       "managerEmail",
+      "description",
+      "notes",
+      "rejectedReason",
+
+      "type",
       "status",
       "compatibility",
-      "description",
       "applicationMethod",
-      "interviewCount",
-      "rejectedReason",
-      "rating",
-      "archived",
+      "isArchived",
+      "isFavorite",
+
       "appliedAt",
-      "lastContactAt"
+      "lastContactAt",
+      "createdAt"
     ]
     return await this.jobService.findJobForUser(+userId, +jobId, selectedColumns);
   }

@@ -1,10 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, Technology } from "@prisma/client";
 import { PrismaService } from "prisma/prisma.service";
-import { OptionRepositoryInterface } from "src/interfaces/options-repository.interface";
-import { UpsertTechnologyDto } from "src/technology/dto/upsert-technology.dto";
 import { TechnologyRepository } from "src/technology/technology.repository";
-import { UtilRepository } from "src/utils/UtilRepository";
+
 
 
 
