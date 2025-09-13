@@ -1,25 +1,47 @@
-import { Address, ApplicationMethod, JobStatus, PriorityJob, TypeEnterprise } from "@prisma/client";
+import { Address, ApplicationMethod, JobStatus, CompatibilityJob, TypeEnterprise } from "@prisma/client";
 
 export interface CreateJobInterface {
-  
-  enterprise: string;
-  type: TypeEnterprise;
-  link: string;
+
+  /********************** STRING ******************** */
+
   jobTitle: string;
+  enterprise: string;
+  link: string;
+  description?: string;
+  notes?: string;
   managerName?: string;
   managerEmail?: string;
-  status: JobStatus;
-  priority: PriorityJob;
-  applicationMethod: ApplicationMethod;
-  interviewCount: number;
   rejectedReason?: string;
-  rating: number;
-  archived : boolean;
-  appliedAt?: Date;
-  lastContactAt ? :Date;
-  technologiesId: number[];
-  address: Omit<Address, 'id' |"createdAt" | "updatedAt">;
-  userId: number;
 
+
+  /********************** NUMBER ******************** */
+  
+  interviewCount: number;
+  rating: number;
+
+
+  /********************** BOOLEAN ******************** */
+
+  isArchived: boolean;
+  isFavorite: boolean;
+
+  /********************** DATE ******************** */
+
+  appliedAt?: Date;
+  lastContactAt?: Date;
+
+  
+  /********************** ENUM ******************** */
+  
+  type: TypeEnterprise;
+  status: JobStatus;
+  compatibility: CompatibilityJob;
+  applicationMethod: ApplicationMethod;
+  
+
+  /********************** RELATION ******************** */
+  technologiesId: number[];
+  address: Omit<Address, 'id' | "createdAt" | "updatedAt">;
+  userId: number;
 
 }

@@ -1,18 +1,20 @@
-import { Address, ApplicationMethod, JobStatus, PriorityJob, Technology, TypeEnterprise } from "@prisma/client";
+import {  ApplicationMethod, JobStatus, CompatibilityJob, Technology, TypeEnterprise } from "@prisma/client";
 import { IsBoolean, IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
-import {  UpsertTechnologyDto } from "../../technology/dto/upsert-technology.dto";
+import { CreateTechnologyDto} from "../../technology/dto/create-technology.dto";
 import { CreateAddressDto } from "../../address/dto/create-address.dto";
 import { Transform, Type } from "class-transformer";
 
 export class CreateJobDto {
 
+
+
+/********************** STRING ******************** */
+
+  /****** REQUIRED ******/
+
   @IsNotEmpty()
   @IsString()
   enterprise: string;
-
-  @IsNotEmpty()
-  @IsEnum(TypeEnterprise)
-  type: TypeEnterprise;
 
   @IsNotEmpty()
   @IsString()
@@ -22,6 +24,8 @@ export class CreateJobDto {
   @IsString()
   jobTitle: string;
 
+  /****** OPTIONNAL ******/
+
   @IsOptional()
   @IsString()
   managerName?: string;
@@ -30,63 +34,82 @@ export class CreateJobDto {
   @IsEmail()
   managerEmail?: string;
 
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+  
+  @IsOptional()
+  @IsString()
+  rejectedReason?: string;
+
+/********************** ENUM ******************** */
+
+  @IsNotEmpty()
+  @IsEnum(TypeEnterprise)
+  type: TypeEnterprise;
+
+
   @IsNotEmpty()
   @IsEnum(JobStatus)
   status: JobStatus;
 
   @IsNotEmpty()
-  @IsEnum(PriorityJob)
-  priority: PriorityJob;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
+  @IsEnum(CompatibilityJob)
+  compatibility: CompatibilityJob;
 
   @IsNotEmpty()
   @IsEnum(ApplicationMethod)
   applicationMethod: ApplicationMethod;
 
+
+
+/********************** NUMBER ******************** */
   @IsNotEmpty()
-  @Transform(({ value }) => (value  || value === 0 ? Number(value) : undefined)) 
+  @Transform(({ value }) => (value || value === 0 ? Number(value) : undefined))
   @IsNumber()
-  interviewCount : number;
-
-  @IsOptional()
-  @IsString()
-  rejectedReason ?: string;
+  interviewCount: number;
 
   @IsNotEmpty()
-  @Transform(({ value }) => (value  || value === 0 ? Number(value) : undefined)) 
+  @Transform(({ value }) => (value || value === 0 ? Number(value) : undefined))
   @IsNumber()
   rating: number;
 
+
+/********************** BOOLEAN ******************** */
+
   @IsNotEmpty()
-  @Transform(Boolean) 
+  @Transform(Boolean)
   @IsBoolean()
-  archived : boolean
+  isArchived: boolean
+
+  @IsNotEmpty()
+  @Transform(Boolean)
+  @IsBoolean()
+  isFavorite: boolean
 
 
 
-
-
+/********************** DATE ******************** */
   @IsOptional()
-  @Transform(({ value }) => (value ? new Date(value) : undefined)) 
+  @Transform(({ value }) => (value ? new Date(value) : undefined))
   @IsDate()
   appliedAt?: Date;
 
   @IsOptional()
-  @Transform(({ value }) => (value ? new Date(value) : undefined)) 
+  @Transform(({ value }) => (value ? new Date(value) : undefined))
   @IsDate()
   lastContactAt?: Date;
 
 
-
-
-
+/********************** OBJECT ******************** */
   @IsNotEmpty()
   @ValidateNested()
-  @Type(() => UpsertTechnologyDto)
-  technologies: UpsertTechnologyDto[];
+  @Type(() => CreateTechnologyDto)
+  technologies: CreateTechnologyDto[];
 
   @IsOptional()
   @ValidateNested()

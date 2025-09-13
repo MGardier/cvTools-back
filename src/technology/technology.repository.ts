@@ -1,10 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "prisma/prisma.service";
-import { UpsertTechnologyDto } from "./dto/upsert-technology.dto";
+
 import { Prisma, Technology } from "@prisma/client";
 import { UtilRepository } from "src/utils/UtilRepository";
 import { OptionRepositoryInterface } from "src/interfaces/options-repository.interface";
 import { FindManyTechnologyInterface } from "./interfaces/find-many-technology.interface";
+import { CreateTechnologyDto } from "./dto/create-technology.dto";
 
 
 @Injectable()
@@ -54,7 +55,7 @@ export class TechnologyRepository {
 
 
 
-  async createMany(technologies: UpsertTechnologyDto[], tx?: Prisma.TransactionClient) {
+  async createMany(technologies: CreateTechnologyDto[], tx?: Prisma.TransactionClient) {
     const prisma = tx || this.prismaService;
     return await prisma.technology.createMany({
       data: technologies
