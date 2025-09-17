@@ -2,7 +2,7 @@ import { Address, ApplicationMethod, JobStatus, CompatibilityJob, TypeEnterprise
 
 export interface CreateJobInterface {
 
-  /********************** STRING ******************** */
+  /********************** STRING *********************/
 
   jobTitle: string;
   enterprise: string;

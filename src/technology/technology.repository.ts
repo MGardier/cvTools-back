@@ -20,6 +20,23 @@ export class TechnologyRepository {
 
 
 
+
+  async createMany(technologies: CreateTechnologyDto[], tx?: Prisma.TransactionClient) {
+    const prisma = tx || this.prismaService;
+    return await prisma.technology.createMany({
+      data: technologies
+    });
+  }
+
+
+  async deleteMany(technologiesId: number[], tx?: Prisma.TransactionClient) {
+    const prisma = tx || this.prismaService;
+    const data = technologiesId.map((technologyId) => { return { id :technologyId } });
+    return await prisma.technology.deleteMany({
+      where: {OR :data}
+    });
+  }
+
   async findMany(options: OptionRepositoryInterface<Technology>) {
     const select: Record<keyof Technology, boolean> | undefined = UtilRepository.getSelectedColumns<Technology>(options?.selectedColumns);
     const prisma = options?.tx || this.prismaService;
@@ -54,13 +71,23 @@ export class TechnologyRepository {
   }
 
 
+  async findUnusedManyById(technologiesIds: number[], tx?: Prisma.TransactionClient) {
 
-  async createMany(technologies: CreateTechnologyDto[], tx?: Prisma.TransactionClient) {
     const prisma = tx || this.prismaService;
-    return await prisma.technology.createMany({
-      data: technologies
+    return await prisma.technology.findMany({
+      where: {
+        id: { in: technologiesIds },
+        jobHasTechnology: {
+          none: {}
+        }
+      },
+      select: {
+        id: true,
+      }
     });
   }
+
+
 
 
 
