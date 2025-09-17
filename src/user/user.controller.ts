@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Public } from 'src/decorators/public.decorator';
@@ -28,8 +29,15 @@ export class UserController {
 
   @Public()
   @Post('/:id/job')
-  createJobForUser(@Param('id') id: string, @Body() createJobDto: CreateJobDto) {
-    return this.jobService.createJobForUser(+id, createJobDto);
+  createJobForUser(@Param('id',ParseIntPipe) id: number, @Body() data: CreateJobDto) {
+    return this.jobService.createJobForUser(id, data);
+  }
+
+
+  @Public()
+  @Put('/:userId/job/:jobId')
+  updateJobForUser(@Param('userId', ParseIntPipe) userId: number, @Param('jobId',ParseIntPipe) jobId: number, @Body() data: UpdateJobDto) {
+   return this.jobService.updateJobForUser(jobId,userId, data);
   }
 
 
@@ -42,8 +50,8 @@ export class UserController {
 
 
   @Public()
-  @Get('/:id/job/:jobId')
-  async findJobForUser(@Param('id') userId: string, @Param('jobId') jobId: string,) {
+  @Get('/:userId/job/:jobId')
+  async findJobForUser(@Param('userId',ParseIntPipe) userId: number, @Param('jobId',ParseIntPipe) jobId: number,) {
     const selectedColumns: (keyof Job)[] = [
       "id",
       "interviewCount",
@@ -69,7 +77,7 @@ export class UserController {
       "lastContactAt",
       "createdAt"
     ]
-    return await this.jobService.findJobForUser(+userId, +jobId, selectedColumns);
+    return await this.jobService.findJobForUser(userId, jobId, selectedColumns);
   }
 
 

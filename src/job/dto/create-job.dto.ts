@@ -82,12 +82,12 @@ export class CreateJobDto {
 /********************** BOOLEAN ******************** */
 
   @IsNotEmpty()
-  @Transform(Boolean)
+  @Transform(({ value} ) => value === 'true')
   @IsBoolean()
   isArchived: boolean
 
   @IsNotEmpty()
-  @Transform(Boolean)
+  @Transform(({ value} ) => value === 'true')
   @IsBoolean()
   isFavorite: boolean
 

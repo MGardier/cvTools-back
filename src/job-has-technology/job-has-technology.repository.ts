@@ -11,16 +11,20 @@ export class JobHasTechnologyRepository {
 
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly technologyRepository: TechnologyRepository
   ) { }
 
-  async findAllByJobId(jobId: number,tx?: Prisma.TransactionClient) {
+  async findAllByJobId(jobId: number, tx?: Prisma.TransactionClient) {
     const prisma = tx || this.prismaService;
-    return await prisma.jobHasTechnology.findMany({ where: { jobId }, include: {job:true, technology: true } })
+    return await prisma.jobHasTechnology.findMany({ where: { jobId }, include: { job: true, technology: true } })
+  }
+
+  async findAllByTechnologyId(technologyId: number, tx?: Prisma.TransactionClient) {
+    const prisma = tx || this.prismaService;
+    return await prisma.jobHasTechnology.findMany({ where: { technologyId } })
   }
 
 
-  async createMany(jobId: number, technologiesId: number[],tx?: Prisma.TransactionClient) :Promise<Prisma.BatchPayload> {
+  async createMany(jobId: number, technologiesId: number[], tx?: Prisma.TransactionClient): Promise<Prisma.BatchPayload> {
 
     const prisma = tx || this.prismaService;
     const data = technologiesId.map((technologyId) => { return { jobId, technologyId } });
@@ -30,6 +34,13 @@ export class JobHasTechnologyRepository {
     })
   }
 
-  //deleteMany
+  async deleteMany(jobId: number, tx?: Prisma.TransactionClient): Promise<Prisma.BatchPayload> {
+
+    const prisma = tx || this.prismaService;
+
+    return await prisma.jobHasTechnology.deleteMany({
+      where: { jobId }
+    })
+  }
 
 }
