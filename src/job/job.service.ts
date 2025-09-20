@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { JobRepository } from './job.repository';
@@ -8,6 +8,9 @@ import { Job, Prisma } from '@prisma/client';
 import { JobHasTechnologyService } from 'src/job-has-technology/job-has-technology.service';
 import { PrismaTransactionService } from 'prisma/prisma-transaction.service';
 import { UpdateJobInterface } from './interfaces/update-job.interface';
+import { ErrorCodeEnum } from 'src/enums/error-codes.enum';
+import { FindAllOptions } from 'src/interfaces/findAll-options.interface';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 
 @Injectable()
@@ -18,12 +21,13 @@ export class JobService {
     private readonly technologyService: TechnologyService,
     private readonly jhtService: JobHasTechnologyService,
     private readonly prismaTransactionService: PrismaTransactionService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) { }
 
   //TODO : Revoir les nommages 
   //TODO : Search + auto complete
 
-  async createJobForUser(userId: number, data: CreateJobDto, selectedColumns?: (keyof Job)[]) {
+  async createJobForUser(userId: number, data: CreateJobDto, selectedColumns?: (keyof Job)[]): Promise<Job> {
 
     const { technologies, ...jobData } = data
     return await this.prismaTransactionService.execute(async (tx: Prisma.TransactionClient) => {
@@ -34,45 +38,55 @@ export class JobService {
 
 
       await this.jhtService.createMany(job.id, technologies.map((tech) => tech.id), tx)
-      
+
       return job;
 
     })
   }
 
-  async updateJobForUser( jobId: number,userId: number, data: UpdateJobDto) {
+  async updateJobForUser(jobId: number, userId: number, data: UpdateJobDto): Promise<Job> {
     const { technologies, ...jobData } = data;
-     return await this.prismaTransactionService.execute(async (tx: Prisma.TransactionClient) => {
+    return await this.prismaTransactionService.execute(async (tx: Prisma.TransactionClient) => {
 
-      const job = await this.jobRepository.updateJobForUser( jobId,userId, jobData , { tx });
-      if(data.technologies){
-        const technologies = await this.technologyService.findOrCreateMany(data.technologies, { tx, selectedColumns: ["id","name"] });
+      const job = await this.jobRepository.updateJobForUser(jobId, userId, jobData, { tx });
+      if (!job)
+        throw new NotFoundException(ErrorCodeEnum.JOB_NOT_FOUND_ERROR);
+
+      if (data.technologies) {
+        const technologies = await this.technologyService.findOrCreateMany(data.technologies, { tx, selectedColumns: ["id", "name"] });
 
         await this.jhtService.deleteMany(jobId, tx)
         await this.jhtService.createMany(jobId, technologies.map((tech) => tech.id), tx)
       }
 
       return job;
-       
-     
     })
-
-
-    //récupérer les techno du job existant 
-    //comparer pour obtenir celle à supprimer et celle à créer
-    //créer et supprimer les technologies
-
-    //vérifier l'adresse
-
   }
 
+  //search, sort + pagination
 
-  async findAllForUser(id: number, selectedColumns?: (keyof Job)[]) {
-    return await this.jobRepository.findAllForUser(id, selectedColumns);
+  async findAllJobForUser(userId: number, options: FindAllOptions<Job>) {
+
+
+    let count :number |undefined  = await this.cacheManager.get(`job:countJobsForUser:${userId}`);
+    if (!count) {
+      count = await this.jobRepository.countJobsForUser(userId);
+      await this.cacheManager.set(`user:${userId}:countJobsForUser`, count, 28800)
+    }
+
+
+    const { page,limit, ...restOptions } = options;
+    const defineLimit = limit || 10
+    const data =  await this.jobRepository.findAllJobForUser(userId, {
+      ...restOptions,
+      limit : defineLimit,
+      skip: page ? (page - 1) * defineLimit : 0,
+    });
+    return {data,limit ,count, page , maxPage : Math.ceil(count/ defineLimit)}
   }
 
-  async findJobForUser(userId: number, jobId: number, selectedColumns?: (keyof Job)[]) {
-    const job = await this.jobRepository.findJobForUser(jobId, userId, selectedColumns);
+  async findOneJobForUser(userId: number, jobId: number, selectedColumns?: (keyof Job)[]) {
+    const job = await this.jobRepository.findOneJobForUser(jobId, userId, selectedColumns);
     if (!job)
       throw new NotFoundException();
 
