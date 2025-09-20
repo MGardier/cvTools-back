@@ -31,7 +31,9 @@ export class CreateJobDto {
   managerName?: string;
 
   @IsOptional()
+  @Transform(({ value }) => (value ? value: undefined))
   @IsEmail()
+
   managerEmail?: string;
 
   @IsOptional()

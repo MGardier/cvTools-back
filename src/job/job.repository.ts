@@ -4,8 +4,10 @@ import { Job, Prisma } from "@prisma/client";
 import { UtilRepository } from "src/utils/UtilRepository";
 import { UpdateJobInterface } from "./interfaces/update-job.interface";
 import { CreateJobInterface } from "./interfaces/create-job.interface";
-import { OptionRepositoryInterface } from "src/interfaces/options-repository.interface";
+import { OptionRepository } from "src/interfaces/options-repository.interface";
 import { id } from "zod/v4/locales/index.cjs";
+import { FindAllOptions } from "src/interfaces/findAll-options.interface";
+import { FilterOptions } from "src/interfaces/filter-options.interface";
 
 @Injectable()
 export class JobRepository {
@@ -14,7 +16,7 @@ export class JobRepository {
 
   async createJobForUser(
     data: Omit<CreateJobInterface, 'technologiesId'>,
-    options: OptionRepositoryInterface<Job>
+    options: OptionRepository<Job>
   ): Promise<Job> {
     const prisma = options?.tx || this.prismaService;
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(options?.selectedColumns);
@@ -42,11 +44,11 @@ export class JobRepository {
 
 
 
-  async updateJobForUser(jobId: number,userId: number, data: Omit<UpdateJobInterface,'userId'| 'technologiesId'>,
-    options: OptionRepositoryInterface<Job>) {
+  async updateJobForUser(jobId: number, userId: number, data: Omit<UpdateJobInterface, 'userId' | 'technologiesId'>,
+    options: OptionRepository<Job>) {
     const prisma = options?.tx || this.prismaService;
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(options?.selectedColumns);
-    const {  address, ...jobData } = data;
+    const { address, ...jobData } = data;
     return await prisma.job.update({
       select: select,
       data: {
@@ -59,29 +61,31 @@ export class JobRepository {
             }
           }
         }),
-       
+
 
       },
-       where: {
-          id: jobId,
-          user: {is: {id : userId}}
-        }
+      where: {
+        id: jobId,
+        user: { is: { id: userId } }
+      }
     });
 
   }
 
-  async findAllForUser(userId: number, selectedColumns?: (keyof Job)[]): Promise<Job[]> {
-    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
+  async findAllJobForUser(userId: number, options: FilterOptions<Job>): Promise<Job[]> {
+    const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(options?.selectedColumns);
     return await this.prismaService.job.findMany({
       select,
       where: {
         userId
-      }
+      },
+      ...(options?.skip ? { skip: options?.skip } : {}),
+      ...(options?.limit ? { take: options?.limit } : {})
     });
   }
 
 
-  async findJobForUser(id: number, userId: number, selectedColumns?: (keyof Job)[]): Promise<any | null> {
+  async findOneJobForUser(id: number, userId: number, selectedColumns?: (keyof Job)[]): Promise<any | null> {
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(selectedColumns);
     return await this.prismaService.job.findFirst({
       select: {
@@ -102,6 +106,13 @@ export class JobRepository {
     });
   }
 
+  async countJobsForUser(userId: number) {
+    return await this.prismaService.job.count({
+      where: {
+        userId
+      }
+    })
+  }
 
 
 }

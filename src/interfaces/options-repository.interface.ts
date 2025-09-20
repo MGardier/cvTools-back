@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-export interface OptionRepositoryInterface<TdataSelectedColumns>  {
+export interface OptionRepository<TdataSelectedColumns>  {
   tx?: Prisma.TransactionClient;
   selectedColumns?: (keyof TdataSelectedColumns)[];
 }

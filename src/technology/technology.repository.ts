@@ -3,8 +3,7 @@ import { PrismaService } from "prisma/prisma.service";
 
 import { Prisma, Technology } from "@prisma/client";
 import { UtilRepository } from "src/utils/UtilRepository";
-import { OptionRepositoryInterface } from "src/interfaces/options-repository.interface";
-import { FindManyTechnologyInterface } from "./interfaces/find-many-technology.interface";
+import { OptionRepository } from "src/interfaces/options-repository.interface";
 import { CreateTechnologyDto } from "./dto/create-technology.dto";
 
 
@@ -37,7 +36,7 @@ export class TechnologyRepository {
     });
   }
 
-  async findMany(options: OptionRepositoryInterface<Technology>) {
+  async findMany(options: OptionRepository<Technology>) {
     const select: Record<keyof Technology, boolean> | undefined = UtilRepository.getSelectedColumns<Technology>(options?.selectedColumns);
     const prisma = options?.tx || this.prismaService;
     return await prisma.technology.findMany({
@@ -46,7 +45,7 @@ export class TechnologyRepository {
 
   }
 
-  async findManyByName(technologiesNames: string[], options: OptionRepositoryInterface<Technology>) {
+  async findManyByName(technologiesNames: string[], options: OptionRepository<Technology>) {
     const select: Record<keyof Technology, boolean> | undefined = UtilRepository.getSelectedColumns<Technology>(options?.selectedColumns);
     const prisma = options?.tx || this.prismaService;
     return await prisma.technology.findMany({
@@ -58,7 +57,7 @@ export class TechnologyRepository {
     })
   }
 
-  async findManyById(technologiesIds: number[], options: OptionRepositoryInterface<Technology>) {
+  async findManyById(technologiesIds: number[], options: OptionRepository<Technology>) {
     const select: Record<keyof Technology, boolean> | undefined = UtilRepository.getSelectedColumns<Technology>(options?.selectedColumns);
     const prisma = options?.tx || this.prismaService;
     return await prisma.technology.findMany({
