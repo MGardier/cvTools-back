@@ -74,13 +74,16 @@ export class JobRepository {
 
   async findAllJobForUser(userId: number, options: FilterOptions<Job>): Promise<Job[]> {
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(options?.selectedColumns);
+    const orderBy : Record<keyof Job, Prisma.SortOrder>[]= UtilRepository.getSortedColumns<Job>(options?.sort)
+    
     return await this.prismaService.job.findMany({
       select,
       where: {
         userId
       },
       ...(options?.skip ? { skip: options?.skip } : {}),
-      ...(options?.limit ? { take: options?.limit } : {})
+      ...(options?.limit ? { take: options?.limit } : {}),
+      ...(orderBy ? {orderBy} : {})
     });
   }
 

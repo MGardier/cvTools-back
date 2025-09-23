@@ -76,14 +76,15 @@ export class JobService {
     }
 
 
-    const { page,limit, ...restOptions } = options;
+    const { page,limit,sort, ...restOptions } = options;
 
     const defineLimit = limit || 10
     const skip = page && (page - 1) * defineLimit > count ? (page - 1) * defineLimit : 0;
     const data =  await this.jobRepository.findAllJobForUser(userId, {
       ...restOptions,
       limit : defineLimit,
-      skip
+      skip,
+      sort : sort 
     });
     return {data,limit ,count, page , maxPage : Math.ceil(count/ defineLimit)}
   }
