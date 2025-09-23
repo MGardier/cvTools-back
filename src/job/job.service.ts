@@ -67,20 +67,24 @@ export class JobService {
 
   async findAllJobForUser(userId: number, options: FindAllOptions<Job>) {
 
-
-    let count :number |undefined  = await this.cacheManager.get(`job:countJobsForUser:${userId}`);
+    const cacheKey = `user:${userId}:countJobsForUser`;
+    let count :number |undefined  = await this.cacheManager.get(cacheKey);
     if (!count) {
       count = await this.jobRepository.countJobsForUser(userId);
-      await this.cacheManager.set(`user:${userId}:countJobsForUser`, count, 28800)
+      //hour * min * sec
+      await this.cacheManager.set(cacheKey, count, 8 * 60 * 60)
     }
 
 
-    const { page,limit, ...restOptions } = options;
+    const { page,limit,sort, ...restOptions } = options;
+
     const defineLimit = limit || 10
+    const skip = page && (page - 1) * defineLimit > count ? (page - 1) * defineLimit : 0;
     const data =  await this.jobRepository.findAllJobForUser(userId, {
       ...restOptions,
       limit : defineLimit,
-      skip: page ? (page - 1) * defineLimit : 0,
+      skip,
+      sort : sort 
     });
     return {data,limit ,count, page , maxPage : Math.ceil(count/ defineLimit)}
   }

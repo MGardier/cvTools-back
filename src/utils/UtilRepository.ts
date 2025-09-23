@@ -1,17 +1,24 @@
-import { PrismaTokenType } from "@prisma/client";
+import { Prisma, PrismaTokenType } from "@prisma/client";
+import { SortItem } from "src/interfaces/filter-options.interface";
 import { TokenType } from "src/user-token/enum/token-type.enum";
 
 export abstract class UtilRepository {
 
-    static getSelectedColumns<T>(columns?: (keyof T)[]): Record<keyof T, boolean> | undefined {
+    static getSelectedColumns<TData>(columns?: (keyof TData)[]): Record<keyof TData, boolean> | undefined {
 
-        const select = columns?.reduce((acc, column) => {
+       return columns?.reduce((acc, column) => {
             acc[column] = true;
             return acc;
-        }, {} as Record<keyof T, boolean>);
-        return select;
+        }, {} as Record<keyof TData, boolean>);
     }
 
+    static getSortedColumns<TData>(columns ?: SortItem<TData>[] ) :Record<keyof TData, Prisma.SortOrder>[]{
+        if(!columns) return  [];
+        return  columns?.map((column) => {
+           return  {[column.field ] :column.direction} as Record<keyof TData, Prisma.SortOrder> ;
+        })
+
+    }
 
 
 

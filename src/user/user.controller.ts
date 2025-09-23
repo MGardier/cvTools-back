@@ -49,17 +49,16 @@ export class UserController {
   @Get('/:userId/job')
   async findAllJobForUser(
     @Param('userId', ParseIntPipe) userId: number,
-    @Query() query : FilterOptionsDto,
+    @Query() query : FilterOptionsDto<Job>,
 
 ) {
-
-   
     return await this.jobService.findAllJobForUser(
       userId, 
       {
         selectedColumns : ['id', 'jobTitle', "enterprise", "status", "applicationMethod", "appliedAt"], 
         page : query.page,
         limit : query.limit,
+        sort : query.sort
       });
   }
 
