@@ -21,7 +21,6 @@ export abstract class UtilRepository {
     }
 
 
-
     static toPrismaTokenType(tokenType: TokenType): PrismaTokenType {
         const mapping = {
             [TokenType.REFRESH]: PrismaTokenType.REFRESH,

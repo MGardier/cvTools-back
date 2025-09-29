@@ -25,7 +25,7 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log'],
   });
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true ,transform: true}),
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true ,transform: true,}),
   );
 
   app.enableCors({

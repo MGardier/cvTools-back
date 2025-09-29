@@ -3,7 +3,7 @@ import { PrismaService } from "prisma/prisma.service";
 import {  Prisma, UserToken } from '@prisma/client';
 
 
-import { CreateUserTokenInterface } from './dto/create-user-token.interface';
+import { CreateUserTokenInterface } from './interfaces/create-user-token.interface';
 import { UtilRepository } from "src/utils/UtilRepository";
 
 @Injectable()
