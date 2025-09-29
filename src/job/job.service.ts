@@ -63,12 +63,11 @@ export class JobService {
     })
   }
 
-  //search, sort + pagination
-
+  // TODO : gérer le cache et son invalidation
   async findAllJobForUser(userId: number, options: FindAllOptions<Job>) {
 
     const cacheKey = `user:${userId}:countJobsForUser`;
-    let count :number |undefined  = await this.cacheManager.get(cacheKey);
+    let count: number | undefined = await this.cacheManager.get(cacheKey);
     if (!count) {
       count = await this.jobRepository.countJobsForUser(userId);
       //hour * min * sec
@@ -76,17 +75,27 @@ export class JobService {
     }
 
 
-    const { page,limit,sort, ...restOptions } = options;
-
+    const { page, limit, sort, ...restOptions } = options;
     const defineLimit = limit || 10
-    const skip = page && (page - 1) * defineLimit > count ? (page - 1) * defineLimit : 0;
-    const data =  await this.jobRepository.findAllJobForUser(userId, {
+
+    let skip = 0;
+    if (page && page > 0) {
+      skip = (page - 1) * defineLimit;
+
+      if (skip >= count) {
+        const maxPage = Math.ceil(count / defineLimit);
+        skip = Math.max(0, (maxPage - 1) * defineLimit);
+      }
+    }
+
+
+    const data = await this.jobRepository.findAllJobForUser(userId, {
       ...restOptions,
-      limit : defineLimit,
+      limit: defineLimit,
       skip,
-      sort : sort 
+      sort: sort
     });
-    return {data,limit ,count, page , maxPage : Math.ceil(count/ defineLimit)}
+    return { data, limit, count, page, maxPage: Math.ceil(count / defineLimit) }
   }
 
   async findOneJobForUser(userId: number, jobId: number, selectedColumns?: (keyof Job)[]) {

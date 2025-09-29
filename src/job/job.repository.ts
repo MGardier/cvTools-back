@@ -74,16 +74,37 @@ export class JobRepository {
 
   async findAllJobForUser(userId: number, options: FilterOptions<Job>): Promise<Job[]> {
     const select: Record<keyof Job, boolean> | undefined = UtilRepository.getSelectedColumns<Job>(options?.selectedColumns);
-    const orderBy : Record<keyof Job, Prisma.SortOrder>[]= UtilRepository.getSortedColumns<Job>(options?.sort)
-    
+    const orderBy: Record<keyof Job, Prisma.SortOrder>[] = UtilRepository.getSortedColumns<Job>(options?.sort)
+
+    // Construction dynamique des filtres (évite les objets vides)
+    const whereConditions: Prisma.JobWhereInput[] = [];
+
+    if (options?.filters?.jobTitle) {
+      whereConditions.push({ jobTitle: { contains: options?.filters?.jobTitle } });
+    }
+
+    if (options?.filters?.enterprise) {
+      whereConditions.push({ enterprise: { contains: options?.filters?.enterprise } });
+    }
+
+    if (options?.filters?.status) {
+      whereConditions.push({ status: { equals: options?.filters?.status } });
+    }
+
+    if (options?.filters?.applicationMethod) {
+      whereConditions.push({ applicationMethod: { equals: options?.filters?.applicationMethod } });
+    }
+
+
     return await this.prismaService.job.findMany({
       select,
       where: {
-        userId
+        userId,
+        ...(whereConditions.length > 0 ? { AND: whereConditions } : {})
       },
       ...(options?.skip ? { skip: options?.skip } : {}),
       ...(options?.limit ? { take: options?.limit } : {}),
-      ...(orderBy ? {orderBy} : {})
+      ...(orderBy ? { orderBy } : {})
     });
   }
 

@@ -18,7 +18,8 @@ import { UpdateJobDto } from 'src/job/dto/update-job.dto';
 import { CreateJobDto } from 'src/job/dto/create-job.dto';
 
 import { Job } from '@prisma/client';
-import { FilterOptionsDto } from 'src/dto/filter-options.dto';
+import { ParamsOptionsDto } from 'src/dto/params-options.dto';
+import { FindAllJobDto } from 'src/job/dto/find-all-job.dto';
 
 
 
@@ -49,7 +50,7 @@ export class UserController {
   @Get('/:userId/job')
   async findAllJobForUser(
     @Param('userId', ParseIntPipe) userId: number,
-    @Query() query : FilterOptionsDto<Job>,
+    @Query() query : FindAllJobDto,
 
 ) {
     return await this.jobService.findAllJobForUser(
@@ -58,8 +59,15 @@ export class UserController {
         selectedColumns : ['id', 'jobTitle', "enterprise", "status", "applicationMethod", "appliedAt"], 
         page : query.page,
         limit : query.limit,
-        sort : query.sort
-      });
+        sort : query.sort,
+        filters : {
+        jobTitle: query.jobTitle,
+        enterprise: query.enterprise,
+        status : query.status,
+        applicationMethod : query.applicationMethod,
+      }
+      }
+    );
   }
 
 

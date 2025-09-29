@@ -9,6 +9,7 @@ export class TechnologyService {
 
   constructor(private readonly technologyRepository: TechnologyRepository) { }
 
+  //TODO : 
 
   async findOrCreateMany(technologies: CreateTechnologyDto[], options?: OptionRepository<Technology>): Promise<Technology[]> {
 
@@ -17,7 +18,6 @@ export class TechnologyService {
       {...options}
     );
 
-   
     const existingTechnologiesNames = new Set(existingTechnology.map((tech) => tech.name.toLowerCase()))
 
     const technologiesToCreate = technologies.filter((tech) => !existingTechnologiesNames.has(tech.name.toLowerCase()));
