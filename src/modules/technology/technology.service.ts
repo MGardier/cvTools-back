@@ -9,7 +9,6 @@ export class TechnologyService {
 
   constructor(private readonly technologyRepository: TechnologyRepository) { }
 
-  //TODO : 
 
   async findOrCreateMany(technologies: CreateTechnologyDto[], options?: IOptionRepository<Technology>): Promise<Technology[]> {
 

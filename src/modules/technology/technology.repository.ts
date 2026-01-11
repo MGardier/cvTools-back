@@ -12,12 +12,6 @@ export class TechnologyRepository {
   constructor(private readonly prismaService: PrismaService) { }
 
 
-  //TODO: Typage
-  //Todo : case sensitive lowercase
-  //TODO : Faire par fonctionnazlité pback puis front
-  //TODO : Voir la pertinence renvoie de données
-
-
 
 
   async createMany(technologies: CreateTechnologyDto[], tx?: Prisma.TransactionClient) {

@@ -22,9 +22,6 @@ import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
 
 
 
-//Todo : rajouter les codes d'erreurs pour les messages 
-//Todo : Oubli de suppression des anciens tokens
-
 
 @Injectable()
 export class AuthService {
