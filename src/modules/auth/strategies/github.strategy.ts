@@ -20,6 +20,7 @@ export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
       clientSecret: configService.get<string>('GITHUB_CLIENT_SECRET'),
       callbackURL: configService.get<string>('GITHUB_CALLBACK_URL'),
       scope: ['user:email'],
+      state: true 
     });
   }
 

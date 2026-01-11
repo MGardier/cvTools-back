@@ -23,7 +23,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       passReqToCallback: true,
       prompt: 'select_account',
       accessType: 'offline',
-      state: true, // CSRF PROTECTION
+      state: true, 
     });
 
 
