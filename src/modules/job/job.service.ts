@@ -23,8 +23,7 @@ export class JobService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) { }
 
-  //TODO : Revoir les nommages 
-  //TODO : Search + auto complete
+
 
   async createJobForUser(userId: number, data: CreateJobDto, selectedColumns?: (keyof Job)[]): Promise<Job> {
 
@@ -62,7 +61,7 @@ export class JobService {
     })
   }
 
-  // TODO : gérer le cache et son invalidation
+
   async findAllJobForUser(userId: number, options: IFindAllOptions<Job>) {
 
     const cacheKey = `user:${userId}:countJobsForUser`;
