@@ -156,7 +156,7 @@ export class AuthController {
         ...data
       })
 
-      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?sessionId=${encodeURIComponent(sessionId)}&loginMethod=${encodeURIComponent(LoginMethod.GITHUB)}`;
+      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?sessionId=${encodeURIComponent(sessionId)}&loginMethod=${encodeURIComponent(LoginMethod.GOOGLE)}`;
       res.redirect(redirectUrl)
 
     }
