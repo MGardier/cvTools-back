@@ -1,8 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from 'prisma/prisma.service';
-import {  User, UserRoles, UserStatus } from "@prisma/client";
-
-import { UtilRepository } from "src/common/utils/util-repository";
+import { User, UserRoles, UserStatus } from "@prisma/client";
 import { IUpdateUser, ICreateUser, IFindOneByOauthId } from "./types";
 
 @Injectable()
@@ -13,86 +11,51 @@ export class UserRepository {
 
 
 
-  async create(
-    data: ICreateUser,
-    selectedColumns?: (keyof User)[],
-  ): Promise<User> {
-    const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
+  async create(data: ICreateUser): Promise<User> {
     return await this.prismaService.user.create({
-      select: select ,
       data: {
         ...data,
         roles: UserRoles.USER,
-        status: UserStatus.PENDING,
+        status: data.status ?? UserStatus.PENDING,
       }
     });
   }
 
 
-  async update(
-    id: number,
-    data: IUpdateUser,
-    selectedColumns?: (keyof User)[]
-  ): Promise<User> {
-    const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
+  async update(id: number, data: IUpdateUser): Promise<User> {
     return await this.prismaService.user.update({
-      select: select ,
       where: { id },
       data,
     });
-
   }
 
   /***************************************** FIND   ***************************************************************************************/
 
-  async findAll(
-    selectedColumns?: (keyof User)[],
-  ): Promise<User[]> {
-    const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
-    return await this.prismaService.user.findMany({
-      select: select ,
-    });
-
+  async findAll(): Promise<User[]> {
+    return await this.prismaService.user.findMany();
   }
 
 
-  async findOneById(
-    id: number,
-    selectedColumns?: (keyof User)[],
-  ): Promise<User | null> {
-    const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
+  async findOneById(id: number): Promise<User | null> {
     return await this.prismaService.user.findUnique({
-      select: select ,
       where: { id },
     });
-
   }
 
-  async findOneByEmail(
-    email: string,
-    selectedColumns?: (keyof User)[],
-  ): Promise<User | null> {
-    const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
+  async findOneByEmail(email: string): Promise<User | null> {
     return await this.prismaService.user.findUnique({
-      select: select ,
       where: { email },
     });
-
   }
 
-    async findOneByOauthId(
-    data : IFindOneByOauthId,
-    selectedColumns?: (keyof User)[],
-  ): Promise<User | null> {
-  
-    const select: Record<keyof User, boolean> | undefined = UtilRepository.getSelectedColumns<User>(selectedColumns);
+  async findOneByOauthId(data: IFindOneByOauthId): Promise<User | null> {
     return await this.prismaService.user.findUnique({
-      select: select ,
-      where: { unique_oauth_user :{
-        ...data
-      }},
+      where: {
+        unique_oauth_user: {
+          ...data
+        }
+      },
     });
-
   }
 
 

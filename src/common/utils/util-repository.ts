@@ -4,13 +4,6 @@ import { TokenType } from "src/modules/user-token/enums/token-type.enum";
 
 export abstract class UtilRepository {
 
-    static getSelectedColumns<TData>(columns?: (keyof TData)[]): Record<keyof TData, boolean> | undefined {
-
-       return columns?.reduce((acc, column) => {
-            acc[column] = true;
-            return acc;
-        }, {} as Record<keyof TData, boolean>);
-    }
 
     static getSortedColumns<TData>(columns ?: TSortItem<TData>[] ) :Record<keyof TData, Prisma.SortOrder>[]{
         if(!columns) return  [];
@@ -19,7 +12,6 @@ export abstract class UtilRepository {
         })
 
     }
-
 
     static toPrismaTokenType(tokenType: TokenType): PrismaTokenType {
         const mapping = {

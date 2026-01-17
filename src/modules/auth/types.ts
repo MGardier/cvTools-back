@@ -1,11 +1,13 @@
 import { User } from '@prisma/client';
 
-export interface ISignInOutput {
-  tokens: {
-    accessToken: string;
-    refreshToken: string;
-  };
-  user: Omit<User, 'password' | 'createdAt' | 'updatedAt'>;
+export interface IAuthTokens {
+  accessToken: string;
+  refreshToken: string;
 }
 
-export interface ISignInOauthOutput extends Omit<ISignInOutput, 'user'> {}
+export interface IAuthSession {
+  tokens: IAuthTokens;
+  user: User;
+}
+
+export type TUserAccountStatus = Pick<User, 'id' | 'email' | 'status'>;

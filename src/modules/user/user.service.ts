@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { SignUpDto } from 'src/modules/auth/dto/sign-up.dto';
 import { UserRepository } from './user.repository';
 import { IUpdateUser, IFindOneByOauthId, ICreateUser } from './types';
 
@@ -8,46 +7,32 @@ import { IUpdateUser, IFindOneByOauthId, ICreateUser } from './types';
 export class UserService {
   constructor(private readonly userRepository: UserRepository) { }
 
-  async create(
-    data: ICreateUser,
-    selectedColumn?: (keyof User)[]
-  ): Promise<User> {
-    return await this.userRepository.create(data, selectedColumn)
+  async create(data: ICreateUser): Promise<User> {
+    return await this.userRepository.create(data);
   }
 
 
-  async update(
-    id: number,
-    data: IUpdateUser,
-    selectedColumns?: (keyof User)[],
-  ): Promise<Partial<User | null>> {
-    return await this.userRepository.update(id, data, selectedColumns)
+  async update(id: number, data: IUpdateUser): Promise<User> {
+    return await this.userRepository.update(id, data);
   }
 
   /***************************************** FIND   ***************************************************************************************/
 
 
-  async findAll(selectedColumns?: (keyof User)[]): Promise<Partial<User[]>> {
-    return await this.userRepository.findAll(selectedColumns);
+  async findAll(): Promise<User[]> {
+    return await this.userRepository.findAll();
   }
 
-  async findOneById(
-    id: number,
-    selectedColumns?: (keyof User)[],
-  ): Promise<Partial<User | null>> {
-    return await this.userRepository.findOneById(id, selectedColumns)
+  async findOneById(id: number): Promise<User | null> {
+    return await this.userRepository.findOneById(id);
   }
 
-  async findOneByEmail(
-    email: string,
-    selectedColumns?: (keyof User)[],
-  ): Promise<Partial<User | null>> {
-    return await this.userRepository.findOneByEmail(email, selectedColumns)
-
+  async findOneByEmail(email: string): Promise<User | null> {
+    return await this.userRepository.findOneByEmail(email);
   }
 
-  async findOneByOauthId(data: IFindOneByOauthId, selectedColumns?: (keyof User)[]): Promise<Partial<User | null>> {
-    return await this.userRepository.findOneByOauthId(data, selectedColumns)
+  async findOneByOauthId(data: IFindOneByOauthId): Promise<User | null> {
+    return await this.userRepository.findOneByOauthId(data);
   }
 
 }

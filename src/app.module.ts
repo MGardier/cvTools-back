@@ -15,6 +15,7 @@ import { GlobalExceptionFilter } from './common/exceptions/global-exception.filt
 import { HttpExceptionFilter } from './common/exceptions/http-exception.filter';
 import { PrismaClientExceptionFilter } from './common/exceptions/prisma-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { SerializeInterceptor } from './common/interceptors/serialize.interceptor';
 import { AuthGuard } from './common/guards/auth.guard';
 import { CacheManagerModule } from './modules/cache/cache-manager.module';
 import { JobModule } from './modules/job/job.module';
@@ -59,6 +60,10 @@ import { JobHasTechnologyModule } from './modules/job-has-technology/job-has-tec
     },
     {
       provide: APP_FILTER, useClass: GlobalExceptionFilter
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SerializeInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

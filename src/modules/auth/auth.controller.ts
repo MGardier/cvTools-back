@@ -15,15 +15,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignUpDto } from './dto/sign-up.dto';
+import { SignUpRequestDto } from './dto/request/sign-up.dto';
+import { SignInRequestDto } from './dto/request/sign-in.dto';
+import { ForgotPasswordRequestDto } from './dto/request/forgot-password.dto';
+import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto';
+import { ResetPasswordRequestDto } from './dto/request/reset-password.dto';
+import { SignUpResponseDto } from './dto/response/sign-up.dto';
+import { SignInResponseDto } from './dto/response/sign-in.dto';
 
 import { Public } from 'src/common/decorators/public.decorator';
-import { LoginMethod, User } from '@prisma/client';
-import { SignInDto } from './dto/sign-in.dto';
-import { ISignInOutput } from './types';
-import { ForgotPasswordDTO } from './dto/forgot-password.dto';
-import { ConfirmAccountDto } from './dto/confirm-account.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { SerializeWith, SkipSerialize } from 'src/common/decorators/serialize.decorator';
+import { LoginMethod } from '@prisma/client';
+import { IAuthSession, TUserAccountStatus } from './types';
 import { RequireTokenType } from 'src/common/decorators/require-token-type.decorator';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 import { GoogleOauthGuard } from 'src/common/guards/google-oauth.guard';
@@ -51,36 +54,37 @@ export class AuthController {
 
   @Public()
   @Post('signUp')
+  @SerializeWith(SignUpResponseDto)
   async signUp(
-    @Body() signUpDto: SignUpDto,
-  ): Promise<Pick<User, "id" | 'email'>> {
-
-    return await this.authService.signUp(signUpDto, ["id", "email"]);
+    @Body() signUpDto: SignUpRequestDto,
+  ): Promise<SignUpResponseDto> {
+    return await this.authService.signUp(signUpDto);
   }
 
   @Public()
   @Post('signIn')
+  @SerializeWith(SignInResponseDto)
   async signIn(
-    @Body() signInDto: SignInDto,
-  ): Promise<ISignInOutput> {
-    return await this.authService.signIn(signInDto, ['id', 'email', 'password', 'status', 'roles']);
-
+    @Body() signInDto: SignInRequestDto,
+  ): Promise<SignInResponseDto> {
+    return await this.authService.signIn(signInDto);
   }
 
   @RequireTokenType(TokenType.REFRESH)
   @Delete('logout')
+  @SkipSerialize()
   async logout(
     @Req() req: Request,
   ): Promise<boolean> {
     const token = req['token'];
     return await this.authService.logout(token);
-
   }
 
   @RequireTokenType(TokenType.REFRESH)
   @HttpCode(201)
   @Post('refresh')
-  async refresh(@Req() req: Request): Promise<ISignInOutput> {
+  @SerializeWith(SignInResponseDto)
+  async refresh(@Req() req: Request): Promise<SignInResponseDto> {
     const token = req['token'];
     return await this.authService.refresh(token);
   }
@@ -89,22 +93,21 @@ export class AuthController {
 
   @Public()
   @Post('sendConfirmAccount')
+  @SkipSerialize()
   async sendConfirmAccount(
-    @Body() sendConfirmAccountDto: ForgotPasswordDTO,
-  ): Promise<Pick<User, "id" | "email" | "status">> {
-
-    return await this.authService.sendConfirmAccount(sendConfirmAccountDto.email, ['id', 'email', 'status']);
-
+    @Body() sendConfirmAccountDto: ForgotPasswordRequestDto,
+  ): Promise<TUserAccountStatus> {
+    return await this.authService.sendConfirmAccount(sendConfirmAccountDto.email);
   }
 
 
   @Public()
   @Patch('confirmAccount')
+  @SkipSerialize()
   async confirmAccount(
-    @Body() confirmAccountDto: ConfirmAccountDto,
+    @Body() confirmAccountDto: ConfirmAccountRequestDto,
   ): Promise<Boolean> {
     return await this.authService.confirmAccount(confirmAccountDto);
-
   }
 
 
@@ -112,20 +115,20 @@ export class AuthController {
 
   @Public()
   @Post('forgotPassword')
+  @SkipSerialize()
   async forgotPassword(
-    @Body() forgotPasswordDTO: ForgotPasswordDTO,
+    @Body() forgotPasswordDTO: ForgotPasswordRequestDto,
   ): Promise<Boolean> {
     return await this.authService.forgotPassword(forgotPasswordDTO.email);
-
   }
 
   @Public()
   @Patch('resetPassword')
+  @SkipSerialize()
   async resetPassword(
-    @Body() resetPasswordDto: ResetPasswordDto,
+    @Body() resetPasswordDto: ResetPasswordRequestDto,
   ): Promise<Boolean> {
     return await this.authService.resetPassword(resetPasswordDto);
-
   }
 
   /************************************  GOOGLE ****************************************************/
@@ -134,6 +137,7 @@ export class AuthController {
   @Public()
   @Get('google')
   @UseGuards(GoogleOauthGuard)
+  @SkipSerialize()
   googleAuth() {
     // Redirection manage by Passport
   }
@@ -143,6 +147,7 @@ export class AuthController {
   @Public()
   @Get('google/callback')
   @UseGuards(GoogleOauthGuard)
+  @SkipSerialize()
   async googleAuthCallback(@Req() req, @Res() res: Response) {
     try {
       if (!req.user.oauthId)
@@ -150,7 +155,7 @@ export class AuthController {
       const sessionId: string = uuidv4();
 
 
-      const data: ISignInOutput = await this.authService.signInOauth(req.user.oauthId, LoginMethod.GOOGLE, ['id', 'email', 'status', 'oauthId', 'roles', 'loginMethod']);
+      const data: IAuthSession = await this.authService.signInOauth(req.user.oauthId, LoginMethod.GOOGLE);
 
       await this.cacheManager.set(sessionId, {
         ...data
@@ -167,11 +172,12 @@ export class AuthController {
     }
   }
 
-  /************************************  GOOGLE ****************************************************/
+  /************************************  GITHUB ****************************************************/
 
   @Public()
   @Get("github")
   @UseGuards(GithubOauthGuard)
+  @SkipSerialize()
   async githubAuth() {
     //
   }
@@ -179,6 +185,7 @@ export class AuthController {
   @Public()
   @Get('github/callback')
   @UseGuards(GithubOauthGuard)
+  @SkipSerialize()
   async githubAuthCallback(@Req() req, @Res() res: Response) {
 
     try {
@@ -186,7 +193,7 @@ export class AuthController {
         throw new BadRequestException(ErrorCodeEnum.GITHUB_COMPLETED_OAUTH_FAILED)
       const sessionId: string = uuidv4();
 
-      const data: ISignInOutput = await this.authService.signInOauth(req.user.oauthId, LoginMethod.GITHUB, ['id', 'email', 'status', 'oauthId', 'roles', 'loginMethod']);
+      const data: IAuthSession = await this.authService.signInOauth(req.user.oauthId, LoginMethod.GITHUB);
 
       await this.cacheManager.set(sessionId, {
         ...data
@@ -205,8 +212,9 @@ export class AuthController {
 
   @Public()
   @Get('oauthSession/:id')
-  async getOauthSession(@Param('id') sessionId: string): Promise<ISignInOutput> {
-    const session: ISignInOutput | undefined = await this.cacheManager.get(sessionId);
+  @SerializeWith(SignInResponseDto)
+  async getOauthSession(@Param('id') sessionId: string): Promise<SignInResponseDto> {
+    const session: IAuthSession | undefined = await this.cacheManager.get(sessionId);
     if (!session)
       throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED)
     return session;

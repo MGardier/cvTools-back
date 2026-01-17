@@ -72,6 +72,8 @@ src/
 ├── modules/
 │   ├── user/
 │   │   ├── dto/
+|   |      ├── request/    # Input DTOs (validation of request)
+|   |      └── response/   # Output DTOs (serialisation of response)
 │   │   ├── types.ts              
 │   │   ├── user.controller.ts
 │   │   ├── user.service.ts
@@ -82,7 +84,7 @@ src/
 │   ├── job/
 │   ├── technology/
 │   └── ...
-│
+
 ├── common/
 │   ├── dto/
 │   ├── exceptions/
@@ -135,14 +137,21 @@ user.service.ts           # Service
 user.repository.ts        # Repository implementation
 types.ts                  # Module types/interfaces
 
-create-user.dto.ts        # Input DTO
-user-response.dto.ts      # Output DTO
-user.entity.ts            # Domain entity
-
 jwt-auth.guard.ts         # Guard
 logging.interceptor.ts    # Interceptor
 validation.pipe.ts        # Pipe
+sign-in.dto.ts            # DTO
 ```
+
+---
+
+### DTOs  Conventions
+
+#### Naming Conventions 
+- **Classes Request** : PascalCase +  `RequestDto` (ex: `SignInRequestDto`)
+- **Classes Response** : PascalCase +  `ResponseDto` (ex: `SignInResponseDto`)
+
+
 
 ---
 

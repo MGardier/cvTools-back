@@ -1,23 +1,21 @@
 import {
   ConflictException,
   Injectable,
-
   NotFoundException,
   UnauthorizedException,
-
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserTokenService } from '../user-token/user-token.service';
 import { EmailService } from '../email/email.service';
 import { ConfigService } from '@nestjs/config';
-import { SignUpDto } from './dto/sign-up.dto';
+import { SignUpRequestDto } from './dto/request/sign-up.dto';
+import { SignInRequestDto } from './dto/request/sign-in.dto';
+import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto';
+import { ResetPasswordRequestDto } from './dto/request/reset-password.dto';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 import { LoginMethod, User, UserStatus } from '@prisma/client';
-import { SignInDto } from './dto/sign-in.dto';
-import { ISignInOutput } from './types';
-import { ConfirmAccountDto } from './dto/confirm-account.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { IAuthSession, TUserAccountStatus } from './types';
 import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
 
 
@@ -39,18 +37,15 @@ export class AuthService {
   /***************************************** AUTHENTIFICATION ***************************************************************************************/
 
 
-  async signUp(data: SignUpDto, userSelectedColumn?: (keyof User)[]): Promise<Pick<User, "id" | 'email'>> {
+  async signUp(data: SignUpRequestDto): Promise<User> {
 
     const hashedPassword = await this.__hashPassword(data.password);
 
-    const user = await this.userService.create(
-      {
-        email: data.email,
-        password: hashedPassword,
-        loginMethod: LoginMethod.CLASSIC
-      },
-      userSelectedColumn
-    );
+    const user = await this.userService.create({
+      email: data.email,
+      password: hashedPassword,
+      loginMethod: LoginMethod.CLASSIC
+    });
 
     const userToken = await this.userTokenService.generateAndSave(
       { sub: user.id, email: user.email },
@@ -66,14 +61,10 @@ export class AuthService {
   }
 
 
-  async signIn(data: SignInDto, userSelectedColumn?: (keyof User)[]): Promise<ISignInOutput> {
+  async signIn(data: SignInRequestDto): Promise<IAuthSession> {
 
-    const user = await this.userService.findOneByEmail(data.email, userSelectedColumn);
-    if (
-      !user ||
-      !user?.password ||
-      !(await bcrypt.compare(data.password, user.password))
-    )
+    const user = await this.userService.findOneByEmail(data.email);
+    if (!user ||!user.password || !(await bcrypt.compare(data.password, user?.password)))
       throw new UnauthorizedException('Invalid credentials');
 
     if (user.status === UserStatus.PENDING)
@@ -82,26 +73,20 @@ export class AuthService {
     if (user.status === UserStatus.BANNED)
       throw new UnauthorizedException('User is banned and cannot login ');
 
-    const access = await this.userTokenService.generate({
-      email: user.email!,
-      sub: user.id!,
-    },
+    const access = await this.userTokenService.generate(
+      { email: user.email, sub: user.id },
       TokenType.ACCESS
     );
 
     const refresh = await this.userTokenService.generateAndSave(
-      {
-        email: user.email!,
-        sub: user.id!,
-      },
-      TokenType.REFRESH,
-      ['token']
+      { email: user.email, sub: user.id },
+      TokenType.REFRESH
     );
 
-    const { password, ...responseUser } = user;
-
-
-    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user: responseUser as Omit<User, "password"> };
+    return {
+      tokens: { accessToken: access.token, refreshToken: refresh.token! },
+      user
+    };
   }
 
 
@@ -111,12 +96,11 @@ export class AuthService {
   async logout(token: string): Promise<boolean> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       token,
-      TokenType.REFRESH,
-      ['id', 'token']
+      TokenType.REFRESH
     );
     if (!userToken.id) throw new UnauthorizedException();
 
-    const user = await this.userService.findOneById(+payload.sub, ['id']);
+    const user = await this.userService.findOneById(+payload.sub);
     if (!user) throw new UnauthorizedException();
 
     await this.userTokenService.remove(userToken.id);
@@ -124,93 +108,86 @@ export class AuthService {
   }
 
 
-  async refresh(token: string): Promise<ISignInOutput> {
+  async refresh(token: string): Promise<IAuthSession> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
-      token, TokenType.REFRESH,
+      token,
+      TokenType.REFRESH
     );
 
     if (!userToken.id || !userToken.token) throw new UnauthorizedException();
 
     const user = await this.userService.findOneById(+payload.sub);
-    if (!user?.id || !user?.email || !user) throw new UnauthorizedException('User was not found');
+    if (!user) throw new UnauthorizedException('User was not found');
 
-    const newPayload = {
-      sub: user.id,
-      email: user.email
-    }
-
-    const accessToken = await this.userTokenService.generate(newPayload, TokenType.ACCESS);
-    const refreshToken = await this.userTokenService.generateAndSave(newPayload, TokenType.REFRESH);
+    const accessToken = await this.userTokenService.generate(
+      { sub: user.id, email: user.email },
+      TokenType.ACCESS
+    );
+    const refreshToken = await this.userTokenService.generateAndSave(
+      { sub: user.id, email: user.email },
+      TokenType.REFRESH
+    );
 
     await this.userTokenService.remove(userToken.id);
-    const { password, ...responseUser } = user;
-    return { tokens: { accessToken: accessToken.token, refreshToken: refreshToken.token! }, user: responseUser as Omit<User, "password"> };
+
+    return {
+      tokens: { accessToken: accessToken.token, refreshToken: refreshToken.token! },
+      user
+    };
   }
 
   /************************ ACCOUNT MANAGEMENT **********************************************************/
 
 
-
-  async sendConfirmAccount(
-    email: string,
-    userSelectedColumn?: (keyof User)[]
-  ): Promise<Pick<User, "id" | "email" | "status">> {
-
-    const user = await this.userService.findOneByEmail(email, userSelectedColumn);
-    if (!user?.id || !user?.status)
+  async sendConfirmAccount(email: string): Promise<TUserAccountStatus> {
+    const user = await this.userService.findOneByEmail(email);
+    if (!user)
       throw new NotFoundException();
 
     if (user.status !== UserStatus.PENDING)
       throw new UnauthorizedException();
 
-    const userToken = await this.userTokenService.generateAndSave({ sub: user.id, email }, TokenType.CONFIRM_ACCOUNT);
+    const userToken = await this.userTokenService.generateAndSave(
+      { sub: user.id, email },
+      TokenType.CONFIRM_ACCOUNT
+    );
 
     await this.emailService.sendAccountConfirmationLink(
       email,
       `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}?token=${userToken.token}`,
     );
 
-    return user as Pick<User, "id" | "email" | "status">;
+    return { id: user.id, email: user.email, status: user.status };
   }
 
 
-
-
-  async confirmAccount(
-    confirmAccountDto: ConfirmAccountDto,
-    selectedColumn?: (keyof User)[]
-  ): Promise<Boolean> {
+  async confirmAccount(confirmAccountDto: ConfirmAccountRequestDto): Promise<Boolean> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       confirmAccountDto.token,
-      TokenType.CONFIRM_ACCOUNT,
-      ['id', 'token']
+      TokenType.CONFIRM_ACCOUNT
     );
     if (!userToken.id || !payload.sub)
       throw new NotFoundException(ErrorCodeEnum.TOKEN_EXPIRED);
 
-    const user = await this.userService.update(payload.sub, {
+    await this.userService.update(payload.sub, {
       status: UserStatus.ALLOWED,
-    }, selectedColumn);
+    });
 
     await this.userTokenService.remove(userToken.id);
     return true;
-
   }
 
   async forgotPassword(email: string): Promise<Boolean> {
-    const user = await this.userService.findOneByEmail(email, ['id', 'email']);
+    const user = await this.userService.findOneByEmail(email);
 
     if (user) {
       const userToken = await this.userTokenService.generateAndSave(
-        {
-          email: user.email!,
-          sub: user.id!,
-        },
-        TokenType.FORGOT_PASSWORD,
+        { email: user.email, sub: user.id },
+        TokenType.FORGOT_PASSWORD
       );
 
       await this.emailService.sendResetPasswordLink(
-        user.email!,
+        user.email,
         `${this.configService.get('FRONT_URL_RESET_PASSWORD')}?token=${userToken.token}`,
       );
     }
@@ -218,23 +195,19 @@ export class AuthService {
     return true;
   }
 
-  async resetPassword(data: ResetPasswordDto): Promise<Boolean> {
-
+  async resetPassword(data: ResetPasswordRequestDto): Promise<Boolean> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       data.token,
-      TokenType.FORGOT_PASSWORD,
-      ['id', 'token']
+      TokenType.FORGOT_PASSWORD
     );
 
     if (!userToken.id) throw new NotFoundException();
 
     const hashedPassword = await this.__hashPassword(data.password);
 
-    const user = await this.userService.update(payload.sub, {
+    await this.userService.update(payload.sub, {
       password: hashedPassword,
-    }, ['id']);
-
-    if (!user) throw new NotFoundException('User was not found ');
+    });
 
     await this.userTokenService.remove(userToken.id);
     return true;
@@ -245,9 +218,11 @@ export class AuthService {
   /********************************************* GOOGLE METHOD *********************************************************************************************** */
 
 
-  async validateOrCreateGoogleUser(googleId: string, googleEmail: string) {
-
-    const existingUser = await this.userService.findOneByOauthId({ oauthId: googleId, loginMethod: LoginMethod.GOOGLE }, ['id', 'email', 'status', 'oauthId'])
+  async validateOrCreateGoogleUser(googleId: string, googleEmail: string): Promise<User> {
+    const existingUser = await this.userService.findOneByOauthId({
+      oauthId: googleId,
+      loginMethod: LoginMethod.GOOGLE
+    });
 
     if (existingUser)
       return existingUser;
@@ -255,19 +230,17 @@ export class AuthService {
     const existingEmailUser = await this.userService.findOneByEmail(googleEmail);
 
     if (existingEmailUser) {
-      if (existingEmailUser?.password)
+      if (existingEmailUser.password)
         throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR);
-      if (existingEmailUser?.loginMethod !== LoginMethod.GOOGLE)
+      if (existingEmailUser.loginMethod !== LoginMethod.GOOGLE)
         throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR);
 
-
-      return await this.userService.update(existingEmailUser.id!, {
+      return await this.userService.update(existingEmailUser.id, {
         email: googleEmail,
         loginMethod: LoginMethod.GOOGLE,
         status: UserStatus.ALLOWED,
         oauthId: googleId
-      }, ['id', 'email', 'status', 'oauthId']);
-
+      });
     }
 
     return await this.userService.create({
@@ -275,18 +248,17 @@ export class AuthService {
       loginMethod: LoginMethod.GOOGLE,
       status: UserStatus.ALLOWED,
       oauthId: googleId
-    }, ['id', 'email', 'status', 'oauthId']);
-
-
+    });
   }
 
   /********************************************* GITHUB METHOD *********************************************************************************************** */
 
 
-
-  async validateOrCreateGithubUser(githubId: string, githubEmail: string) {
-
-    const existingUser = await this.userService.findOneByOauthId({ oauthId: githubId, loginMethod: LoginMethod.GITHUB }, ['id', 'email', 'status', 'oauthId'])
+  async validateOrCreateGithubUser(githubId: string, githubEmail: string): Promise<User> {
+    const existingUser = await this.userService.findOneByOauthId({
+      oauthId: githubId,
+      loginMethod: LoginMethod.GITHUB
+    });
 
     if (existingUser)
       return existingUser;
@@ -294,59 +266,49 @@ export class AuthService {
     const existingEmailUser = await this.userService.findOneByEmail(githubEmail);
 
     if (existingEmailUser) {
-      if (existingEmailUser?.password)
-        throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR)
-      if (existingEmailUser?.loginMethod !== LoginMethod.GITHUB)
-        throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR)
+      if (existingEmailUser.password)
+        throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR);
+      if (existingEmailUser.loginMethod !== LoginMethod.GITHUB)
+        throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR);
 
-
-      return await this.userService.update(existingEmailUser.id!, {
+      return await this.userService.update(existingEmailUser.id, {
         email: githubEmail,
         status: UserStatus.ALLOWED,
         loginMethod: LoginMethod.GITHUB,
         oauthId: githubId
-      }, ['id', 'email', 'status', 'oauthId'])
-
-
+      });
     }
-
 
     return await this.userService.create({
       email: githubEmail,
       loginMethod: LoginMethod.GITHUB,
       status: UserStatus.ALLOWED,
       oauthId: githubId
-    }, ['id', 'email', 'status', 'oauthId'])
-
-
+    });
   }
 
   /********************************************* OAUTH METHOD *********************************************************************************************** */
 
-  async signInOauth(oauthId: string, loginMethod: LoginMethod, selectedColumn?: (keyof User)[]): Promise<ISignInOutput> {
-
-    const user = await this.userService.findOneByOauthId({ oauthId, loginMethod }, selectedColumn) as Omit<User, "password" | "createdAt" | "updatedAt">
+  async signInOauth(oauthId: string, loginMethod: LoginMethod): Promise<IAuthSession> {
+    const user = await this.userService.findOneByOauthId({ oauthId, loginMethod });
 
     if (!user)
       throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED);
 
-    const access = await this.userTokenService.generate({
-      email: user.email!,
-      sub: user.id!,
-    },
+    const access = await this.userTokenService.generate(
+      { email: user.email, sub: user.id },
       TokenType.ACCESS
     );
 
     const refresh = await this.userTokenService.generateAndSave(
-      {
-        email: user.email!,
-        sub: user.id!,
-      },
-      TokenType.REFRESH,
-      ['token']
+      { email: user.email, sub: user.id },
+      TokenType.REFRESH
     );
 
-    return { tokens: { accessToken: access.token, refreshToken: refresh.token! }, user };
+    return {
+      tokens: { accessToken: access.token, refreshToken: refresh.token! },
+      user
+    };
   }
 
 
@@ -357,5 +319,7 @@ export class AuthService {
     return await bcrypt.hash(password, saltRound);
 
   }
+
+  
 
 }

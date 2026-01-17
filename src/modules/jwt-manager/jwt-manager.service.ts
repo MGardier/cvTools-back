@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { ConfigService } from '@nestjs/config';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
-import { IGenerateJwtOutput, IPayloadJwt } from './types';
+import { IGeneratedJwt, IPayloadJwt } from './types';
 
 @Injectable()
 export class JwtManagerService {
@@ -15,7 +15,7 @@ export class JwtManagerService {
 
   async generate(payload: IPayloadJwt,
     type: TokenType,
-  ): Promise<IGenerateJwtOutput> {
+  ): Promise<IGeneratedJwt> {
     const expiresIn = this.__getExpiration(type);
     const token = await this.jwtService.signAsync({
       ...payload

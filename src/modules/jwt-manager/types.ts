@@ -1,4 +1,4 @@
-export interface IGenerateJwtOutput {
+export interface IGeneratedJwt {
   token: string;
   expiresIn: number;
 }
