@@ -24,7 +24,7 @@ import { ISignInOutput } from './types';
 import { ForgotPasswordDTO } from './dto/forgot-password.dto';
 import { ConfirmAccountDto } from './dto/confirm-account.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { Token_Type } from 'src/common/decorators/token-type.decorator';
+import { RequireTokenType } from 'src/common/decorators/require-token-type.decorator';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 import { GoogleOauthGuard } from 'src/common/guards/google-oauth.guard';
 import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
@@ -36,7 +36,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 
-
+//By default @RequireTokenType is TokenType.ACCESS
 
 @Controller('auth')
 export class AuthController {
@@ -67,17 +67,17 @@ export class AuthController {
 
   }
 
-  @Token_Type(TokenType.REFRESH)
+  @RequireTokenType(TokenType.REFRESH)
   @Delete('logout')
   async logout(
     @Req() req: Request,
   ): Promise<boolean> {
     const token = req['token'];
     return await this.authService.logout(token);
-    ;
+
   }
 
-  @Token_Type(TokenType.REFRESH)
+  @RequireTokenType(TokenType.REFRESH)
   @HttpCode(201)
   @Post('refresh')
   async refresh(@Req() req: Request): Promise<ISignInOutput> {

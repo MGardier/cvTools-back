@@ -9,7 +9,7 @@ import { UserTokenModule } from './modules/user-token/user-token.module';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 import { JwtManagerModule } from './modules/jwt-manager/jwt-manager.module';
-import { TOKEN_TYPE } from './common/decorators/token-type.decorator';
+import { TOKEN_TYPE } from './common/decorators/require-token-type.decorator';
 import { validateEnv } from './common/config/env.validation';
 import { GlobalExceptionFilter } from './common/exceptions/global-exception.filter';
 import { HttpExceptionFilter } from './common/exceptions/http-exception.filter';

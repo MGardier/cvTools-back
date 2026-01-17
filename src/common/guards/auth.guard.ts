@@ -8,7 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
 
-import { TOKEN_TYPE } from 'src/common/decorators/token-type.decorator';
+import { TOKEN_TYPE } from 'src/common/decorators/require-token-type.decorator';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 import { UserTokenService } from 'src/modules/user-token/user-token.service';
 
@@ -31,7 +31,7 @@ export class AuthGuard implements CanActivate {
       const { payload } = await this.userTokenService.decodeAndGet(token, tokenType);
 
       request['user'] = payload;
-      if (tokenType === 'REFRESH') request['token'] = token;
+      if (tokenType === TokenType.REFRESH) request['token'] = token;
 
       return true;
     } catch (e){
