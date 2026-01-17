@@ -18,10 +18,8 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { SerializeInterceptor } from './common/interceptors/serialize.interceptor';
 import { AuthGuard } from './common/guards/auth.guard';
 import { CacheManagerModule } from './modules/cache/cache-manager.module';
-import { JobModule } from './modules/job/job.module';
-import { TechnologyModule } from './modules/technology/technology.module';
 import { AddressModule } from './modules/address/address.module';
-import { JobHasTechnologyModule } from './modules/job-has-technology/job-has-technology.module';
+
 
 
 
@@ -39,10 +37,7 @@ import { JobHasTechnologyModule } from './modules/job-has-technology/job-has-tec
     EmailModule,
     UserTokenModule,
     JwtManagerModule,
-    JobModule,
-    TechnologyModule,
     AddressModule,
-    JobHasTechnologyModule,
 
   ],
   controllers: [],
