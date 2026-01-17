@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { catchError, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import { IEmailPayload } from './types';
 
 @Injectable()
 export class EmailService {
@@ -34,7 +35,7 @@ export class EmailService {
   }
 
   
-  private async __sendToMsEmail(payload: Record<string, any>) {
+  private async __sendToMsEmail(payload: IEmailPayload) {
     try {
       return await firstValueFrom(
         await this.natsClient.send('email.send', payload),

@@ -1,4 +1,5 @@
-import { OmitType, PartialType } from '@nestjs/mapped-types';
-import { SignUpDto } from '../../auth/dto/sign-up.dto';
+import { OmitType } from '@nestjs/mapped-types';
+import { SignUpRequestDto } from 'src/modules/auth/dto/request/sign-up.dto';
 
-export class UpdateUserDto extends OmitType(SignUpDto, ['password']) {}
+
+export class UpdateUserDto extends OmitType(SignUpRequestDto, ['password']) {}
