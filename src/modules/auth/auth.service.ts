@@ -5,7 +5,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { UtilPassword } from 'src/common/utils/util-password';
 import { UserTokenService } from '../user-token/user-token.service';
 import { EmailService } from '../email/email.service';
 import { ConfigService } from '@nestjs/config';
@@ -17,6 +16,7 @@ import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 import { LoginMethod, User, UserStatus } from '@prisma/client';
 import { IAuthSession, TUserAccountStatus } from './types';
 import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -56,7 +56,7 @@ export class AuthService {
     if (
       !user ||
       !user.password ||
-      !(await UtilPassword.compare(data.password, user.password))
+      !(await this.__comparePassword(data.password, user.password))
     )
       throw new UnauthorizedException('Invalid credentials');
 
@@ -320,6 +320,14 @@ export class AuthService {
 
   private async __hashPassword(password: string): Promise<string> {
     const saltRound = Number(this.configService.get('HASH_SALT_ROUND')) || 12;
-    return await UtilPassword.hash(password, saltRound);
+    return bcrypt.hash(password, saltRound);
   }
+
+
+  private async __comparePassword(
+      password: string,
+      hashedPassword: string,
+    ): Promise<boolean> {
+      return await bcrypt.compare(password, hashedPassword);
+    }
 }
