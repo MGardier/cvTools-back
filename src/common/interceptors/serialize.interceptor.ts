@@ -10,7 +10,11 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { plainToInstance } from 'class-transformer';
-import { SERIALIZE_KEY, SKIP_SERIALIZE_KEY, TDtoClass } from '../decorators/serialize.decorator';
+import {
+  SERIALIZE_KEY,
+  SKIP_SERIALIZE_KEY,
+  TDtoClass,
+} from '../decorators/serialize.decorator';
 import { ErrorCodeEnum } from '../enums/error-codes.enum';
 
 @Injectable()
@@ -29,10 +33,10 @@ export class SerializeInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const dto = this.reflector.getAllAndOverride<TDtoClass>(
-      SERIALIZE_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const dto = this.reflector.getAllAndOverride<TDtoClass>(SERIALIZE_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (!dto) {
       const handler = context.getHandler().name;
@@ -40,7 +44,9 @@ export class SerializeInterceptor implements NestInterceptor {
       this.logger.error(
         `Missing @SerializeWith() or @SkipSerialize() on ${controller}.${handler}`,
       );
-      throw new InternalServerErrorException(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+      throw new InternalServerErrorException(
+        ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+      );
     }
 
     return next.handle().pipe(
@@ -50,8 +56,13 @@ export class SerializeInterceptor implements NestInterceptor {
             excludeExtraneousValues: true,
           });
         } catch (error) {
-          this.logger.error(`Serialization error: ${(error as Error).message}`, (error as Error).stack);
-          throw new InternalServerErrorException(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+          this.logger.error(
+            `Serialization error: ${(error as Error).message}`,
+            (error as Error).stack,
+          );
+          throw new InternalServerErrorException(
+            ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+          );
         }
       }),
     );

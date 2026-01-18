@@ -10,37 +10,33 @@ export class JwtManagerService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
-
-  async generate(payload: IPayloadJwt,
+  async generate(
+    payload: IPayloadJwt,
     type: TokenType,
   ): Promise<IGeneratedJwt> {
     const expiresIn = this.__getExpiration(type);
-    const token = await this.jwtService.signAsync({
-      ...payload
-    }, {
-      secret: this.__getSecret(type),
-      expiresIn,
-    });
+    const token = await this.jwtService.signAsync(
+      {
+        ...payload,
+      },
+      {
+        secret: this.__getSecret(type),
+        expiresIn,
+      },
+    );
 
-   
     return { token, expiresIn };
   }
 
-  async verify(
-    token: string,
-    type: TokenType,
-  ): Promise<IPayloadJwt> {
+  async verify(token: string, type: TokenType): Promise<IPayloadJwt> {
     return await this.jwtService.verifyAsync(token, {
       secret: this.__getSecret(type),
     });
   }
 
-
   /********************************************* PRIVATE METHOD *********************************************************************************************** */
-
-
 
   private __getSecret(type: TokenType): string {
     switch (type) {
@@ -52,9 +48,7 @@ export class JwtManagerService {
       default:
         return this.configService.get('JWT_DEFAULT_SECRET')!;
     }
-
   }
-
 
   private __getExpiration(type: TokenType): number {
     switch (type) {
@@ -67,7 +61,5 @@ export class JwtManagerService {
       default:
         return this.configService.get('JWT_ACCESS_EXPIRATION')!;
     }
-
   }
-
 }

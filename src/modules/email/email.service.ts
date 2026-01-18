@@ -34,14 +34,12 @@ export class EmailService {
     });
   }
 
-  
   private async __sendToMsEmail(payload: IEmailPayload) {
     try {
       return await firstValueFrom(
         await this.natsClient.send('email.send', payload),
       );
     } catch (error) {
-      
       throw error instanceof RpcException
         ? error
         : new RpcException(error.message);

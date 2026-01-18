@@ -5,10 +5,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
 import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
-
 import { TOKEN_TYPE } from 'src/common/decorators/require-token-type.decorator';
+import { IAuthenticatedRequest } from 'src/common/types/request.types';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 import { UserTokenService } from 'src/modules/user-token/user-token.service';
 
@@ -19,28 +18,30 @@ export class AuthGuard implements CanActivate {
     private readonly reflector: Reflector,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<any> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     if (this.__IsPublicRoute(context)) return true;
 
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<IAuthenticatedRequest>();
     const token = this.__extractToken(request);
     if (!token) throw new UnauthorizedException();
 
     try {
       const tokenType = this.__getTokenType(context);
-      const { payload } = await this.userTokenService.decodeAndGet(token, tokenType);
+      const { payload } = await this.userTokenService.decodeAndGet(
+        token,
+        tokenType,
+      );
 
-      request['user'] = payload;
-      if (tokenType === TokenType.REFRESH) request['token'] = token;
+      request.user = payload;
+      if (tokenType === TokenType.REFRESH) request.token = token;
 
       return true;
-    } catch (e){
-
+    } catch {
       throw new UnauthorizedException();
     }
   }
 
-  private __extractToken(request: Request): string | undefined {
+  private __extractToken(request: IAuthenticatedRequest): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }
@@ -53,11 +54,9 @@ export class AuthGuard implements CanActivate {
   }
 
   private __getTokenType(context: ExecutionContext) {
-    return this.reflector.getAllAndOverride<TokenType>(
-      TOKEN_TYPE,
-      [context.getHandler(), context.getClass()],
-    );
+    return this.reflector.getAllAndOverride<TokenType>(TOKEN_TYPE, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
   }
-
-
 }

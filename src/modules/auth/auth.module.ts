@@ -7,10 +7,9 @@ import { UserTokenModule } from '../user-token/user-token.module';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GithubOauthStrategy } from './strategies/github.strategy';
 
-
 @Module({
   imports: [UserModule, EmailModule, UserTokenModule],
   controllers: [AuthController],
-  providers: [AuthService,GoogleStrategy,GithubOauthStrategy],
+  providers: [AuthService, GoogleStrategy, GithubOauthStrategy],
 })
 export class AuthModule {}

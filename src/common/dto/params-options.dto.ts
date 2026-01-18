@@ -1,13 +1,8 @@
-import { Job } from "@prisma/client";
-import { Transform } from "class-transformer";
-import { IsObject, IsOptional, IsPositive, IsString, Validate } from "class-validator";
-import { TSortItem } from "src/common/types/repository.types";
-import { CustomSortFieldsValidator } from "src/common/pipes/custom-sort-fields-validator";
+import { Transform } from 'class-transformer';
+import { IsOptional, IsPositive } from 'class-validator';
 
-
-// tableau query params 
+// tableau query params
 export class ParamsOptionsDto {
-
   @IsOptional()
   @Transform(({ value }) => (value ? Number(value) : undefined))
   @IsPositive()
@@ -17,6 +12,4 @@ export class ParamsOptionsDto {
   @Transform(({ value }) => (value ? Number(value) : undefined))
   @IsPositive()
   limit: number;
-
-
-} 
+}

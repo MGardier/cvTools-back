@@ -1,15 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { User, UserRoles, UserStatus } from "@prisma/client";
-import { IUpdateUser, ICreateUser, IFindOneByOauthId } from "./types";
+import { User, UserRoles, UserStatus } from '@prisma/client';
+import { IUpdateUser, ICreateUser, IFindOneByOauthId } from './types';
 
 @Injectable()
 export class UserRepository {
-
-
-  constructor(private readonly prismaService: PrismaService) { }
-
-
+  constructor(private readonly prismaService: PrismaService) {}
 
   async create(data: ICreateUser): Promise<User> {
     return await this.prismaService.user.create({
@@ -17,10 +13,9 @@ export class UserRepository {
         ...data,
         roles: UserRoles.USER,
         status: data.status ?? UserStatus.PENDING,
-      }
+      },
     });
   }
-
 
   async update(id: number, data: IUpdateUser): Promise<User> {
     return await this.prismaService.user.update({
@@ -34,7 +29,6 @@ export class UserRepository {
   async findAll(): Promise<User[]> {
     return await this.prismaService.user.findMany();
   }
-
 
   async findOneById(id: number): Promise<User | null> {
     return await this.prismaService.user.findUnique({
@@ -52,12 +46,9 @@ export class UserRepository {
     return await this.prismaService.user.findUnique({
       where: {
         unique_oauth_user: {
-          ...data
-        }
+          ...data,
+        },
       },
     });
   }
-
-
-
 }

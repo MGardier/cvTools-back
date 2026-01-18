@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import * as bcrypt from 'bcrypt';
+import { UtilPassword } from 'src/common/utils/util-password';
 import { UserTokenService } from '../user-token/user-token.service';
 import { EmailService } from '../email/email.service';
 import { ConfigService } from '@nestjs/config';
@@ -18,38 +18,29 @@ import { LoginMethod, User, UserStatus } from '@prisma/client';
 import { IAuthSession, TUserAccountStatus } from './types';
 import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
 
-
-
-
 @Injectable()
 export class AuthService {
-
   constructor(
     private readonly userTokenService: UserTokenService,
     private readonly userService: UserService,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
-  ) {
-
-  }
-
+  ) {}
 
   /***************************************** AUTHENTIFICATION ***************************************************************************************/
 
-
   async signUp(data: SignUpRequestDto): Promise<User> {
-
     const hashedPassword = await this.__hashPassword(data.password);
 
     const user = await this.userService.create({
       email: data.email,
       password: hashedPassword,
-      loginMethod: LoginMethod.CLASSIC
+      loginMethod: LoginMethod.CLASSIC,
     });
 
     const userToken = await this.userTokenService.generateAndSave(
       { sub: user.id, email: user.email },
-      TokenType.CONFIRM_ACCOUNT
+      TokenType.CONFIRM_ACCOUNT,
     );
 
     await this.emailService.sendAccountConfirmationLink(
@@ -60,11 +51,13 @@ export class AuthService {
     return user;
   }
 
-
   async signIn(data: SignInRequestDto): Promise<IAuthSession> {
-
     const user = await this.userService.findOneByEmail(data.email);
-    if (!user ||!user.password || !(await bcrypt.compare(data.password, user?.password)))
+    if (
+      !user ||
+      !user.password ||
+      !(await UtilPassword.compare(data.password, user.password))
+    )
       throw new UnauthorizedException('Invalid credentials');
 
     if (user.status === UserStatus.PENDING)
@@ -75,28 +68,24 @@ export class AuthService {
 
     const access = await this.userTokenService.generate(
       { email: user.email, sub: user.id },
-      TokenType.ACCESS
+      TokenType.ACCESS,
     );
 
     const refresh = await this.userTokenService.generateAndSave(
       { email: user.email, sub: user.id },
-      TokenType.REFRESH
+      TokenType.REFRESH,
     );
 
     return {
-      tokens: { accessToken: access.token, refreshToken: refresh.token! },
-      user
+      tokens: { accessToken: access.token, refreshToken: refresh.token },
+      user,
     };
   }
-
-
-
-
 
   async logout(token: string): Promise<boolean> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       token,
-      TokenType.REFRESH
+      TokenType.REFRESH,
     );
     if (!userToken.id) throw new UnauthorizedException();
 
@@ -107,11 +96,10 @@ export class AuthService {
     return true;
   }
 
-
   async refresh(token: string): Promise<IAuthSession> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       token,
-      TokenType.REFRESH
+      TokenType.REFRESH,
     );
 
     if (!userToken.id || !userToken.token) throw new UnauthorizedException();
@@ -121,35 +109,35 @@ export class AuthService {
 
     const accessToken = await this.userTokenService.generate(
       { sub: user.id, email: user.email },
-      TokenType.ACCESS
+      TokenType.ACCESS,
     );
     const refreshToken = await this.userTokenService.generateAndSave(
       { sub: user.id, email: user.email },
-      TokenType.REFRESH
+      TokenType.REFRESH,
     );
 
     await this.userTokenService.remove(userToken.id);
 
     return {
-      tokens: { accessToken: accessToken.token, refreshToken: refreshToken.token! },
-      user
+      tokens: {
+        accessToken: accessToken.token,
+        refreshToken: refreshToken.token,
+      },
+      user,
     };
   }
 
   /************************ ACCOUNT MANAGEMENT **********************************************************/
 
-
   async sendConfirmAccount(email: string): Promise<TUserAccountStatus> {
     const user = await this.userService.findOneByEmail(email);
-    if (!user)
-      throw new NotFoundException();
+    if (!user) throw new NotFoundException();
 
-    if (user.status !== UserStatus.PENDING)
-      throw new UnauthorizedException();
+    if (user.status !== UserStatus.PENDING) throw new UnauthorizedException();
 
     const userToken = await this.userTokenService.generateAndSave(
       { sub: user.id, email },
-      TokenType.CONFIRM_ACCOUNT
+      TokenType.CONFIRM_ACCOUNT,
     );
 
     await this.emailService.sendAccountConfirmationLink(
@@ -160,11 +148,12 @@ export class AuthService {
     return { id: user.id, email: user.email, status: user.status };
   }
 
-
-  async confirmAccount(confirmAccountDto: ConfirmAccountRequestDto): Promise<Boolean> {
+  async confirmAccount(
+    confirmAccountDto: ConfirmAccountRequestDto,
+  ): Promise<boolean> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       confirmAccountDto.token,
-      TokenType.CONFIRM_ACCOUNT
+      TokenType.CONFIRM_ACCOUNT,
     );
     if (!userToken.id || !payload.sub)
       throw new NotFoundException(ErrorCodeEnum.TOKEN_EXPIRED);
@@ -177,13 +166,13 @@ export class AuthService {
     return true;
   }
 
-  async forgotPassword(email: string): Promise<Boolean> {
+  async forgotPassword(email: string): Promise<boolean> {
     const user = await this.userService.findOneByEmail(email);
 
     if (user) {
       const userToken = await this.userTokenService.generateAndSave(
         { email: user.email, sub: user.id },
-        TokenType.FORGOT_PASSWORD
+        TokenType.FORGOT_PASSWORD,
       );
 
       await this.emailService.sendResetPasswordLink(
@@ -195,10 +184,10 @@ export class AuthService {
     return true;
   }
 
-  async resetPassword(data: ResetPasswordRequestDto): Promise<Boolean> {
+  async resetPassword(data: ResetPasswordRequestDto): Promise<boolean> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       data.token,
-      TokenType.FORGOT_PASSWORD
+      TokenType.FORGOT_PASSWORD,
     );
 
     if (!userToken.id) throw new NotFoundException();
@@ -213,33 +202,37 @@ export class AuthService {
     return true;
   }
 
-
-
   /********************************************* GOOGLE METHOD *********************************************************************************************** */
 
-
-  async validateOrCreateGoogleUser(googleId: string, googleEmail: string): Promise<User> {
+  async validateOrCreateGoogleUser(
+    googleId: string,
+    googleEmail: string,
+  ): Promise<User> {
     const existingUser = await this.userService.findOneByOauthId({
       oauthId: googleId,
-      loginMethod: LoginMethod.GOOGLE
+      loginMethod: LoginMethod.GOOGLE,
     });
 
-    if (existingUser)
-      return existingUser;
+    if (existingUser) return existingUser;
 
-    const existingEmailUser = await this.userService.findOneByEmail(googleEmail);
+    const existingEmailUser =
+      await this.userService.findOneByEmail(googleEmail);
 
     if (existingEmailUser) {
       if (existingEmailUser.password)
-        throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR);
+        throw new ConflictException(
+          ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR,
+        );
       if (existingEmailUser.loginMethod !== LoginMethod.GOOGLE)
-        throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR);
+        throw new ConflictException(
+          ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR,
+        );
 
       return await this.userService.update(existingEmailUser.id, {
         email: googleEmail,
         loginMethod: LoginMethod.GOOGLE,
         status: UserStatus.ALLOWED,
-        oauthId: googleId
+        oauthId: googleId,
       });
     }
 
@@ -247,35 +240,41 @@ export class AuthService {
       email: googleEmail,
       loginMethod: LoginMethod.GOOGLE,
       status: UserStatus.ALLOWED,
-      oauthId: googleId
+      oauthId: googleId,
     });
   }
 
   /********************************************* GITHUB METHOD *********************************************************************************************** */
 
-
-  async validateOrCreateGithubUser(githubId: string, githubEmail: string): Promise<User> {
+  async validateOrCreateGithubUser(
+    githubId: string,
+    githubEmail: string,
+  ): Promise<User> {
     const existingUser = await this.userService.findOneByOauthId({
       oauthId: githubId,
-      loginMethod: LoginMethod.GITHUB
+      loginMethod: LoginMethod.GITHUB,
     });
 
-    if (existingUser)
-      return existingUser;
+    if (existingUser) return existingUser;
 
-    const existingEmailUser = await this.userService.findOneByEmail(githubEmail);
+    const existingEmailUser =
+      await this.userService.findOneByEmail(githubEmail);
 
     if (existingEmailUser) {
       if (existingEmailUser.password)
-        throw new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR);
+        throw new ConflictException(
+          ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR,
+        );
       if (existingEmailUser.loginMethod !== LoginMethod.GITHUB)
-        throw new ConflictException(ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR);
+        throw new ConflictException(
+          ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR,
+        );
 
       return await this.userService.update(existingEmailUser.id, {
         email: githubEmail,
         status: UserStatus.ALLOWED,
         loginMethod: LoginMethod.GITHUB,
-        oauthId: githubId
+        oauthId: githubId,
       });
     }
 
@@ -283,43 +282,44 @@ export class AuthService {
       email: githubEmail,
       loginMethod: LoginMethod.GITHUB,
       status: UserStatus.ALLOWED,
-      oauthId: githubId
+      oauthId: githubId,
     });
   }
 
   /********************************************* OAUTH METHOD *********************************************************************************************** */
 
-  async signInOauth(oauthId: string, loginMethod: LoginMethod): Promise<IAuthSession> {
-    const user = await this.userService.findOneByOauthId({ oauthId, loginMethod });
+  async signInOauth(
+    oauthId: string,
+    loginMethod: LoginMethod,
+  ): Promise<IAuthSession> {
+    const user = await this.userService.findOneByOauthId({
+      oauthId,
+      loginMethod,
+    });
 
     if (!user)
       throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED);
 
     const access = await this.userTokenService.generate(
       { email: user.email, sub: user.id },
-      TokenType.ACCESS
+      TokenType.ACCESS,
     );
 
     const refresh = await this.userTokenService.generateAndSave(
       { email: user.email, sub: user.id },
-      TokenType.REFRESH
+      TokenType.REFRESH,
     );
 
     return {
-      tokens: { accessToken: access.token, refreshToken: refresh.token! },
-      user
+      tokens: { accessToken: access.token, refreshToken: refresh.token },
+      user,
     };
   }
 
-
   /********************************************* PRIVATE METHOD *********************************************************************************************** */
 
-  private async __hashPassword(password: string) {
+  private async __hashPassword(password: string): Promise<string> {
     const saltRound = Number(this.configService.get('HASH_SALT_ROUND')) || 12;
-    return await bcrypt.hash(password, saltRound);
-
+    return await UtilPassword.hash(password, saltRound);
   }
-
-  
-
 }

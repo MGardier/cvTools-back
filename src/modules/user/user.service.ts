@@ -5,19 +5,17 @@ import { IUpdateUser, IFindOneByOauthId, ICreateUser } from './types';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) { }
+  constructor(private readonly userRepository: UserRepository) {}
 
   async create(data: ICreateUser): Promise<User> {
     return await this.userRepository.create(data);
   }
-
 
   async update(id: number, data: IUpdateUser): Promise<User> {
     return await this.userRepository.update(id, data);
   }
 
   /***************************************** FIND   ***************************************************************************************/
-
 
   async findAll(): Promise<User[]> {
     return await this.userRepository.findAll();
@@ -34,5 +32,4 @@ export class UserService {
   async findOneByOauthId(data: IFindOneByOauthId): Promise<User | null> {
     return await this.userRepository.findOneByOauthId(data);
   }
-
 }

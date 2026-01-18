@@ -4,14 +4,16 @@ import { ValidationPipe } from '@nestjs/common';
 import * as passport from 'passport';
 import * as session from 'express-session';
 
-
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log'],
   });
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true ,transform: true,}),
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
   );
 
   app.enableCors({
@@ -23,16 +25,15 @@ async function bootstrap() {
 
   app.use(
     session({
-      secret: process.env.JWT_DEFAULT_SECRET ?? "",
+      secret: process.env.JWT_DEFAULT_SECRET ?? '',
       resave: false,
       saveUninitialized: false,
       cookie: {
-        maxAge: 600000, 
+        maxAge: 600000,
         secure: process.env.NODE_ENV === 'production',
       },
     }),
   );
-  
 
   app.use(passport.initialize());
   app.use(passport.session());

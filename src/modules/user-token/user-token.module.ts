@@ -12,7 +12,7 @@ import { UserTokenRepository } from './user-token.repository';
     JwtManagerModule,
   ],
   controllers: [],
-  providers: [UserTokenService,UserTokenRepository],
+  providers: [UserTokenService, UserTokenRepository],
   exports: [UserTokenService],
 })
 export class UserTokenModule {}

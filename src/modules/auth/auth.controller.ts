@@ -24,7 +24,10 @@ import { SignUpResponseDto } from './dto/response/sign-up.dto';
 import { SignInResponseDto } from './dto/response/sign-in.dto';
 
 import { Public } from 'src/common/decorators/public.decorator';
-import { SerializeWith, SkipSerialize } from 'src/common/decorators/serialize.decorator';
+import {
+  SerializeWith,
+  SkipSerialize,
+} from 'src/common/decorators/serialize.decorator';
 import { LoginMethod } from '@prisma/client';
 import { IAuthSession, TUserAccountStatus } from './types';
 import { RequireTokenType } from 'src/common/decorators/require-token-type.decorator';
@@ -34,21 +37,23 @@ import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
 import { GithubOauthGuard } from 'src/common/guards/github-oauth.guard';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
+import {
+  IAuthenticatedRequest,
+  IOAuthCallbackRequest,
+} from 'src/common/types/request.types';
 
 import { v4 as uuidv4 } from 'uuid';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
-
-//By default @RequireTokenType is TokenType.ACCESS
+// By default @RequireTokenType is TokenType.ACCESS
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
-
-  ) { }
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   /***************************************** AUTHENTIFICATION ***************************************************************************************/
 
@@ -73,10 +78,9 @@ export class AuthController {
   @RequireTokenType(TokenType.REFRESH)
   @Delete('logout')
   @SkipSerialize()
-  async logout(
-    @Req() req: Request,
-  ): Promise<boolean> {
-    const token = req['token'];
+  async logout(@Req() req: IAuthenticatedRequest): Promise<boolean> {
+    const token = req.token;
+    if (!token) throw new UnauthorizedException();
     return await this.authService.logout(token);
   }
 
@@ -84,8 +88,9 @@ export class AuthController {
   @HttpCode(201)
   @Post('refresh')
   @SerializeWith(SignInResponseDto)
-  async refresh(@Req() req: Request): Promise<SignInResponseDto> {
-    const token = req['token'];
+  async refresh(@Req() req: IAuthenticatedRequest): Promise<SignInResponseDto> {
+    const token = req.token;
+    if (!token) throw new UnauthorizedException();
     return await this.authService.refresh(token);
   }
 
@@ -97,19 +102,19 @@ export class AuthController {
   async sendConfirmAccount(
     @Body() sendConfirmAccountDto: ForgotPasswordRequestDto,
   ): Promise<TUserAccountStatus> {
-    return await this.authService.sendConfirmAccount(sendConfirmAccountDto.email);
+    return await this.authService.sendConfirmAccount(
+      sendConfirmAccountDto.email,
+    );
   }
-
 
   @Public()
   @Patch('confirmAccount')
   @SkipSerialize()
   async confirmAccount(
     @Body() confirmAccountDto: ConfirmAccountRequestDto,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return await this.authService.confirmAccount(confirmAccountDto);
   }
-
 
   /************************************  PASSWORD ****************************************************/
 
@@ -118,7 +123,7 @@ export class AuthController {
   @SkipSerialize()
   async forgotPassword(
     @Body() forgotPasswordDTO: ForgotPasswordRequestDto,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return await this.authService.forgotPassword(forgotPasswordDTO.email);
   }
 
@@ -127,12 +132,11 @@ export class AuthController {
   @SkipSerialize()
   async resetPassword(
     @Body() resetPasswordDto: ResetPasswordRequestDto,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return await this.authService.resetPassword(resetPasswordDto);
   }
 
   /************************************  GOOGLE ****************************************************/
-
 
   @Public()
   @Get('google')
@@ -142,32 +146,38 @@ export class AuthController {
     // Redirection manage by Passport
   }
 
-
-
   @Public()
   @Get('google/callback')
   @UseGuards(GoogleOauthGuard)
   @SkipSerialize()
-  async googleAuthCallback(@Req() req, @Res() res: Response) {
+  async googleAuthCallback(
+    @Req() req: IOAuthCallbackRequest,
+    @Res() res: Response,
+  ): Promise<void> {
     try {
       if (!req.user.oauthId)
-        throw new BadRequestException(ErrorCodeEnum.GOOGLE_COMPLETED_OAUTH_FAILED)
+        throw new BadRequestException(
+          ErrorCodeEnum.GOOGLE_COMPLETED_OAUTH_FAILED,
+        );
+
       const sessionId: string = uuidv4();
+      const data: IAuthSession = await this.authService.signInOauth(
+        req.user.oauthId,
+        LoginMethod.GOOGLE,
+      );
 
+      await this.cacheManager.set(sessionId, { ...data });
 
-      const data: IAuthSession = await this.authService.signInOauth(req.user.oauthId, LoginMethod.GOOGLE);
-
-      await this.cacheManager.set(sessionId, {
-        ...data
-      })
-
-      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?sessionId=${encodeURIComponent(sessionId)}&loginMethod=${encodeURIComponent(LoginMethod.GOOGLE)}`;
-      res.redirect(redirectUrl)
-
-    }
-    catch (error) {
-      const errorCode = Object.values(ErrorCodeEnum).includes(error.message) ? error.message : ErrorCodeEnum.INTERNAL_SERVER_ERROR
-      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?error=${encodeURIComponent(errorCode)}`;
+      const redirectUrl = `${this.configService.get('FRONT_URL_OAUTH_CALLBACK_SUCCESS')}?sessionId=${encodeURIComponent(sessionId)}&loginMethod=${encodeURIComponent(LoginMethod.GOOGLE)}`;
+      res.redirect(redirectUrl);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      const errorCode = Object.values(ErrorCodeEnum).includes(
+        errorMessage as ErrorCodeEnum,
+      )
+        ? errorMessage
+        : ErrorCodeEnum.INTERNAL_SERVER_ERROR;
+      const redirectUrl = `${this.configService.get('FRONT_URL_OAUTH_CALLBACK_SUCCESS')}?error=${encodeURIComponent(errorCode)}`;
       res.redirect(redirectUrl);
     }
   }
@@ -175,7 +185,7 @@ export class AuthController {
   /************************************  GITHUB ****************************************************/
 
   @Public()
-  @Get("github")
+  @Get('github')
   @UseGuards(GithubOauthGuard)
   @SkipSerialize()
   async githubAuth() {
@@ -186,24 +196,34 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(GithubOauthGuard)
   @SkipSerialize()
-  async githubAuthCallback(@Req() req, @Res() res: Response) {
-
+  async githubAuthCallback(
+    @Req() req: IOAuthCallbackRequest,
+    @Res() res: Response,
+  ): Promise<void> {
     try {
       if (!req.user.oauthId)
-        throw new BadRequestException(ErrorCodeEnum.GITHUB_COMPLETED_OAUTH_FAILED)
+        throw new BadRequestException(
+          ErrorCodeEnum.GITHUB_COMPLETED_OAUTH_FAILED,
+        );
+
       const sessionId: string = uuidv4();
+      const data: IAuthSession = await this.authService.signInOauth(
+        req.user.oauthId,
+        LoginMethod.GITHUB,
+      );
 
-      const data: IAuthSession = await this.authService.signInOauth(req.user.oauthId, LoginMethod.GITHUB);
+      await this.cacheManager.set(sessionId, { ...data });
 
-      await this.cacheManager.set(sessionId, {
-        ...data
-      })
-      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_SUCCESS")}?sessionId=${encodeURIComponent(sessionId)}&loginMethod=${encodeURIComponent(LoginMethod.GITHUB)}`;
-      res.redirect(redirectUrl)
-    }
-    catch (error) {
-      const errorCode = Object.values(ErrorCodeEnum).includes(error.message) ? error.message : ErrorCodeEnum.INTERNAL_SERVER_ERROR
-      const redirectUrl = `${this.configService.get("FRONT_URL_OAUTH_CALLBACK_ERROR")}?error=${encodeURIComponent(errorCode)}`;
+      const redirectUrl = `${this.configService.get('FRONT_URL_OAUTH_CALLBACK_SUCCESS')}?sessionId=${encodeURIComponent(sessionId)}&loginMethod=${encodeURIComponent(LoginMethod.GITHUB)}`;
+      res.redirect(redirectUrl);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      const errorCode = Object.values(ErrorCodeEnum).includes(
+        errorMessage as ErrorCodeEnum,
+      )
+        ? errorMessage
+        : ErrorCodeEnum.INTERNAL_SERVER_ERROR;
+      const redirectUrl = `${this.configService.get('FRONT_URL_OAUTH_CALLBACK_ERROR')}?error=${encodeURIComponent(errorCode)}`;
       res.redirect(redirectUrl);
     }
   }
@@ -213,12 +233,13 @@ export class AuthController {
   @Public()
   @Get('oauthSession/:id')
   @SerializeWith(SignInResponseDto)
-  async getOauthSession(@Param('id') sessionId: string): Promise<SignInResponseDto> {
-    const session: IAuthSession | undefined = await this.cacheManager.get(sessionId);
+  async getOauthSession(
+    @Param('id') sessionId: string,
+  ): Promise<SignInResponseDto> {
+    const session: IAuthSession | undefined =
+      await this.cacheManager.get(sessionId);
     if (!session)
-      throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED)
+      throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED);
     return session;
   }
 }
-
-

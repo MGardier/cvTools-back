@@ -1,17 +1,15 @@
-import { ArgumentsHost, Catch, HttpStatus, Logger, NotFoundException } from '@nestjs/common';
-import { BaseExceptionFilter } from "@nestjs/core";
-import { Prisma } from "@prisma/client";
+import { ArgumentsHost, Catch, HttpStatus, Logger } from '@nestjs/common';
+import { BaseExceptionFilter } from '@nestjs/core';
+import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
-import { ErrorCodeEnum } from "src/common/enums/error-codes.enum";
-import { PrismaErrorEnum } from "src/common/enums/prisma-error-codes.enum";
+import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
+import { PrismaErrorEnum } from 'src/common/enums/prisma-error-codes.enum';
 import { ILogContext } from 'src/common/types/api.types';
-
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaClientExceptionFilter extends BaseExceptionFilter {
   private readonly logger = new Logger(PrismaClientExceptionFilter.name);
   catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
-
     const ctx = host.switchToHttp();
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
@@ -22,10 +20,10 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
 
     switch (exception.code) {
       case PrismaErrorEnum.UniqueConstraintFailed:
-        this.handleUniqueConstraintError(exception, request, response)
+        this.handleUniqueConstraintError(exception, request, response);
         break;
       case PrismaErrorEnum.RecordDoesNotExist:
-        this.handleRecordDoesNotExist(exception, request, response)
+        this.handleRecordDoesNotExist(exception, request, response);
         break;
       default:
         super.catch(exception, host);
@@ -35,59 +33,59 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
 
   /***************************************** HANDLE METHOD   ***************************************************************************************/
 
-
-  private handleUniqueConstraintError(exception: Prisma.PrismaClientKnownRequestError, request: Request, response: Response) : void {
+  private handleUniqueConstraintError(
+    exception: Prisma.PrismaClientKnownRequestError,
+    request: Request,
+    response: Response,
+  ): void {
     let message: string;
 
-    if (exception.meta?.target === "user_email_key")
+    if (exception.meta?.target === 'user_email_key')
       message = ErrorCodeEnum.EMAIL_ALREADY_EXISTS_ERROR;
-    else
-      message = ErrorCodeEnum.DEFAULT_ALREADY_EXISTS_ERROR;
-    response
-      .status(HttpStatus.CONFLICT)
-      .json({
-        success: false,
-        statusCode: HttpStatus.CONFLICT,
-        timestamp: new Date().toISOString(),
-        path: request.url,
-        message,
-
-      });
+    else message = ErrorCodeEnum.DEFAULT_ALREADY_EXISTS_ERROR;
+    response.status(HttpStatus.CONFLICT).json({
+      success: false,
+      statusCode: HttpStatus.CONFLICT,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+      message,
+    });
   }
 
-
-  private handleRecordDoesNotExist(exception: Prisma.PrismaClientKnownRequestError, request: Request, response: Response) : void {
-    response
-      .status(HttpStatus.NOT_FOUND)
-      .json({
-        success: false,
-        statusCode: HttpStatus.NOT_FOUND,
-        timestamp: new Date().toISOString(),
-        path: request.url,
-        message: ErrorCodeEnum.DEFAULT_NOT_FOUND_ERROR,
-
-      });
+  private handleRecordDoesNotExist(
+    exception: Prisma.PrismaClientKnownRequestError,
+    request: Request,
+    response: Response,
+  ): void {
+    response.status(HttpStatus.NOT_FOUND).json({
+      success: false,
+      statusCode: HttpStatus.NOT_FOUND,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+      message: ErrorCodeEnum.DEFAULT_NOT_FOUND_ERROR,
+    });
   }
 
   /***************************************** LOG METHOD   ***************************************************************************************/
 
-
-  private __buildLogContext(request: Request, exception: Prisma.PrismaClientKnownRequestError): ILogContext {
+  private __buildLogContext(
+    request: Request,
+    exception: Prisma.PrismaClientKnownRequestError,
+  ): ILogContext {
     return {
       method: request.method,
       url: request.url,
       timestamp: new Date().toISOString(),
-      stack : JSON.stringify(exception.meta, null, 2),
+      stack: JSON.stringify(exception.meta, null, 2),
       statusCode: exception.code,
       message: exception.message,
     };
   }
 
-  private __logPrismaException( context: ILogContext): void {
-
-    const { method, url, statusCode, message, stack,timestamp} = context;
-    this.logger.error(`Prisma Error ${statusCode} : ${method} ${url} - ${timestamp} \n${message} \n${stack}`);
-
+  private __logPrismaException(context: ILogContext): void {
+    const { method, url, statusCode, message, stack, timestamp } = context;
+    this.logger.error(
+      `Prisma Error ${statusCode} : ${method} ${url} - ${timestamp} \n${message} \n${stack}`,
+    );
   }
-
 }

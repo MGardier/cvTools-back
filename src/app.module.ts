@@ -1,5 +1,5 @@
-import { Inject, Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from 'prisma/prisma.module';
 import { PrismaService } from 'prisma/prisma.service';
@@ -20,15 +20,11 @@ import { AuthGuard } from './common/guards/auth.guard';
 import { CacheManagerModule } from './modules/cache/cache-manager.module';
 import { AddressModule } from './modules/address/address.module';
 
-
-
-
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       validate: validateEnv,
-
     }),
     CacheManagerModule,
     UserModule,
@@ -38,7 +34,6 @@ import { AddressModule } from './modules/address/address.module';
     UserTokenModule,
     JwtManagerModule,
     AddressModule,
-
   ],
   controllers: [],
   providers: [
@@ -54,7 +49,8 @@ import { AddressModule } from './modules/address/address.module';
       useValue: 'ACCESS',
     },
     {
-      provide: APP_FILTER, useClass: GlobalExceptionFilter
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
     },
     {
       provide: APP_INTERCEPTOR,
@@ -64,7 +60,6 @@ import { AddressModule } from './modules/address/address.module';
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
-
   ],
 })
-export class AppModule { }
+export class AppModule {}
