@@ -25,6 +25,12 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+
+### Package Manager
+
+This project uses **pnpm** as the package manager. All commands should use `pnpm` instead of `npm` or `yarn`.
+
+
 ## Project setup
 
 ```bash
@@ -57,41 +63,179 @@ $ pnpm run test:e2e
 $ pnpm run test:cov
 ```
 
-## Deployment
+## Development Conventions
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Project Structure
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+```
+src/
+├── modules/
+│   ├── user/
+│   │   ├── dto/
+|   |      ├── request/    # Input DTOs (validation of request)
+|   |      └── response/   # Output DTOs (serialisation of response)
+│   │   ├── types.ts              
+│   │   ├── user.controller.ts
+│   │   ├── user.service.ts
+│   │   ├── user.repository.ts
+│   │   └── user.module.ts
+│   │
+│   ├── auth/
+│   ├── job/
+│   ├── technology/
+│   └── ...
 
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+├── common/
+│   ├── dto/
+│   ├── exceptions/
+│   ├── guards/
+│   ├── interceptors/
+│   ├── pipes/
+│   ├── config/
+│   ├── types/                    
+│   │   ├── api.types.ts          
+│   │   └── repository.types.ts    
+│   ├── enums/
+│   └── utils/
+│
+├── app.module.ts
+└── main.ts
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+### Layer Rules
 
-Check out a few resources that may come in handy when working with NestJS:
+|Layer|File|Does|Does NOT|
+|---|---|---|---|
+|**Controller**|`*.controller.ts`|Route handling, call service, return response|Business logic, DB queries|
+|**Service**|`*.service.ts`|Business logic, orchestration, call repository|HTTP concerns, direct ORM calls|
+|**Repository**|`*.repository.ts`|Database operations only|Business rules|
+|**Types**|`types.ts`|Define interfaces and types for the module|Contain implementation|
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
+
+### Code Flow
+
+```
+Request → Controller → Service → Repository → Database
+                ↓           ↓
+              DTO      Interface
+```
+
+**Controller** receives DTO, calls Service.
+**Service** contains logic, uses Repository through Interface.
+**Repository** implements Interface, talks to database.
+
+---
+
+### Naming Conventions
+
+```
+user.controller.ts        # Controller
+user.service.ts           # Service
+user.repository.ts        # Repository implementation
+types.ts                  # Module types/interfaces
+
+jwt-auth.guard.ts         # Guard
+logging.interceptor.ts    # Interceptor
+validation.pipe.ts        # Pipe
+sign-in.dto.ts            # DTO
+```
+
+---
+
+### DTOs  Conventions
+
+#### Naming Conventions 
+- **Classes Request** : PascalCase +  `RequestDto` (ex: `SignInRequestDto`)
+- **Classes Response** : PascalCase +  `ResponseDto` (ex: `SignInResponseDto`)
+
+
+
+---
+
+### Typing Conventions
+
+**Required prefixes:**
+- `I` for interfaces: `ICreateUser`, `IApiResponse`, `IOptionRepository`
+- `T` for types: `TSortItem`, `TFilterOptions`
+
+**File organization:**
+
+| Location | Purpose | Examples |
+|----------|---------|----------|
+| `src/modules/*/types.ts` | Module-specific interfaces/types | `ICreateUser`, `IUpdateJob`, `ISignInOutput` |
+| `src/common/types/api.types.ts` | API-related shared types | `IApiResponse`, `ILogContext` |
+
+
+**Rules:**
+- One `types.ts` file per module containing ALL module interfaces/types
+- Shared types go in `common/types/` grouped by theme
+- No "Interface" or "Type" suffix in names (the I/T prefix is sufficient)
+
+**Examples:**
+```typescript
+import { ICreateUser } from './types';
+import { IFilterOptions } from 'src/common/types/repository.types';
+```
+
+---
+
+### Architecture Guidelines
+
+#### `common/` - Technical Infrastructure
+Contains cross-cutting technical concerns used by 2+ modules.
+
+| Directory | Purpose | Examples |
+|-----------|---------|----------|
+| `decorators/` | Custom decorators | `@Public()`, `@CurrentUser()`, `@Roles()` |
+| `exceptions/` | Global exception filters | `GlobalExceptionFilter`, Custom exceptions |
+| `guards/` | Authentication/Authorization | `JwtAuthGuard`, `RolesGuard` |
+| `interceptors/` | Request/Response transformation | `LoggingInterceptor`, `TransformInterceptor` |
+| `pipes/` | Validation & transformation | Custom validation pipes |
+| `config/` | Application configuration | Environment validation, schemas |
+| `types/` | Shared type definitions (thematic) | `api.types.ts`, `repository.types.ts` |
+| `dto/` | Cross-module DTOs | `params-options.dto.ts` |
+| `enums/` | Business enums | `error-codes.enum.ts`, `status.enum.ts` |
+| `utils/` | Business utilities | `util-repository.ts`, `util-date.ts` |
+
+**Rule:** If it's used by multiple modules → `common/`
+
+
+---
+
+
+
+### Commit Conventions
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) specification.
+
+**Format:** `<type>(<scope>): <description>`
+
+**Types:**
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `style:` - Code style changes (formatting, semicolons, etc.)
+- `refactor:` - Code refactoring
+- `test:` - Adding or updating tests
+- `chore:` - Maintenance tasks
+
+**Examples:**
+```bash
+feat: add JWT authentication
+fix: resolve null pointer in getUserById
+docs: update installation instructions
+refactor: simplify error handling logic
+```
+
+---
 
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 
