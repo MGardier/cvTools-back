@@ -1,48 +1,42 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
-import { IEmailPayload } from './types';
+import { Injectable } from '@nestjs/common';
+import { RabbitmqService } from '../rabbitmq/rabbitmq.service';
+
 
 @Injectable()
 export class EmailService {
   constructor(
-    @Inject('NATS_TRANSPORT')
-    private natsClient: ClientProxy,
-  ) {}
+    private readonly rabbitMqQService: RabbitmqService,
+  ) { }
 
-  async sendAccountConfirmationLink(email: string, confirmationLink: string) {
-    return await this.__sendToMsEmail({
-      receivers: [email],
+  async sendAccountConfirmationLink(userId: number, email: string, confirmationLink: string) {
+
+    return await this.rabbitMqQService.sendEmail({
+      recipients: [email],
       subject: 'Confirmation of your accout ',
-      templatePath: 'auth/account-confirmation.hbs',
-      templateVariables: {
+      templateVersionId: 1,
+      variables: {
         userName: email,
         confirmationLink,
       },
+      userId ,
+      origin :"send-account-confirmation-link"
     });
   }
 
-  async sendResetPasswordLink(email: string, resetPasswordLink: string) {
-    return await this.__sendToMsEmail({
-      receivers: [email],
-      subject: 'Reset your password  ',
-      templatePath: 'auth/forgot-password.hbs',
-      templateVariables: {
+  async sendResetPasswordLink(userId: number, email: string, resetPasswordLink: string) {
+    return await this.rabbitMqQService.sendEmail({
+      recipients: [email],
+      subject: 'Confirmation of your accout ',
+      templateVersionId: 1,
+      variables: {
         userName: email,
         resetPasswordLink,
       },
+      userId ,
+      origin :"send-account-confirmation-link"
     });
   }
 
-  private async __sendToMsEmail(payload: IEmailPayload) {
-    try {
-      return await firstValueFrom(
-        await this.natsClient.send('email.send', payload),
-      );
-    } catch (error) {
-      throw error instanceof RpcException
-        ? error
-        : new RpcException(error.message);
-    }
-  }
+
+
 }

@@ -19,6 +19,9 @@ import { SerializeInterceptor } from './common/interceptors/serialize.intercepto
 import { AuthGuard } from './common/guards/auth.guard';
 import { CacheManagerModule } from './modules/cache/cache-manager.module';
 import { AddressModule } from './modules/address/address.module';
+import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
+import { RabbitmqService } from './modules/rabbitmq/rabbitmq.service';
+
 
 @Module({
   imports: [
@@ -26,6 +29,7 @@ import { AddressModule } from './modules/address/address.module';
       isGlobal: true,
       validate: validateEnv,
     }),
+    RabbitmqModule,
     CacheManagerModule,
     UserModule,
     PrismaModule,
@@ -34,9 +38,11 @@ import { AddressModule } from './modules/address/address.module';
     UserTokenModule,
     JwtManagerModule,
     AddressModule,
+    
   ],
   controllers: [],
   providers: [
+    RabbitmqService,
     PrismaService,
     PrismaClientExceptionFilter,
     HttpExceptionFilter,
