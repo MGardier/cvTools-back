@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    if (this.__IsPublicRoute(context)) return true;
+    if (this.__isPublicRoute(context)) return true;
 
     const request = context.switchToHttp().getRequest<IAuthenticatedRequest>();
     const token = this.__extractToken(request);
@@ -46,7 +46,7 @@ export class AuthGuard implements CanActivate {
     return type === 'Bearer' ? token : undefined;
   }
 
-  private __IsPublicRoute(context: ExecutionContext) {
+  private __isPublicRoute(context: ExecutionContext) {
     return this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),

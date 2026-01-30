@@ -61,7 +61,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
 
     if (user.status === UserStatus.PENDING)
-      throw new UnauthorizedException('User must be valid his account');
+      throw new UnauthorizedException('User must  valid his account');
 
     if (user.status === UserStatus.BANNED)
       throw new UnauthorizedException('User is banned and cannot login ');
@@ -250,6 +250,8 @@ export class AuthService {
     githubId: string,
     githubEmail: string,
   ): Promise<User> {
+
+    
     const existingUser = await this.userService.findOneByOauthId({
       oauthId: githubId,
       loginMethod: LoginMethod.GITHUB,

@@ -57,6 +57,9 @@ export class AuthController {
 
   /***************************************** AUTHENTIFICATION ***************************************************************************************/
 
+
+
+  
   @Public()
   @Post('signUp')
   @SerializeWith(SignUpResponseDto)
@@ -79,9 +82,7 @@ export class AuthController {
   @Delete('logout')
   @SkipSerialize()
   async logout(@Req() req: IAuthenticatedRequest): Promise<boolean> {
-    const token = req.token;
-    if (!token) throw new UnauthorizedException();
-    return await this.authService.logout(token);
+    return await this.authService.logout(req.token!);
   }
 
   @RequireTokenType(TokenType.REFRESH)
@@ -89,9 +90,8 @@ export class AuthController {
   @Post('refresh')
   @SerializeWith(SignInResponseDto)
   async refresh(@Req() req: IAuthenticatedRequest): Promise<SignInResponseDto> {
-    const token = req.token;
-    if (!token) throw new UnauthorizedException();
-    return await this.authService.refresh(token);
+    
+    return await this.authService.refresh(req.token!);
   }
 
   /********************************************** ACCOUNT MANAGEMENT *************************************************************/
