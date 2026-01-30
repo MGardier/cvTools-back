@@ -17,7 +17,6 @@ services:
 
   phpmyadmin:
     image: phpmyadmin:5
-    container_name: phpmyadmin
     restart: always
     environment:
       PMA_HOST: mysql
@@ -26,12 +25,23 @@ services:
       - '8080:80'
     depends_on:
       - mysql
-
-  nats:
-    image: nats:2-alpine
-    container_name: nats
-    restart: always
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    restart: unless-stopped
     ports:
-      - '4223:4222'
+      - '5672:5672'
+      - '15672:15672'
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'check_port_connectivity']
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+
 volumes:
   mysql_data:
+  rabbitmq_data:
