@@ -1,3 +1,4 @@
+import { UserStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
 
 export class SignUpResponseDto {
@@ -6,4 +7,7 @@ export class SignUpResponseDto {
 
   @Expose()
   email: string;
+  
+  @Expose()
+  status: UserStatus
 }

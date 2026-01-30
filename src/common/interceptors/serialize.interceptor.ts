@@ -48,7 +48,6 @@ export class SerializeInterceptor implements NestInterceptor {
         ErrorCodeEnum.INTERNAL_SERVER_ERROR,
       );
     }
-
     return next.handle().pipe(
       map((data: unknown) => {
         try {

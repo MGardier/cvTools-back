@@ -2,12 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from 'prisma/prisma.module';
-import { PrismaService } from 'prisma/prisma.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { EmailModule } from './modules/email/email.module';
 import { UserTokenModule } from './modules/user-token/user-token.module';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-
 import { JwtManagerModule } from './modules/jwt-manager/jwt-manager.module';
 import { TOKEN_TYPE } from './common/decorators/require-token-type.decorator';
 import { validateEnv } from './common/config/env.validation';
@@ -20,7 +18,6 @@ import { AuthGuard } from './common/guards/auth.guard';
 import { CacheManagerModule } from './modules/cache/cache-manager.module';
 import { AddressModule } from './modules/address/address.module';
 import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
-import { RabbitmqService } from './modules/rabbitmq/rabbitmq.service';
 
 
 @Module({
@@ -58,11 +55,11 @@ import { RabbitmqService } from './modules/rabbitmq/rabbitmq.service';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: SerializeInterceptor,
+      useClass: ResponseInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: ResponseInterceptor,
+      useClass: SerializeInterceptor,
     },
   ],
 })
