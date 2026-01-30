@@ -97,13 +97,13 @@ export class AuthController {
   /********************************************** ACCOUNT MANAGEMENT *************************************************************/
 
   @Public()
-  @Post('sendConfirmAccount')
+  @Post('resendConfirmAccount')
   @SkipSerialize()
-  async sendConfirmAccount(
-    @Body() sendConfirmAccountDto: ForgotPasswordRequestDto,
+  async reSendConfirmAccount(
+    @Body() resendConfirmAccountDto: ForgotPasswordRequestDto,
   ): Promise<TUserAccountStatus> {
-    return await this.authService.sendConfirmAccount(
-      sendConfirmAccountDto.email,
+    return await this.authService.reSendConfirmAccount(
+      resendConfirmAccountDto.email,
     );
   }
 

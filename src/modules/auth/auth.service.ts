@@ -43,7 +43,8 @@ export class AuthService {
       TokenType.CONFIRM_ACCOUNT,
     );
 
-    await this.emailService.sendAccountConfirmationLink(
+    this.emailService.sendAccountConfirmationLink(
+      user.id,
       user.email,
       `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}/${userToken.token}`,
     );
@@ -129,7 +130,7 @@ export class AuthService {
 
   /************************ ACCOUNT MANAGEMENT **********************************************************/
 
-  async sendConfirmAccount(email: string): Promise<TUserAccountStatus> {
+  async reSendConfirmAccount(email: string): Promise<TUserAccountStatus> {
     const user = await this.userService.findOneByEmail(email);
     if (!user) throw new NotFoundException();
 
@@ -140,7 +141,8 @@ export class AuthService {
       TokenType.CONFIRM_ACCOUNT,
     );
 
-    await this.emailService.sendAccountConfirmationLink(
+    await this.emailService.reSendAccountConfirmationLink(
+      user.id,
       email,
       `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}?token=${userToken.token}`,
     );
@@ -176,6 +178,7 @@ export class AuthService {
       );
 
       await this.emailService.sendResetPasswordLink(
+        user.id,
         user.email,
         `${this.configService.get('FRONT_URL_RESET_PASSWORD')}?token=${userToken.token}`,
       );

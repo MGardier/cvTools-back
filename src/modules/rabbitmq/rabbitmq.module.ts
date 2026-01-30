@@ -16,14 +16,10 @@ import { RabbitmqService } from './rabbitmq.service';
           },
         },
       },
-      // Futurs services
-      // {
-      //   name: 'NOTIFICATION_SERVICE',
-      //   queue: 'notification_queue',
-      // }
+
     ]),
   ],
   providers: [RabbitmqService],
-  exports: [RabbitmqService], // ⚠️ Export pour utiliser ailleurs
+  exports: [RabbitmqService],
 })
 export class RabbitmqModule {}

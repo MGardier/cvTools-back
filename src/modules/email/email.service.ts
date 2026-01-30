@@ -8,32 +8,57 @@ export class EmailService {
     private readonly rabbitMqQService: RabbitmqService,
   ) { }
 
-  async sendAccountConfirmationLink(userId: number, email: string, confirmationLink: string) {
-
-    return await this.rabbitMqQService.sendEmail({
+  sendAccountConfirmationLink(
+    userId: number,
+    email: string,
+    confirmationLink: string,
+  ): void {
+    this.rabbitMqQService.sendEmailAsync({
       recipients: [email],
-      subject: 'Confirmation of your accout ',
+      subject: 'Confirmation of your account',
       templateVersionId: 1,
       variables: {
         userName: email,
         confirmationLink,
       },
-      userId ,
-      origin :"send-account-confirmation-link"
+      userId,
+      origin: 'send-account-confirmation-link',
     });
   }
 
-  async sendResetPasswordLink(userId: number, email: string, resetPasswordLink: string) {
-    return await this.rabbitMqQService.sendEmail({
+  async reSendAccountConfirmationLink(
+    userId: number,
+    email: string,
+    confirmationLink: string,
+  ): Promise<unknown> {
+    return this.rabbitMqQService.sendEmail({
       recipients: [email],
-      subject: 'Confirmation of your accout ',
+      subject: 'Confirmation of your account',
+      templateVersionId: 1,
+      variables: {
+        userName: email,
+        confirmationLink,
+      },
+      userId,
+      origin: 'resend-account-confirmation-link',
+    });
+  }
+
+  async sendResetPasswordLink(
+    userId: number,
+    email: string,
+    resetPasswordLink: string,
+  ): Promise<unknown> {
+    return this.rabbitMqQService.sendEmail({
+      recipients: [email],
+      subject: 'Reset your password',
       templateVersionId: 1,
       variables: {
         userName: email,
         resetPasswordLink,
       },
-      userId ,
-      origin :"send-account-confirmation-link"
+      userId,
+      origin: 'send-reset-password-link',
     });
   }
 
