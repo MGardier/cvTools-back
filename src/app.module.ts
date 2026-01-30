@@ -42,8 +42,6 @@ import { RabbitmqService } from './modules/rabbitmq/rabbitmq.service';
   ],
   controllers: [],
   providers: [
-    RabbitmqService,
-    PrismaService,
     PrismaClientExceptionFilter,
     HttpExceptionFilter,
     {

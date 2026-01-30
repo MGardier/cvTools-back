@@ -11,7 +11,6 @@ export class RabbitmqService {
   ) {}
 
 
-
 async sendEmail(data: IEmailPayload) {
   return await firstValueFrom(
     this.emailClient.send('send_email', data)
