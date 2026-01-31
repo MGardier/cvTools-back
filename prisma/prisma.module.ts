@@ -6,6 +6,6 @@ import { PrismaTransactionService } from './prisma-transaction.service';
 @Module({
   providers: [PrismaService,PrismaTransactionService],
   exports: [PrismaService,PrismaTransactionService],
-  imports: [PrismaModule],
+  imports: [],
 })
 export class PrismaModule {}

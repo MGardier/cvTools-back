@@ -1,6 +1,18 @@
 export interface IEmailPayload {
-  receivers: string[];
+  recipients: string[];
   subject: string;
-  templatePath: string;
-  templateVariables: Record<string, string>;
+  cc?: string[]
+  bcc?: string[]
+  html?: string
+  templateVersionId?: number;
+  variables?:  Record<string, unknown>;
+  userId: number;
+  origin: string
+  isApproved?: boolean;
+  metadata?: Record<string, unknown>;
+
 }
+
+
+
+
