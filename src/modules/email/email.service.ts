@@ -52,7 +52,7 @@ export class EmailService {
     return this.rabbitMqQService.sendEmail({
       recipients: [email],
       subject: 'Reset your password',
-      templateVersionId: 1,
+      templateVersionId: 2,
       variables: {
         userName: email,
         resetPasswordLink,

@@ -48,6 +48,7 @@ export class AuthService {
       user.email,
       `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}/${userToken.token}`,
     );
+    
     return user;
   }
 

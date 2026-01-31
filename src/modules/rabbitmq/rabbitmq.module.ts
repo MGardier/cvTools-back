@@ -10,7 +10,7 @@ import { RabbitmqService } from './rabbitmq.service';
         name:'EMAIL_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
+          urls: [process.env.RABBITMQ_URL || 'amqp://root:root@localhost:5672'],
           queue: 'email_queue',
           queueOptions: {
             durable: true,

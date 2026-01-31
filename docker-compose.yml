@@ -1,30 +1,22 @@
 services:
-  mysql:
-    image: mysql:9
-    restart: always
+  api-postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root123+
+      POSTGRES_USER: ${API_POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${API_POSTGRES_PASSWORD:?err}
+      POSTGRES_DB: ${API_POSTGRES_DB:-cv_tools}
     volumes:
-      - mysql_data:/var/lib/mysql
+      - api_postgres_data:/var/lib/postgresql/data
     ports:
-      - '3360:3306'
+      - '5433:5432'
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-proot123+']
-      interval: 5s
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 10s
       timeout: 5s
-      start_period: 5s
+      start_period: 30s
       retries: 5
 
-  phpmyadmin:
-    image: phpmyadmin:5
-    restart: always
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-    ports:
-      - '8080:80'
-    depends_on:
-      - mysql
   rabbitmq:
     image: rabbitmq:3-management-alpine
     restart: unless-stopped
@@ -42,13 +34,14 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 5
+
   ms-postgres:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-ms_email_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?err}
-      POSTGRES_DB: ${POSTGRES_DB:-ms_email}
+      POSTGRES_USER: ${MS_POSTGRES_USER:-ms_email_user}
+      POSTGRES_PASSWORD: ${MS_POSTGRES_PASSWORD:?err}
+      POSTGRES_DB: ${MS_POSTGRES_DB:-ms_email}
     volumes:
       - ms_postgres_data:/var/lib/postgresql/data
     ports:
@@ -59,16 +52,18 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 5
-  ms-pgadmin:
+
+  pgadmin:
     image: dpage/pgadmin4:8.14
     restart: unless-stopped
     profiles: ["dev"]
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@local.dev}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:?err}
-      PGADMIN_CONFIG_SERVER_MODE: 'False' # Not for production
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
-      - ms-pgadmin_data:/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
     ports:
       - '5050:80'
     healthcheck:
@@ -77,10 +72,28 @@ services:
       timeout: 10s
       retries: 3
     depends_on:
+      api-postgres:
+        condition: service_healthy
       ms-postgres:
         condition: service_healthy
+  mailpit:
+    image: axllent/mailpit:v1.28
+    restart: unless-stopped
+    profiles: ["dev"]
+    ports:
+      - '1025:1025' # SMTP
+      - '8025:8025' # Web UI
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:8025/api/v1/info']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
 volumes:
-  mysql_data:
+  api_postgres_data:
   rabbitmq_data:
   ms_postgres_data:
-  ms_pgadmin_data:
+  pgadmin_data:
