@@ -133,9 +133,9 @@ export class AuthService {
 
   async reSendConfirmAccount(email: string): Promise<TUserAccountStatus> {
     const user = await this.userService.findOneByEmail(email);
-    if (!user) throw new NotFoundException();
+    if (!user) throw new NotFoundException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
 
-    if (user.status !== UserStatus.PENDING) throw new UnauthorizedException();
+    if (user.status !== UserStatus.PENDING) throw new UnauthorizedException(ErrorCodeEnum.ACCOUNT_ALREADY_CONFIRM);
 
     const userToken = await this.userTokenService.generateAndSave(
       { sub: user.id, email },
