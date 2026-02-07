@@ -16,7 +16,7 @@ import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 import { LoginMethod, User, UserStatus } from '@prisma/client';
 import { IAuthSession, TUserAccountStatus } from './types';
 import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
-import * as bcrypt from 'bcrypt';
+import { UtilHash } from 'src/common/utils/util-hash';
 
 @Injectable()
 export class AuthService {
@@ -195,6 +195,7 @@ export class AuthService {
 
     if (!userToken.id) throw new NotFoundException();
 
+    
     const hashedPassword = await this.__hashPassword(data.password);
 
     await this.userService.update(payload.sub, {
@@ -325,14 +326,13 @@ export class AuthService {
 
   private async __hashPassword(password: string): Promise<string> {
     const saltRound = Number(this.configService.get('HASH_SALT_ROUND')) || 12;
-    return bcrypt.hash(password, saltRound);
+    return UtilHash.hash(password, saltRound);
   }
 
-
   private async __comparePassword(
-      password: string,
-      hashedPassword: string,
-    ): Promise<boolean> {
-      return await bcrypt.compare(password, hashedPassword);
-    }
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    return UtilHash.compare(password, hashedPassword);
+  }
 }
