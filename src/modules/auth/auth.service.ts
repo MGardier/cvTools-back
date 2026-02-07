@@ -158,8 +158,6 @@ export class AuthService {
       confirmAccountDto.token,
       TokenType.CONFIRM_ACCOUNT,
     );
-    if (!userToken.id || !payload.sub)
-      throw new NotFoundException(ErrorCodeEnum.TOKEN_EXPIRED);
 
     await this.userService.update(payload.sub, {
       status: UserStatus.ALLOWED,
