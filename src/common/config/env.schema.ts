@@ -151,6 +151,16 @@ export const envSchema = z.object({
       ? 'You must provide FRONT_URL_RESET_PASSWORD.'
       : 'FRONT_URL_RESET_PASSWORD must be a valid URL.',
   }),
+  FRONT_URL_OAUTH_CALLBACK_SUCCESS: z.url({
+    error: (iss) => iss.input === undefined
+      ? 'You must provide FRONT_URL_OAUTH_CALLBACK_SUCCESS.'
+      : 'FRONT_URL_OAUTH_CALLBACK_SUCCESS must be a valid URL.',
+  }),
+  FRONT_URL_OAUTH_CALLBACK_ERROR: z.url({
+    error: (iss) => iss.input === undefined
+      ? 'You must provide FRONT_URL_OAUTH_CALLBACK_ERROR.'
+      : 'FRONT_URL_OAUTH_CALLBACK_ERROR must be a valid URL.',
+  }),
 
 
   /* #################### EXTERNAL SERVICES  ########################### */

@@ -177,7 +177,7 @@ export class AuthController {
       )
         ? errorMessage
         : ErrorCodeEnum.INTERNAL_SERVER_ERROR;
-      const redirectUrl = `${this.configService.get('FRONT_URL_OAUTH_CALLBACK_SUCCESS')}?error=${encodeURIComponent(errorCode)}`;
+      const redirectUrl = `${this.configService.get('FRONT_URL_OAUTH_CALLBACK_ERROR')}?error=${encodeURIComponent(errorCode)}`;
       res.redirect(redirectUrl);
     }
   }
@@ -240,6 +240,7 @@ export class AuthController {
       await this.cacheManager.get(sessionId);
     if (!session)
       throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED);
+    await this.cacheManager.del(sessionId);
     return session;
   }
 }
