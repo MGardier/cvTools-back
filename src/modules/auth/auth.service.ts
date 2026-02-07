@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -59,13 +60,13 @@ export class AuthService {
       !user.password ||
       !(await this.__comparePassword(data.password, user.password))
     )
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS);
 
     if (user.status === UserStatus.PENDING)
-      throw new UnauthorizedException('User must  valid his account');
+      throw new ForbiddenException(ErrorCodeEnum.ACCOUNT_PENDING);
 
     if (user.status === UserStatus.BANNED)
-      throw new UnauthorizedException('User is banned and cannot login ');
+      throw new ForbiddenException(ErrorCodeEnum.USER_BANNED);
 
     const access = await this.userTokenService.generate(
       { email: user.email, sub: user.id },
