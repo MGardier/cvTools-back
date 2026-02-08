@@ -80,11 +80,10 @@ export class AuthController {
     return await this.authService.signIn(signInDto);
   }
 
-  @RequireTokenType(TokenType.REFRESH)
   @Delete('logout')
-  @SkipSerialize()
-  async logout(@Req() req: IAuthenticatedRequest): Promise<boolean> {
-    return await this.authService.logout(req.token!);
+  @HttpCode(204)
+  async logout(@Req() req: IAuthenticatedRequest): Promise<void> {
+    await this.authService.logout(req.user.sub);
   }
 
   @RequireTokenType(TokenType.REFRESH)

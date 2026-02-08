@@ -31,4 +31,10 @@ export class UserTokenRepository {
       },
     });
   }
+
+  async removeAllByUserId(userId: number): Promise<{ count: number }> {
+    return await this.prismaService.userToken.deleteMany({
+      where: { userId, type: 'REFRESH' },
+    });
+  }
 }

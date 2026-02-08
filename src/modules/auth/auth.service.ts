@@ -84,18 +84,8 @@ export class AuthService {
     };
   }
 
-  async logout(token: string): Promise<boolean> {
-    const { userToken, payload } = await this.userTokenService.decodeAndGet(
-      token,
-      TokenType.REFRESH,
-    );
-    if (!userToken.id) throw new UnauthorizedException();
-
-    const user = await this.userService.findOneById(+payload.sub);
-    if (!user) throw new UnauthorizedException();
-
-    await this.userTokenService.remove(userToken.id);
-    return true;
+  async logout(userId: number): Promise<void> {
+    await this.userTokenService.removeAllByUserId(userId);
   }
 
   async refresh(token: string): Promise<IAuthSession> {
