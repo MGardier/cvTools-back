@@ -11,6 +11,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Request, Response } from 'express';
 
 import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
+import { OAuthRedirectException } from 'src/common/exceptions/oauth-redirect.exception';
 import { ILogContext } from 'src/common/types/api.types';
 import { PrismaClientExceptionFilter } from './prisma-exception.filter';
 import { HttpExceptionFilter } from './http-exception.filter';
@@ -27,9 +28,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(GlobalExceptionFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
+    // Skip OAuth redirect exceptions to stop the request lifecycle - those are already sent
+    if (exception instanceof OAuthRedirectException) return;
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+
+    // Safety check: don't attempt to send a response if headers were already sent
+    if (response.headersSent) return;
 
     const logContext = this.buildLogContext(request, exception);
 

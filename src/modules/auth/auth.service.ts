@@ -301,7 +301,7 @@ export class AuthService {
       oauthId,
       loginMethod,
     });
-
+    
     if (!user)
       throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED);
 

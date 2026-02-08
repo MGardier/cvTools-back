@@ -21,11 +21,10 @@ export class RabbitmqService implements OnModuleInit {
   }
 
   async sendEmail(data: IEmailPayload) {
-    const r = await firstValueFrom(
+    return await firstValueFrom(
       this.emailClient.send('send_email', data)
     );
-    console.log(r)
-    return r;
+
   }
 
   sendEmailAsync(data: IEmailPayload): void {

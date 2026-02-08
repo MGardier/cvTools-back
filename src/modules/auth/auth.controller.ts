@@ -53,13 +53,14 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+  ) { }
+
 
   /***************************************** AUTHENTIFICATION ***************************************************************************************/
 
 
 
-  
+
   @Public()
   @Post('signUp')
   @SerializeWith(SignUpResponseDto)
@@ -90,7 +91,7 @@ export class AuthController {
   @Post('refresh')
   @SerializeWith(SignInResponseDto)
   async refresh(@Req() req: IAuthenticatedRequest): Promise<SignInResponseDto> {
-    
+
     return await this.authService.refresh(req.token!);
   }
 
@@ -165,20 +166,20 @@ export class AuthController {
         req.user.oauthId,
         LoginMethod.GOOGLE,
       );
-
       await this.cacheManager.set(sessionId, { ...data });
 
-      const redirectUrl = `${this.configService.get('FRONT_URL_OAUTH_CALLBACK_SUCCESS')}?sessionId=${encodeURIComponent(sessionId)}&loginMethod=${encodeURIComponent(LoginMethod.GOOGLE)}`;
-      res.redirect(redirectUrl);
+      res.redirect(
+        this.__buildOAuthRedirectUrl('success', {
+          sessionId,
+          loginMethod: LoginMethod.GOOGLE,
+        }),
+      );
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : '';
-      const errorCode = Object.values(ErrorCodeEnum).includes(
-        errorMessage as ErrorCodeEnum,
-      )
-        ? errorMessage
-        : ErrorCodeEnum.INTERNAL_SERVER_ERROR;
-      const redirectUrl = `${this.configService.get('FRONT_URL_OAUTH_CALLBACK_ERROR')}?error=${encodeURIComponent(errorCode)}`;
-      res.redirect(redirectUrl);
+      res.redirect(
+        this.__buildOAuthRedirectUrl('error', {
+          errorCode: this.__getErrorCodeFromException(error),
+        }),
+      );
     }
   }
 
@@ -212,19 +213,20 @@ export class AuthController {
         LoginMethod.GITHUB,
       );
 
+    
       await this.cacheManager.set(sessionId, { ...data });
-
-      const redirectUrl = `${this.configService.get('FRONT_URL_OAUTH_CALLBACK_SUCCESS')}?sessionId=${encodeURIComponent(sessionId)}&loginMethod=${encodeURIComponent(LoginMethod.GITHUB)}`;
-      res.redirect(redirectUrl);
+      res.redirect(
+        this.__buildOAuthRedirectUrl('success', {
+          sessionId,
+          loginMethod: LoginMethod.GITHUB,
+        }),
+      );
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : '';
-      const errorCode = Object.values(ErrorCodeEnum).includes(
-        errorMessage as ErrorCodeEnum,
-      )
-        ? errorMessage
-        : ErrorCodeEnum.INTERNAL_SERVER_ERROR;
-      const redirectUrl = `${this.configService.get('FRONT_URL_OAUTH_CALLBACK_ERROR')}?error=${encodeURIComponent(errorCode)}`;
-      res.redirect(redirectUrl);
+      res.redirect(
+        this.__buildOAuthRedirectUrl('error', {
+          errorCode: this.__getErrorCodeFromException(error),
+        }),
+      );
     }
   }
 
@@ -238,9 +240,43 @@ export class AuthController {
   ): Promise<SignInResponseDto> {
     const session: IAuthSession | undefined =
       await this.cacheManager.get(sessionId);
+
     if (!session)
       throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED);
+
     await this.cacheManager.del(sessionId);
     return session;
+  }
+
+
+
+  /************************************  PRIVATE METHOD ****************************************************/
+
+  private __buildOAuthRedirectUrl(
+    type: 'success' | 'error',
+    params: { sessionId?: string; loginMethod?: LoginMethod; errorCode?: string },
+  ): string {
+    const baseUrl =
+      type === 'success'
+        ? this.configService.get('FRONT_URL_OAUTH_CALLBACK_SUCCESS')
+        : this.configService.get('FRONT_URL_OAUTH_CALLBACK_ERROR');
+
+    const searchParams = new URLSearchParams();
+
+    if (type === 'success' && params.sessionId && params.loginMethod) {
+      searchParams.set('sessionId', params.sessionId);
+      searchParams.set('loginMethod', params.loginMethod);
+    } else if (type === 'error' && params.errorCode) {
+      searchParams.set('errorCode', params.errorCode);
+    }
+
+    return `${baseUrl}?${searchParams.toString()}`;
+  }
+
+  private __getErrorCodeFromException(error: unknown): string {
+    const errorMessage = error instanceof Error ? error.message : '';
+    return Object.values(ErrorCodeEnum).includes(errorMessage as ErrorCodeEnum)
+      ? errorMessage
+      : ErrorCodeEnum.INTERNAL_SERVER_ERROR;
   }
 }
