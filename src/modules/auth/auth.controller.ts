@@ -22,6 +22,7 @@ import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto';
 import { ResetPasswordRequestDto } from './dto/request/reset-password.dto';
 import { SignUpResponseDto } from './dto/response/sign-up.dto';
 import { SignInResponseDto } from './dto/response/sign-in.dto';
+import { ForgotPasswordResponseDto } from './dto/response/forgot-password.dto';
 
 import { Public } from 'src/common/decorators/public.decorator';
 import {
@@ -121,10 +122,10 @@ export class AuthController {
 
   @Public()
   @Post('forgotPassword')
-  @SkipSerialize()
+  @SerializeWith(ForgotPasswordResponseDto)
   async forgotPassword(
     @Body() forgotPasswordDTO: ForgotPasswordRequestDto,
-  ): Promise<boolean> {
+  ): Promise<ForgotPasswordResponseDto> {
     return await this.authService.forgotPassword(forgotPasswordDTO.email);
   }
 

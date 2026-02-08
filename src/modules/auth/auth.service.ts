@@ -167,23 +167,24 @@ export class AuthService {
     return true;
   }
 
-  async forgotPassword(email: string): Promise<boolean> {
+  async forgotPassword(email: string): Promise<{ id: number; email: string }> {
     const user = await this.userService.findOneByEmail(email);
 
-    if (user) {
-      const userToken = await this.userTokenService.generateAndSave(
-        { email: user.email, sub: user.id },
-        TokenType.FORGOT_PASSWORD,
-      );
+    if (!user)
+      throw new NotFoundException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
 
-      await this.emailService.sendResetPasswordLink(
-        user.id,
-        user.email,
-        `${this.configService.get('FRONT_URL_RESET_PASSWORD')}?token=${userToken.token}`,
-      );
-    }
+    const userToken = await this.userTokenService.generateAndSave(
+      { email: user.email, sub: user.id },
+      TokenType.FORGOT_PASSWORD,
+    );
 
-    return true;
+    await this.emailService.sendResetPasswordLink(
+      user.id,
+      user.email,
+      `${this.configService.get('FRONT_URL_RESET_PASSWORD')}?token=${userToken.token}`,
+    );
+
+    return { id: user.id, email: user.email };
   }
 
   async resetPassword(data: ResetPasswordRequestDto): Promise<boolean> {
