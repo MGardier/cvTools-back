@@ -59,13 +59,16 @@ export class UserTokenService {
   async decodeAndGet(token: string, type: TokenType): Promise<IValidatedToken> {
     const payload = await this.decode(token, type);
 
-    if (!payload.uuid) throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
+    if (!payload.uuid)
+      throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
 
     const userToken = await this.userTokenRepository.findByUuid(payload.uuid);
-    if (!userToken) throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
+    if (!userToken)
+      throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
 
     const isValidToken = await UtilHash.compare(token, userToken.token);
-    if (!isValidToken) throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
+    if (!isValidToken)
+      throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
 
     return { userToken, payload };
   }

@@ -16,8 +16,6 @@ import { ILogContext } from 'src/common/types/api.types';
 import { PrismaClientExceptionFilter } from './prisma-exception.filter';
 import { HttpExceptionFilter } from './http-exception.filter';
 
-
-
 //TODO: Improve display of error for all filters
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {

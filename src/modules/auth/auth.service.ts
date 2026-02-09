@@ -10,14 +10,14 @@ import { UserTokenService } from '../user-token/user-token.service';
 import { EmailService } from '../email/email.service';
 import { ConfigService } from '@nestjs/config';
 import { SignUpRequestDto } from './dto/request/sign-up.dto';
-import { SignInRequestDto } from './dto/request/sign-in.dto';
 import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto';
 import { ResetPasswordRequestDto } from './dto/request/reset-password.dto';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 import { LoginMethod, User, UserStatus } from '@prisma/client';
-import { IAuthSession } from './types';
+import { IAuthSession, IAuthTokens } from './types';
 import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
 import { UtilHash } from 'src/common/utils/util-hash';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +28,38 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+
+  private readonly ACCESS_TOKEN_COOKIE = 'access_token';
+  private readonly REFRESH_TOKEN_COOKIE = 'refresh_token';
+  
   /***************************************** AUTHENTIFICATION ***************************************************************************************/
+
+  async validateUser(email: string, password: string): Promise<User> {
+    const user = await this.userService.findOneByEmail(email);
+
+    if (!user) 
+      throw new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS);
+    
+
+    if (!user.password) 
+      throw new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS);
+    
+
+    const isPasswordValid = await this.__comparePassword(password, user.password);
+    if (!isPasswordValid) 
+      throw new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS);
+    
+
+    if (user.status === UserStatus.PENDING) 
+      throw new ForbiddenException(ErrorCodeEnum.ACCOUNT_PENDING);
+    
+
+    if (user.status === UserStatus.BANNED) 
+      throw new ForbiddenException(ErrorCodeEnum.USER_BANNED);
+    
+
+    return user;
+  }
 
   async signUp(data: SignUpRequestDto): Promise<User> {
     const hashedPassword = await this.__hashPassword(data.password);
@@ -49,25 +80,11 @@ export class AuthService {
       user.email,
       `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}/${userToken.token}`,
     );
-    
+
     return user;
   }
 
-  async signIn(data: SignInRequestDto): Promise<IAuthSession> {
-    const user = await this.userService.findOneByEmail(data.email);
-    if (
-      !user ||
-      !user.password ||
-      !(await this.__comparePassword(data.password, user.password))
-    )
-      throw new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS);
-
-    if (user.status === UserStatus.PENDING)
-      throw new ForbiddenException(ErrorCodeEnum.ACCOUNT_PENDING);
-
-    if (user.status === UserStatus.BANNED)
-      throw new ForbiddenException(ErrorCodeEnum.USER_BANNED);
-
+  async signIn(user: User): Promise<IAuthTokens> {
     const access = await this.userTokenService.generate(
       { email: user.email, sub: user.id },
       TokenType.ACCESS,
@@ -78,10 +95,7 @@ export class AuthService {
       TokenType.REFRESH,
     );
 
-    return {
-      tokens: { accessToken: access.token, refreshToken: refresh.token },
-      user,
-    };
+    return { accessToken: access.token, refreshToken: refresh.token };
   }
 
   async logout(token: string): Promise<void> {
@@ -130,7 +144,8 @@ export class AuthService {
     const user = await this.userService.findOneByEmail(email);
     if (!user) throw new NotFoundException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
 
-    if (user.status !== UserStatus.PENDING) throw new UnauthorizedException(ErrorCodeEnum.ACCOUNT_ALREADY_CONFIRM);
+    if (user.status !== UserStatus.PENDING)
+      throw new UnauthorizedException(ErrorCodeEnum.ACCOUNT_ALREADY_CONFIRM);
 
     const userToken = await this.userTokenService.generateAndSave(
       { sub: user.id, email },
@@ -165,8 +180,7 @@ export class AuthService {
   async forgotPassword(email: string): Promise<User> {
     const user = await this.userService.findOneByEmail(email);
 
-    if (!user)
-      throw new NotFoundException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
+    if (!user) throw new NotFoundException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
 
     const userToken = await this.userTokenService.generateAndSave(
       { email: user.email, sub: user.id },
@@ -190,7 +204,6 @@ export class AuthService {
 
     if (!userToken.id) throw new NotFoundException();
 
-    
     const hashedPassword = await this.__hashPassword(data.password);
 
     await this.userService.update(payload.sub, {
@@ -249,8 +262,6 @@ export class AuthService {
     githubId: string,
     githubEmail: string,
   ): Promise<User> {
-
-    
     const existingUser = await this.userService.findOneByOauthId({
       oauthId: githubId,
       loginMethod: LoginMethod.GITHUB,
@@ -297,7 +308,7 @@ export class AuthService {
       oauthId,
       loginMethod,
     });
-    
+
     if (!user)
       throw new UnauthorizedException(ErrorCodeEnum.OAUTH_LOGIN_FAILED);
 
@@ -329,5 +340,48 @@ export class AuthService {
     hashedPassword: string,
   ): Promise<boolean> {
     return UtilHash.compare(password, hashedPassword);
+  }
+
+  /********************************************* COOKIE METHODS *********************************************************************************************** */
+
+
+  private __setAccessTokenCookie(res: Response, token: string): void {
+    res.cookie(this.ACCESS_TOKEN_COOKIE, token, {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite: 'strict',
+      maxAge: this.configService.get<number>('JWT_ACCESS_EXPIRATION'),
+      path: '/',
+    });
+  }
+
+  private __setRefreshTokenCookie(res: Response, token: string): void {
+    res.cookie(this.REFRESH_TOKEN_COOKIE, token, {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite: 'strict',
+      maxAge: this.configService.get<number>('JWT_REFRESH_EXPIRATION'),
+      path: '/auth',
+    });
+  }
+
+  setAuthCookies(res: Response, tokens: IAuthTokens): void {
+    this.__setAccessTokenCookie(res, tokens.accessToken);
+    this.__setRefreshTokenCookie(res, tokens.refreshToken);
+  }
+
+  clearAuthCookies(res: Response): void {
+    res.clearCookie(this.ACCESS_TOKEN_COOKIE, {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite: 'strict',
+      path: '/',
+    });
+    res.clearCookie(this.REFRESH_TOKEN_COOKIE, {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite: 'strict',
+      path: '/auth',
+    });
   }
 }

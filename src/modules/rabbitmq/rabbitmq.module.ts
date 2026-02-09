@@ -7,7 +7,7 @@ import { RabbitmqService } from './rabbitmq.service';
   imports: [
     ClientsModule.register([
       {
-        name:'EMAIL_SERVICE',
+        name: 'EMAIL_SERVICE',
         transport: Transport.RMQ,
         options: {
           urls: [process.env.RABBITMQ_URL || 'amqp://root:root@localhost:5672'],
@@ -17,7 +17,6 @@ import { RabbitmqService } from './rabbitmq.service';
           },
         },
       },
-
     ]),
   ],
   providers: [RabbitmqService],

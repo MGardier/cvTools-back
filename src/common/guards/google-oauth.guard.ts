@@ -26,7 +26,11 @@ export class GoogleOauthGuard extends AuthGuard('google') {
     const response = context.switchToHttp().getResponse<Response>();
 
     //Prevent double api call at handleRequest
-    if (request.user && typeof request.user === 'object' && 'id' in request.user) {
+    if (
+      request.user &&
+      typeof request.user === 'object' &&
+      'id' in request.user
+    ) {
       return request.user as TUser;
     }
 

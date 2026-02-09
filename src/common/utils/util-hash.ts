@@ -8,7 +8,10 @@ export abstract class UtilHash {
     return bcrypt.hash(plainText, rounds);
   }
 
-  static async compare(plainText: string, hashedText: string): Promise<boolean> {
+  static async compare(
+    plainText: string,
+    hashedText: string,
+  ): Promise<boolean> {
     return bcrypt.compare(plainText, hashedText);
   }
 }
