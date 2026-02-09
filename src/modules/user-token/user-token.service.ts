@@ -73,8 +73,4 @@ export class UserTokenService {
   async remove(id: number): Promise<UserToken> {
     return await this.userTokenRepository.remove(id);
   }
-
-  async removeAllByUserId(userId: number): Promise<{ count: number }> {
-    return await this.userTokenRepository.removeAllByUserId(userId);
-  }
 }

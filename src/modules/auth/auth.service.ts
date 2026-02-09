@@ -15,7 +15,7 @@ import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto';
 import { ResetPasswordRequestDto } from './dto/request/reset-password.dto';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 import { LoginMethod, User, UserStatus } from '@prisma/client';
-import { IAuthSession, TUserAccountStatus } from './types';
+import { IAuthSession } from './types';
 import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
 import { UtilHash } from 'src/common/utils/util-hash';
 
@@ -84,8 +84,13 @@ export class AuthService {
     };
   }
 
-  async logout(userId: number): Promise<void> {
-    await this.userTokenService.removeAllByUserId(userId);
+  async logout(token: string): Promise<void> {
+    const { userToken } = await this.userTokenService.decodeAndGet(
+      token,
+      TokenType.REFRESH,
+    );
+    if (!userToken.id) throw new UnauthorizedException();
+    await this.userTokenService.remove(userToken.id);
   }
 
   async refresh(token: string): Promise<IAuthSession> {
@@ -121,7 +126,7 @@ export class AuthService {
 
   /************************ ACCOUNT MANAGEMENT **********************************************************/
 
-  async reSendConfirmAccount(email: string): Promise<TUserAccountStatus> {
+  async reSendConfirmAccount(email: string): Promise<User> {
     const user = await this.userService.findOneByEmail(email);
     if (!user) throw new NotFoundException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
 
@@ -138,12 +143,12 @@ export class AuthService {
       `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}?token=${userToken.token}`,
     );
 
-    return { id: user.id, email: user.email, status: user.status };
+    return user;
   }
 
   async confirmAccount(
     confirmAccountDto: ConfirmAccountRequestDto,
-  ): Promise<boolean> {
+  ): Promise<void> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       confirmAccountDto.token,
       TokenType.CONFIRM_ACCOUNT,
@@ -154,10 +159,10 @@ export class AuthService {
     });
 
     await this.userTokenService.remove(userToken.id);
-    return true;
+    return;
   }
 
-  async forgotPassword(email: string): Promise<{ id: number; email: string }> {
+  async forgotPassword(email: string): Promise<User> {
     const user = await this.userService.findOneByEmail(email);
 
     if (!user)
@@ -174,10 +179,10 @@ export class AuthService {
       `${this.configService.get('FRONT_URL_RESET_PASSWORD')}?token=${userToken.token}`,
     );
 
-    return { id: user.id, email: user.email };
+    return user;
   }
 
-  async resetPassword(data: ResetPasswordRequestDto): Promise<boolean> {
+  async resetPassword(data: ResetPasswordRequestDto): Promise<void> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       data.token,
       TokenType.FORGOT_PASSWORD,
@@ -193,7 +198,7 @@ export class AuthService {
     });
 
     await this.userTokenService.remove(userToken.id);
-    return true;
+    return;
   }
 
   /********************************************* GOOGLE METHOD *********************************************************************************************** */

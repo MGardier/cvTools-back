@@ -20,9 +20,8 @@ import { SignInRequestDto } from './dto/request/sign-in.dto';
 import { ForgotPasswordRequestDto } from './dto/request/forgot-password.dto';
 import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto';
 import { ResetPasswordRequestDto } from './dto/request/reset-password.dto';
-import { SignUpResponseDto } from './dto/response/sign-up.dto';
 import { SignInResponseDto } from './dto/response/sign-in.dto';
-import { ForgotPasswordResponseDto } from './dto/response/forgot-password.dto';
+import { UserResponseDto } from './dto/response/user.dto';
 
 import { Public } from 'src/common/decorators/public.decorator';
 import {
@@ -30,7 +29,7 @@ import {
   SkipSerialize,
 } from 'src/common/decorators/serialize.decorator';
 import { LoginMethod } from '@prisma/client';
-import { IAuthSession, TUserAccountStatus } from './types';
+import { IAuthSession } from './types';
 import { RequireTokenType } from 'src/common/decorators/require-token-type.decorator';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 import { GoogleOauthGuard } from 'src/common/guards/google-oauth.guard';
@@ -64,10 +63,10 @@ export class AuthController {
 
   @Public()
   @Post('signUp')
-  @SerializeWith(SignUpResponseDto)
+  @SerializeWith(UserResponseDto)
   async signUp(
     @Body() signUpDto: SignUpRequestDto,
-  ): Promise<SignUpResponseDto> {
+  ): Promise<UserResponseDto> {
     return await this.authService.signUp(signUpDto);
   }
 
@@ -80,10 +79,11 @@ export class AuthController {
     return await this.authService.signIn(signInDto);
   }
 
+  @RequireTokenType(TokenType.REFRESH)
   @Delete('logout')
   @HttpCode(204)
   async logout(@Req() req: IAuthenticatedRequest): Promise<void> {
-    await this.authService.logout(req.user.sub);
+    await this.authService.logout(req.token!);
   }
 
   @RequireTokenType(TokenType.REFRESH)
@@ -99,10 +99,10 @@ export class AuthController {
 
   @Public()
   @Post('resendConfirmAccount')
-  @SkipSerialize()
+  @SerializeWith(UserResponseDto)
   async reSendConfirmAccount(
     @Body() resendConfirmAccountDto: ForgotPasswordRequestDto,
-  ): Promise<TUserAccountStatus> {
+  ): Promise<UserResponseDto> {
     return await this.authService.reSendConfirmAccount(
       resendConfirmAccountDto.email,
     );
@@ -113,7 +113,7 @@ export class AuthController {
   @SkipSerialize()
   async confirmAccount(
     @Body() confirmAccountDto: ConfirmAccountRequestDto,
-  ): Promise<boolean> {
+  ): Promise<void> {
     return await this.authService.confirmAccount(confirmAccountDto);
   }
 
@@ -121,10 +121,10 @@ export class AuthController {
 
   @Public()
   @Post('forgotPassword')
-  @SerializeWith(ForgotPasswordResponseDto)
+  @SerializeWith(UserResponseDto)
   async forgotPassword(
     @Body() forgotPasswordDTO: ForgotPasswordRequestDto,
-  ): Promise<ForgotPasswordResponseDto> {
+  ): Promise<UserResponseDto> {
     return await this.authService.forgotPassword(forgotPasswordDTO.email);
   }
 
@@ -133,7 +133,7 @@ export class AuthController {
   @SkipSerialize()
   async resetPassword(
     @Body() resetPasswordDto: ResetPasswordRequestDto,
-  ): Promise<boolean> {
+  ): Promise<void> {
     return await this.authService.resetPassword(resetPasswordDto);
   }
 

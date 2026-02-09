@@ -9,5 +9,3 @@ export interface IAuthSession {
   tokens: IAuthTokens;
   user: User;
 }
-
-export type TUserAccountStatus = Pick<User, 'id' | 'email' | 'status'>;
