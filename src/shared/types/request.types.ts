@@ -1,10 +1,18 @@
 import { Request } from 'express';
 import { User } from '@prisma/client';
 import { IPayloadJwt } from 'src/modules/jwt-manager/types';
+import { IRefreshTokenPayload } from 'src/shared/strategies/jwt-refresh.strategy';
 
 export interface IAuthenticatedRequest extends Request {
   user: IPayloadJwt;
-  token?: string;
+}
+
+export interface IRefreshTokenRequest extends Request {
+  user: IRefreshTokenPayload;
+}
+
+export interface ISignInRequest extends Request {
+  user: User;
 }
 
 export interface IOAuthUser {

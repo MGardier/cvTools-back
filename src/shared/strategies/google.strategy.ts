@@ -4,8 +4,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { User } from '@prisma/client';
-import { AuthService } from '../auth.service';
-import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
+import { AuthService } from 'src/modules/auth/auth.service';
+import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { IGoogleProfile } from './types';
 
 @Injectable()

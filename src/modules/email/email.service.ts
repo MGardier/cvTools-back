@@ -1,12 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { RabbitmqService } from '../rabbitmq/rabbitmq.service';
 
-
 @Injectable()
 export class EmailService {
-  constructor(
-    private readonly rabbitMqQService: RabbitmqService,
-  ) { }
+  constructor(private readonly rabbitMqQService: RabbitmqService) {}
 
   sendAccountConfirmationLink(
     userId: number,
@@ -61,7 +58,4 @@ export class EmailService {
       origin: 'send-reset-password-link',
     });
   }
-
-
-
 }

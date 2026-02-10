@@ -7,18 +7,16 @@ import { EmailModule } from './modules/email/email.module';
 import { UserTokenModule } from './modules/user-token/user-token.module';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtManagerModule } from './modules/jwt-manager/jwt-manager.module';
-import { TOKEN_TYPE } from './common/decorators/require-token-type.decorator';
-import { validateEnv } from './common/config/env.validation';
-import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { PrismaClientExceptionFilter } from './common/filters/prisma-exception.filter';
-import { ResponseInterceptor } from './common/interceptors/response.interceptor';
-import { SerializeInterceptor } from './common/interceptors/serialize.interceptor';
-import { AuthGuard } from './common/guards/auth.guard';
+import { validateEnv } from './app/config/env.validation';
+import { GlobalExceptionFilter } from './app/filters/global-exception.filter';
+import { HttpExceptionFilter } from './app/filters/http-exception.filter';
+import { PrismaClientExceptionFilter } from './app/filters/prisma-exception.filter';
+import { ResponseInterceptor } from './app/interceptors/response.interceptor';
+import { SerializeInterceptor } from './app/interceptors/serialize.interceptor';
+import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
 import { CacheManagerModule } from './modules/cache/cache-manager.module';
 import { AddressModule } from './modules/address/address.module';
 import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
-
 
 @Module({
   imports: [
@@ -35,7 +33,6 @@ import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
     UserTokenModule,
     JwtManagerModule,
     AddressModule,
-    
   ],
   controllers: [],
   providers: [
@@ -43,11 +40,7 @@ import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
     HttpExceptionFilter,
     {
       provide: APP_GUARD,
-      useClass: AuthGuard,
-    },
-    {
-      provide: TOKEN_TYPE,
-      useValue: 'ACCESS',
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_FILTER,
