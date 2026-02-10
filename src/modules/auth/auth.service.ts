@@ -34,6 +34,14 @@ export class AuthService {
   
   /***************************************** AUTHENTIFICATION ***************************************************************************************/
 
+  async getCurrentUser(userId: number): Promise<User> {
+    const user = await this.userService.findOneById(userId);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return user;
+  }
+
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.userService.findOneByEmail(email);
 
@@ -78,7 +86,7 @@ export class AuthService {
     this.emailService.sendAccountConfirmationLink(
       user.id,
       user.email,
-      `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}/${userToken.token}`,
+      `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}?token=${userToken.token}`,
     );
 
     return user;

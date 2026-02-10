@@ -32,6 +32,7 @@ import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import {
+  IAuthenticatedRequest,
   IRefreshTokenRequest,
   IOAuthCallbackRequest,
   ISignInRequest,
@@ -66,15 +67,23 @@ export class AuthController {
     return req.user;
   }
 
+  @Get('me')
+  @SerializeWith(UserResponseDto)
+  async me(@Req() req: IAuthenticatedRequest): Promise<UserResponseDto> {
+    return this.authService.getCurrentUser(req.user.sub);
+  }
+
   @Public()
   @UseGuards(JwtRefreshGuard)
   @Delete('logout')
   @HttpCode(204)
+  @SkipSerialize()
   async logout(
     @Req() req: IRefreshTokenRequest,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     await this.authService.logout(req.user.refreshToken);
+
     this.authService.clearAuthCookies(res);
   }
 
