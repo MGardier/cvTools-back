@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-github2';
 import { User } from '@prisma/client';
-import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
-import { AuthService } from '../auth.service';
+import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { AuthService } from 'src/modules/auth/auth.service';
 import { IGithubProfile } from './types';
 
 @Injectable()

@@ -15,8 +15,8 @@ import { ResetPasswordRequestDto } from './dto/request/reset-password.dto';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 import { LoginMethod, User, UserStatus } from '@prisma/client';
 import { IAuthSession, IAuthTokens } from './types';
-import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
-import { UtilHash } from 'src/common/utils/util-hash';
+import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { UtilHash } from 'src/shared/utils/util-hash';
 import { Response } from 'express';
 
 @Injectable()

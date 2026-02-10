@@ -18,17 +18,17 @@ import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto';
 import { ResetPasswordRequestDto } from './dto/request/reset-password.dto';
 import { UserResponseDto } from './dto/response/user.dto';
 
-import { Public } from 'src/common/decorators/public.decorator';
+import { Public } from 'src/shared/decorators/public.decorator';
 import {
   SerializeWith,
   SkipSerialize,
-} from 'src/common/decorators/serialize.decorator';
+} from 'src/shared/decorators/serialize.decorator';
 import { LoginMethod } from '@prisma/client';
-import { GoogleOauthGuard } from 'src/common/guards/google-oauth.guard';
-import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
-import { GithubOauthGuard } from 'src/common/guards/github-oauth.guard';
-import { CredentialsAuthGuard } from 'src/common/guards/credentials-auth.guard';
-import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
+import { GoogleOauthGuard } from 'src/shared/guards/google-oauth.guard';
+import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { GithubOauthGuard } from 'src/shared/guards/github-oauth.guard';
+import { CredentialsAuthGuard } from 'src/shared/guards/credentials-auth.guard';
+import { JwtRefreshGuard } from 'src/shared/guards/jwt-refresh.guard';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import {
@@ -36,7 +36,7 @@ import {
   IRefreshTokenRequest,
   IOAuthCallbackRequest,
   ISignInRequest,
-} from 'src/common/types/request.types';
+} from 'src/shared/types/request.types';
 
 @Controller('auth')
 export class AuthController {

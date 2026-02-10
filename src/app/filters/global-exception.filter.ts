@@ -10,9 +10,9 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 import { Request, Response } from 'express';
 
-import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
-import { OAuthRedirectException } from 'src/common/exceptions/oauth-redirect.exception';
-import { ILogContext } from 'src/common/types/api.types';
+import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { OAuthRedirectException } from 'src/shared/exceptions/oauth-redirect.exception';
+import { ILogContext } from 'src/shared/types/api.types';
 import { PrismaClientExceptionFilter } from './prisma-exception.filter';
 import { HttpExceptionFilter } from './http-exception.filter';
 

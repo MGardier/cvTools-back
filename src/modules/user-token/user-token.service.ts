@@ -6,12 +6,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { TokenType } from './enums/token-type.enum';
 import { UserTokenRepository } from './user-token.repository';
 import { IGeneratedJwt, IPayloadJwt } from 'src/modules/jwt-manager/types';
-import { UtilRepository } from 'src/common/utils/util-repository';
-import { UtilHash } from 'src/common/utils/util-hash';
+import { UtilRepository } from 'src/shared/utils/util-repository';
+import { UtilHash } from 'src/shared/utils/util-hash';
 import { UserToken } from '@prisma/client';
 import { IValidatedToken } from './types';
-import { UtilDate } from 'src/common/utils/util-date';
-import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
+import { UtilDate } from 'src/shared/utils/util-date';
+import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 
 @Injectable()
 export class UserTokenService {

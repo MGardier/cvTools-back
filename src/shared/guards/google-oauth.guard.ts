@@ -2,9 +2,9 @@ import { ExecutionContext, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard, IAuthModuleOptions } from '@nestjs/passport';
 import { Request, Response } from 'express';
-import { ErrorCodeEnum } from 'src/common/enums/error-codes.enum';
-import { OAuthRedirectException } from 'src/common/exceptions/oauth-redirect.exception';
-import { IOAuthUser } from 'src/common/types/request.types';
+import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { OAuthRedirectException } from 'src/shared/exceptions/oauth-redirect.exception';
+import { IOAuthUser } from 'src/shared/types/request.types';
 
 @Injectable()
 export class GoogleOauthGuard extends AuthGuard('google') {
