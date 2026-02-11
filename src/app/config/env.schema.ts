@@ -7,6 +7,10 @@ export const envSchema = z.object({
     .enum(['dev', 'prod', 'test'])
     .optional()
     .default('dev'),
+  LOG_FORMAT: z
+    .enum(['json', 'visual', 'both'])
+    .optional()
+    .default('visual'),
 
   /* #################### DATABASE ########################### */
 
