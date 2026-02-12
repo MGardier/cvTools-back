@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,104 +10,138 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-  enum UserStatus {
-    ALLOWED
-    PENDING
-    BANNED
-  }
+//================================================
+//                  AUTH
+//================================================
 
-  enum UserRoles {
-    ADMIN
-    USER
-  }
+enum UserStatus {
+  ALLOWED
+  PENDING
+  BANNED
+}
 
+enum UserRoles {
+  ADMIN
+  USER
+}
 
-  enum PrismaTokenType {
-    REFRESH
-    FORGOT_PASSWORD
-    CONFIRM_ACCOUNT
-  }
+enum PrismaTokenType {
+  REFRESH
+  FORGOT_PASSWORD
+  CONFIRM_ACCOUNT
+}
 
-
- enum LoginMethod {
-    CLASSIC
-    GITHUB
-    GOOGLE
-  }
+enum LoginMethod {
+  CLASSIC
+  GITHUB
+  GOOGLE
+}
 
 model User {
-    @@map("user")
+  @@map("user")
 
-    id              Int                     @id @default(autoincrement())
-    email           String                  @unique 
-    status          UserStatus              @default(ALLOWED)
-    password        String?             
-    createdAt       DateTime                @default(now()) @map("created_at")
-    updatedAt       DateTime?               @updatedAt      @map("updated_at")
-    roles           UserRoles        
-    tokens          UserToken[] 
-    jobs            Job[] 
-    loginMethod     LoginMethod
-    oauthId         String?                 @map("oauth_id")
+  id          Int        @id @default(autoincrement())
+  email       String     @unique
+  status      UserStatus @default(ALLOWED)
+  password    String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime?  @updatedAt @map("updated_at")
+  roles       UserRoles
+  tokens      UserToken[]
+  loginMethod LoginMethod
+  oauthId     String?    @map("oauth_id")
 
-    @@unique([loginMethod, oauthId], name: "unique_oauth_user")
-  }
+  // Relations
+  jobs                     Job[]
+  externalProviderHistorics ExternalProviderHistoric[]
+
+  @@unique([loginMethod, oauthId], name: "unique_oauth_user")
+}
 
 model UserToken {
-    @@map("user_token")
+  @@map("user_token")
 
-    id              Int                    @id @default(autoincrement())
-    token           String                 @db.Text
-    type            PrismaTokenType
-    expiresIn       DateTime               @map("expires_in")
-    uuid            String?                @unique
-    createdAt       DateTime               @default(now()) @map("created_at")
-    userId          Int                    @map("user_id")
-    user            User                   @relation(fields: [userId], references: [id])
-  }
+  id        Int             @id @default(autoincrement())
+  token     String          @db.Text
+  type      PrismaTokenType
+  expiresIn DateTime        @map("expires_in")
+  uuid      String?         @unique
+  createdAt DateTime        @default(now()) @map("created_at")
+  userId    Int             @map("user_id")
+  user      User            @relation(fields: [userId], references: [id])
+}
 
+//================================================
+//                  ADDRESS
+//================================================
 
 model Address {
-
   @@map("address")
 
-  id                Int                       @id @default(autoincrement())
-  city              String
-  postalCode        String                    @map("postal_code")
-  createdAt         DateTime                  @default(now())  @map("created_at")
-  updatedAt         DateTime?                 @updatedAt        @map("updated_at")
-  job               Job[]
-  @@unique([city,postalCode],name: "city_postalCode")
+  id         Int       @id @default(autoincrement())
+  city       String
+  postalCode String    @map("postal_code")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
 
+  // Relations
+  jobs Job[]
+
+  @@unique([city, postalCode], name: "city_postalCode")
 }
 
+//================================================
+//                  JOB
+//================================================
 
-
-model Technology {
-  @@map("technology")
-
-  id                      Int     @id @default(autoincrement())
-  name                    String  @unique()
-  jobHasTechnology        JobHasTechnology[]   
+enum ApiProvider {
+  ADZUNA
+  APIFY
+  FRANCE_TRAVAIL
+  UNKNOW
 }
 
+enum ContractType {
+  CDI
+  CDD
+  FREELANCE
+  ALTERNANCE
+}
 
-enum TypeEnterprise {
-  ESN
-  START_UP
-  ENTERPRISE
+enum JobOrigin {
+  FRANCE_TRAVAIL
+  INDEED
+  WTTJ
+  HELLOWORK
+  LINKEDIN
+  USER
+  UNKNOW
+}
+
+enum ExperienceLevel {
+  JUNIOR
+  MID
+  SENIOR
+}
+
+enum RemotePolicy {
+  FULL
+  HYBRID
+  ONSITE
 }
 
 enum JobStatus {
-  NEED_TO_CONTACT
-  NEED_TO_VALIDATE_MESSAGE
-  NEED_TO_SEND_MESSAGE
-  INTERVIEWS
-  TECHNICAL_TEST
-  NEED_TO_SEND_THANKS_AFTER_INTERVIEW
-  NEED_TO_SEND_MAIL_REMINDER
+  BOOKMARKED
+  NEED_TO_APPLY
+  APPLIED
+  IN_PROCESS
+  COMPANY_OFFER_RECEIVED
+  ACCEPTED
+  REJECTED
+  GHOSTED
+  WITHDRAWN
+  ARCHIVED
 }
-
 
 enum CompatibilityJob {
   PERFECT
@@ -118,72 +149,216 @@ enum CompatibilityJob {
   WHY_NOT
 }
 
-
-
-
-enum ApplicationMethod {
-  LINKEDIN
-  JOBBOARD
-  EMAIL
-  OTHER
-}
-
 model Job {
   @@map("job")
-  
-  id                    Int                 @id @default(autoincrement())
-  interviewCount        Int                 @default(0) @map("interview_count")
-  rating                Int                 @default(0)
-  
 
-  jobTitle              String              @map("job_title")
-  enterprise            String
-  link                  String
-  managerName           String?             @map("manager_name")
-  managerEmail          String?             @map("manager_email")
-  description           String?             @db.Text
-  notes                 String?             @db.Text
-  rejectedReason        String?             @map("rejection_reason")
+  //INt
+  id            Int              @id @default(autoincrement())
+  salaryMin     Int?             @map("salary_min")
+  salaryMax     Int?             @map("salary_max")
 
+  //String
 
-  type                  TypeEnterprise
-  status                JobStatus
-  compatibility         CompatibilityJob
-  applicationMethod     ApplicationMethod
+  title         String
+  url           String
+  company       String?
+  apiOfferId    String?          @map("api_offer_id")
+  description   String?          @db.Text
+  rejectedReason String?         @map("rejected_reason")
 
+  // Enum
+  origin        JobOrigin
+  status        JobStatus        @default(BOOKMARKED)
+  apiProvider   ApiProvider?      @map("api_provider")
+  contractType  ContractType?    @map("contract_type")
+  experience    ExperienceLevel?
+  remotePolicy  RemotePolicy?    @map("remote_policy") 
+  compatibility CompatibilityJob?
 
-  isArchived            Boolean             @default(false)
-  isFavorite            Boolean             @default(false)
+  //DateTime
+  createdAt     DateTime         @default(now()) @map("created_at")
+  publishedAt   DateTime         @map("published_at")
+  appliedAt     DateTime?        @map("applied_at")
+  updatedAt     DateTime?        @updatedAt @map("updated_at")
 
+  // Foreign keys
+  userId    Int  @map("user_id")
+  addressId Int? @map("address_id")
 
-  createdAt             DateTime            @default(now())   @map("created_at")
-  updatedAt             DateTime?           @updatedAt        @map("updated_at")
-  appliedAt             DateTime?           @map("applied_at")
-  lastContactAt         DateTime?           @map("last_contact_at")
-
-
-  jobHasTechnology      JobHasTechnology[]
-  addressId             Int?                @map("address_id")
-  address               Address?            @relation(fields: [addressId], references: [id])
-  userId                Int                 @map("user_id")
-  user                  User                @relation(fields: [userId], references: [id])
-  
+  // Relations
+  user       User          @relation(fields: [userId], references: [id])
+  address    Address?      @relation(fields: [addressId], references: [id])
+  contacts   Contact[]
+  jobSkills  JobSkill[]
+  activities JobActivity[]
+  todos      Todo[]
+  notes      Note[]
 
   @@index([userId])
-
+  @@index([status])
 }
 
-model JobHasTechnology {
-  @@map("job_has_technology")
-  
-  jobId                Int                @map("job_id")
-  job                  Job                @relation(fields: [jobId], references: [id])
+// ========================================
+// CONTACTS
+// ========================================
 
-  technologyId         Int                @map("technology_id")
-  technology           Technology         @relation(fields: [technologyId], references: [id])
+model Contact {
+  @@map("contact")
 
-  @@id([jobId, technologyId])
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String?
+  phone     String?
+  role      String?   // "RH", "Tech Lead", "CTO"...
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  // Foreign keys
+  jobId Int @map("job_id")
+
+  // Relations
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
 }
 
+// ========================================
+// SKILLS 
+// ========================================
 
+model Skill {
+  @@map("skill")
 
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  // Relations
+  jobSkills JobSkill[]
+}
+
+model JobSkill {
+  @@map("job_skill")
+
+  jobId   Int @map("job_id")
+  skillId Int @map("skill_id")
+
+  // Relations
+  job   Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([jobId, skillId])
+  @@index([skillId])
+}
+
+// ========================================
+// JOB ACTIVITES (Timeline / Activity Log)
+// ========================================
+
+enum ActionType {
+  SYSTEM
+  USER
+}
+
+model JobActivity {
+  @@map("job_activity")
+
+  id          Int        @id @default(autoincrement())
+  label       String
+  description String?    @db.Text
+  type        ActionType
+  statusFrom  JobStatus? @map("status_from")
+  statusTo    JobStatus? @map("status_to")
+  doneAt      DateTime   @map("done_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime?  @updatedAt @map("updated_at")
+
+  // Foreign keys
+  jobId Int @map("job_id")
+
+  // Relations
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([doneAt])
+}
+
+// ========================================
+// TODOS
+// ========================================
+
+enum StatusTodo {
+  TO_MAKE
+  IN_PROGRESS
+  DONE
+  ARCHIVED
+}
+
+model Todo {
+  @@map("todo")
+
+  id        Int        @id @default(autoincrement())
+  label     String
+  status    StatusTodo  @default(TO_MAKE)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime?  @updatedAt @map("updated_at")
+
+  // Foreign keys
+  jobId Int @map("job_id")
+
+  // Relations
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+}
+
+// ========================================
+// NOTES
+// ========================================
+
+model Note {
+  @@map("note")
+
+  id        Int       @id @default(autoincrement())
+  content   String    @db.Text
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  // Foreign keys
+  jobId Int @map("job_id")
+
+  // Relations
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+}
+
+// ========================================
+// EXTERNAL PROVIDER HISTORIC  
+// ========================================
+
+enum ExternalProvider {
+  CHATGPT
+  CLAUDE
+  ADZUNA
+  FRANCE_TRAVAIL
+  APIFY
+}
+
+model ExternalProviderHistoric {
+  @@map("external_provider_historic")
+
+  id            Int              @id @default(autoincrement())
+  provider      ExternalProvider
+  operationPath String           @map("operation_path")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // Foreign keys
+  userId Int @map("user_id")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([provider])
+}
