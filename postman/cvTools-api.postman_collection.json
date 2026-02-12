@@ -25,6 +25,10 @@
 		{
 			"key": "resetToken",
 			"value": ""
+		},
+		{
+			"key": "jobId",
+			"value": ""
 		}
 	],
 	"item": [
@@ -283,6 +287,122 @@
 							]
 						},
 						"description": "Récupérer les tokens après une connexion OAuth (Google/GitHub)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Jobs",
+			"item": [
+				{
+					"name": "Create Job",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Développeur Full Stack\",\n    \"url\": \"https://example.com/job/123\",\n    \"origin\": \"LINKEDIN\",\n    \"publishedAt\": \"2024-01-15T10:00:00.000Z\",\n    \"company\": \"TechCorp\",\n    \"description\": \"Poste de développeur full stack avec NestJS et React\",\n    \"salaryMin\": 45000,\n    \"salaryMax\": 55000,\n    \"status\": \"BOOKMARKED\",\n    \"contractType\": \"CDI\",\n    \"experience\": \"MID\",\n    \"remotePolicy\": \"HYBRID\",\n    \"compatibility\": \"PERFECT\",\n    \"address\": {\n        \"city\": \"Paris\",\n        \"postalCode\": \"75001\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/jobs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"jobs"
+							]
+						},
+						"description": "Créer un nouveau job. Requiert authentification. L'adresse est optionnelle et sera créée si elle n'existe pas."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Jobs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/jobs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"jobs"
+							]
+						},
+						"description": "Récupérer tous les jobs de l'utilisateur connecté."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Job by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/jobs/{{jobId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"jobs",
+								"{{jobId}}"
+							]
+						},
+						"description": "Récupérer un job par son ID. L'utilisateur doit être propriétaire du job."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Job",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"APPLIED\",\n    \"appliedAt\": \"2024-01-20T14:30:00.000Z\",\n    \"description\": \"Description mise à jour\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/jobs/{{jobId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"jobs",
+								"{{jobId}}"
+							]
+						},
+						"description": "Mettre à jour un job. Tous les champs sont optionnels. Pour supprimer l'adresse, envoyer address: null."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Job",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/jobs/{{jobId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"jobs",
+								"{{jobId}}"
+							]
+						},
+						"description": "Supprimer un job. Retourne 204 No Content."
 					},
 					"response": []
 				}

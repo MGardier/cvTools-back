@@ -17,6 +17,7 @@ import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
 import { CacheManagerModule } from './modules/cache/cache-manager.module';
 import { AddressModule } from './modules/address/address.module';
 import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
+import { JobModule } from './modules/job/job.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
     UserTokenModule,
     JwtManagerModule,
     AddressModule,
+    JobModule,
   ],
   controllers: [],
   providers: [
