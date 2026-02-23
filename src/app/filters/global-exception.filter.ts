@@ -135,9 +135,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (!stack) return '';
 
     const lines = stack.split('\n').slice(1, 4);
-    const formattedLines = lines
-      .map((line) => `\n║   ${line.trim()}`)
-      .join('');
+    const formattedLines = lines.map((line) => `\n║   ${line.trim()}`).join('');
 
     return `\n║ Stack      :${formattedLines}`;
   }

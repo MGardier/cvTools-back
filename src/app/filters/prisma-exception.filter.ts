@@ -113,7 +113,7 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     message: string,
   ): IPrismaLogContext {
     const user = request.user as { id?: string } | undefined;
-    const meta = exception.meta as Record<string, unknown> | undefined;
+    const meta = exception.meta;
 
     return {
       method: request.method,

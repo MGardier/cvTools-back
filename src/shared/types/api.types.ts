@@ -30,7 +30,10 @@ export interface IHttpLogContext {
   stack?: string;
 }
 
-export interface IPrismaLogContext extends Omit<IHttpLogContext, 'exceptionName'> {
+export interface IPrismaLogContext extends Omit<
+  IHttpLogContext,
+  'exceptionName'
+> {
   prismaCode: string;
   model?: string;
   target?: string | string[];

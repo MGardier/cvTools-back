@@ -1,4 +1,4 @@
-import { Job, JobStatus, Prisma } from '@prisma/client';
+import { Application, ApplicationStatus, Prisma } from '@prisma/client';
 
 export interface IOptionRepository<TDataSelectedColumns> {
   tx?: Prisma.TransactionClient;
@@ -17,18 +17,18 @@ export interface IFilterOptions<TData> extends IOptionRepository<TData> {
   filters: {
     title?: string;
     company?: string;
-    status?: JobStatus;
+    status?: ApplicationStatus;
   };
 }
 
 export interface IFindAllOptions<TData> extends IOptionRepository<TData> {
   page?: number;
   limit?: number;
-  sort: TSortItem<Job>[];
+  sort: TSortItem<Application>[];
   filters: {
     title?: string;
     company?: string;
-    status?: JobStatus;
+    status?: ApplicationStatus;
   };
 }
 
