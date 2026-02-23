@@ -13,7 +13,9 @@ import {
 export class ApplicationRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  /********* CREATE *********/
+  // =============================================================================
+  //                               CREATE
+  // =============================================================================
 
   async create(
     dto: CreateApplicationRequestDto,
@@ -26,7 +28,9 @@ export class ApplicationRepository {
     return await client.application.create({ data });
   }
 
-  /********* UPDATE *********/
+  // =============================================================================
+  //                               UPDATE
+  // =============================================================================
 
   async update(
     id: number,
@@ -42,7 +46,9 @@ export class ApplicationRepository {
     });
   }
 
-  /********* DELETE *********/
+  // =============================================================================
+  //                               DELETE
+  // =============================================================================
 
   async delete(id: number): Promise<Application> {
     return await this.prismaService.application.delete({
@@ -50,7 +56,9 @@ export class ApplicationRepository {
     });
   }
 
-  /********* FIND *********/
+  // =============================================================================
+  //                               FIND
+  // =============================================================================
 
   async findAll(userId: number): Promise<Application[]> {
     return await this.prismaService.application.findMany({

@@ -13,7 +13,9 @@ export class UpdateApplicationRequestDto extends PartialType(
   @IsOptional()
   @IsBoolean({ message: 'isFavorite doit être un booléen.' })
   isFavorite?: boolean;
-  /********* OPTIONAL NESTED OBJECT *********/
+  // =============================================================================
+  //                        OPTIONAL NESTED OBJECT
+  // =============================================================================
 
   @IsOptional()
   @IsBoolean({ message: 'disconnectAddress doit être un booléen.' })

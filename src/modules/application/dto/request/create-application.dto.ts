@@ -23,7 +23,9 @@ import { AddressInputDto } from 'src/modules/address/dto/request/create-address.
 import { CreateContactRequestDto } from 'src/modules/contact/dto/request/create-contact.dto';
 
 export class CreateApplicationRequestDto {
-  /********* INTEGER FIELDS *********/
+  // =============================================================================
+  //                            INTEGER FIELDS
+  // =============================================================================
 
   @IsNotEmpty({ message: "L'identifiant du jobboard ne peut pas être vide." })
   @IsInt({ message: "L'identifiant du jobboard doit être un nombre entier." })
@@ -40,7 +42,9 @@ export class CreateApplicationRequestDto {
   @IsPositive({ message: 'Le salaire maximum doit être positif.' })
   salaryMax?: number;
 
-  /********* STRING FIELDS *********/
+  // =============================================================================
+  //                            STRING FIELDS
+  // =============================================================================
 
   @IsNotEmpty({ message: 'Le titre ne peut pas être vide.' })
   @IsString({ message: 'Le titre doit être une chaîne de caractères.' })
@@ -64,7 +68,9 @@ export class CreateApplicationRequestDto {
   @IsString({ message: 'La description doit être une chaîne de caractères.' })
   description?: string;
 
-  /********* DATE FIELDS *********/
+  // =============================================================================
+  //                             DATE FIELDS
+  // =============================================================================
 
   @IsOptional()
   @IsDate({ message: 'La date de publication doit être une date valide.' })
@@ -72,7 +78,9 @@ export class CreateApplicationRequestDto {
   publishedAt?: Date;
 
 
-  /********* ENUM FIELDS *********/
+  // =============================================================================
+  //                             ENUM FIELDS
+  // =============================================================================
 
   @IsNotEmpty({ message: 'Le type de contrat ne peut pas être vide.' })
   @IsEnum(ContractType, {
@@ -110,7 +118,9 @@ export class CreateApplicationRequestDto {
   })
   compatibility?: CompatibilityJob;
 
-  /********* OPTIONAL NESTED OBJECT *********/
+  // =============================================================================
+  //                        OPTIONAL NESTED OBJECT
+  // =============================================================================
 
   @IsOptional()
   @ValidateNested()
