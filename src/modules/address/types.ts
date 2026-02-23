@@ -1,9 +1,13 @@
-export interface ICreateAddress {
-  city: string;
-  postalCode: string;
+import { Address, AddressTable } from '@prisma/client';
+
+export type TCreateAddress  = Omit<Address,'id' | 'createdAt'|'updatedAt'>
+
+
+export type TUpdateAddress = Partial<Omit<TCreateAddress,'tableId'| 'tableName'>>
+
+export interface IFindByEntity {
+  tableName: AddressTable;
+  tableId: number;
 }
 
-export interface IFindByUnique {
-  city: string;
-  postalCode: string;
-}
+export type TUpsertAddress = TCreateAddress;

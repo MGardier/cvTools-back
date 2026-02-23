@@ -1,31 +1,73 @@
 import { Injectable } from '@nestjs/common';
-import { Address } from '@prisma/client';
+import { Address, AddressTable, Prisma } from '@prisma/client';
 
 import { AddressRepository } from './address.repository';
-import { ICreateAddress } from './types';
+import { AddressInputDto } from './dto/request/create-address.dto';
 
 @Injectable()
 export class AddressService {
   constructor(private readonly addressRepository: AddressRepository) {}
 
-  /********* FIND OR CREATE *********/
+// =============================================================================
+//                               UPSERT
+// =============================================================================
 
-  async findOrCreate(data: ICreateAddress): Promise<Address> {
-    const normalizedCity = data.city.toLowerCase().trim();
-    const normalizedPostalCode = data.postalCode.trim();
+  async upsert(
+    dto: AddressInputDto,
+    tableName: AddressTable,
+    tableId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Address> {
+    const existing = await this.addressRepository.findByEntity(
+      { tableName, tableId },
+      tx,
+    );
 
-    const existing = await this.addressRepository.findByUnique({
-      city: normalizedCity,
-      postalCode: normalizedPostalCode,
-    });
+    if (existing)
+      return await this.addressRepository.update(
+        existing.id,
+        dto,
+        tx,
+      );
 
-    if (existing) {
-      return existing;
-    }
+    return await this.addressRepository.create(
+      dto,
+      tableName,
+      tableId,
+      tx,
+    );
+  }
 
-    return await this.addressRepository.create({
-      city: normalizedCity,
-      postalCode: normalizedPostalCode,
-    });
+// =============================================================================
+//                               FIND
+// =============================================================================
+
+  async findByEntity(
+    tableName: AddressTable,
+    tableId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Address | null> {
+    return await this.addressRepository.findByEntity(
+      { tableName, tableId },
+      tx,
+    );
+  }
+
+// =============================================================================
+//                               DELETE
+// =============================================================================
+
+  async deleteByEntity(
+    tableName: AddressTable,
+    tableId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<void> {
+    const existing = await this.addressRepository.findByEntity(
+      { tableName, tableId },
+      tx,
+    );
+
+    if (existing)
+      await this.addressRepository.delete(existing.id, tx);
   }
 }

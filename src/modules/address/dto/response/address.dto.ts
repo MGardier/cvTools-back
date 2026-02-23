@@ -9,4 +9,13 @@ export class AddressResponseDto {
 
   @Expose()
   postalCode: string;
+
+  @Expose()
+  street: string | null;
+
+  @Expose()
+  complement: string | null;
+
+  @Expose()
+  streetNumber: string | null;
 }
