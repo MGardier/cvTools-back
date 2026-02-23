@@ -3,14 +3,8 @@ import { z } from 'zod';
 export const envSchema = z.object({
   // HTTP
   PORT: z.coerce.number().optional(),
-  NODE_ENV: z
-    .enum(['dev', 'prod', 'test'])
-    .optional()
-    .default('dev'),
-  LOG_FORMAT: z
-    .enum(['json', 'visual', 'both'])
-    .optional()
-    .default('visual'),
+  NODE_ENV: z.enum(['dev', 'prod', 'test']).optional().default('dev'),
+  LOG_FORMAT: z.enum(['json', 'visual', 'both']).optional().default('visual'),
 
   /* #################### DATABASE ########################### */
 

@@ -61,6 +61,7 @@ model User {
   applications          Application[]
   jobboards             Jobboard[]
   skills                Skill[]
+  contacts              Contact[]
   providerLogs          ProviderLogger[]
   providerUsageRecords  ProviderUsageRecord[]
 
@@ -220,7 +221,6 @@ model Jobboard {
 
 enum AddressTable {
   APPLICATION
-  CONTACT
 }
 
 
@@ -281,7 +281,6 @@ enum RemotePolicy {
 }
 
 enum ApplicationStatus {
-  BOOKMARKED
   NEED_TO_APPLY
   APPLIED
   IN_PROCESS
@@ -320,7 +319,7 @@ model Application {
   updatedAt    DateTime?  @updatedAt @map("updated_at")
 
   // Boolean
-  isArchived   Boolean    @default(false) @map("is_archived")
+  isFavorite   Boolean    @default(false) @map("is_favorite")
 
   // Enum
   apiProvider    ApiProvider?       @map("api_provider")
@@ -328,7 +327,7 @@ model Application {
   experience     ExperienceLevel?
   remotePolicy   RemotePolicy?      @map("remote_policy")
   compatibility  CompatibilityJob?
-  currentStatus  ApplicationStatus  @default(BOOKMARKED) @map("current_status")
+  currentStatus  ApplicationStatus  @default(NEED_TO_APPLY) @map("current_status")
 
   // Decimal
   salaryMin    Decimal?   @map("salary_min")
@@ -342,7 +341,7 @@ model Application {
   // Relations
   user                 User       @relation(fields: [userId], references: [id])
   jobboard             Jobboard   @relation(fields: [jobboardId], references: [id])
-  applicationContacts  ApplicationHasContact[]
+  contacts             Contact[]
   applicationSkills    ApplicationHasSkill[]
   activities           ApplicationHistory[]
   todos                Todo[]
@@ -362,6 +361,7 @@ model Contact {
 
   // Int
   id         Int       @id @default(autoincrement())
+  createdBy  Int       @map("created_by")
 
   // String
   firstname  String    @db.VarChar(100)
@@ -374,27 +374,15 @@ model Contact {
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime? @updatedAt @map("updated_at")
 
-  // Relations
-  applicationContacts ApplicationHasContact[]
-}
-
-// ================================================
-//     APPLICATION_HAS_CONTACT (junction table)
-// ================================================
-
-model ApplicationHasContact {
-  @@map("application_has_contact")
-
   // Foreign keys
-  applicationId Int         @map("application_id")
-  contactId     Int         @map("contact_id")
+  applicationId Int @map("application_id")
 
-  //Relations
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  contact       Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  // Relations
+  user        User        @relation(fields: [createdBy], references: [id])
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
-  @@id([applicationId, contactId])
-  @@index([contactId])
+  @@index([createdBy])
+  @@index([applicationId])
 }
 
 // ================================================
