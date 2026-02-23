@@ -20,6 +20,7 @@ import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
 import { ApplicationModule } from './modules/application/application.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { SkillModule } from './modules/skill/skill.module';
+import { ScraperModule } from './modules/scraper/scraper.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { SkillModule } from './modules/skill/skill.module';
     ApplicationModule,
     ContactModule,
     SkillModule,
+    ScraperModule,
   ],
   controllers: [],
   providers: [
