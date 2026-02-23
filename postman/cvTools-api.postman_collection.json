@@ -27,7 +27,15 @@
 			"value": ""
 		},
 		{
-			"key": "jobId",
+			"key": "applicationId",
+			"value": ""
+		},
+		{
+			"key": "contactId",
+			"value": ""
+		},
+		{
+			"key": "skillId",
 			"value": ""
 		}
 	],
@@ -88,6 +96,30 @@
 							]
 						},
 						"description": "Connexion d'un utilisateur. Retourne accessToken et refreshToken."
+					},
+					"response": []
+				},
+				{
+					"name": "Me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						},
+						"description": "Récupérer les informations de l'utilisateur connecté."
 					},
 					"response": []
 				},
@@ -264,145 +296,428 @@
 					"response": []
 				},
 				{
-					"name": "Get OAuth Session",
+					"name": "Google OAuth",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/auth/oauthSession/:id",
+							"raw": "{{baseUrl}}/auth/google",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"auth",
-								"oauthSession",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "session-id-here",
-									"description": "ID de la session OAuth"
-								}
+								"google"
 							]
 						},
-						"description": "Récupérer les tokens après une connexion OAuth (Google/GitHub)."
+						"description": "Démarrer le flux OAuth Google. Redirige vers la page de connexion Google."
+					},
+					"response": []
+				},
+				{
+					"name": "GitHub OAuth",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/github",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"github"
+							]
+						},
+						"description": "Démarrer le flux OAuth GitHub. Redirige vers la page de connexion GitHub."
 					},
 					"response": []
 				}
 			]
 		},
 		{
-			"name": "Jobs",
+			"name": "Application",
 			"item": [
 				{
-					"name": "Create Job",
+					"name": "Create Application",
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"Développeur Full Stack\",\n    \"url\": \"https://example.com/job/123\",\n    \"origin\": \"LINKEDIN\",\n    \"publishedAt\": \"2024-01-15T10:00:00.000Z\",\n    \"company\": \"TechCorp\",\n    \"description\": \"Poste de développeur full stack avec NestJS et React\",\n    \"salaryMin\": 45000,\n    \"salaryMax\": 55000,\n    \"status\": \"BOOKMARKED\",\n    \"contractType\": \"CDI\",\n    \"experience\": \"MID\",\n    \"remotePolicy\": \"HYBRID\",\n    \"compatibility\": \"PERFECT\",\n    \"address\": {\n        \"city\": \"Paris\",\n        \"postalCode\": \"75001\"\n    }\n}"
+							"raw": "{\n    \"jobboardId\": 1,\n    \"title\": \"Développeur Full Stack\",\n    \"url\": \"https://example.com/job/123\",\n    \"contractType\": \"CDI\",\n    \"company\": \"TechCorp\",\n    \"description\": \"Poste de développeur full stack avec NestJS et React\",\n    \"salaryMin\": 45000,\n    \"salaryMax\": 55000,\n    \"publishedAt\": \"2024-01-15T10:00:00.000Z\",\n    \"currentStatus\": \"BOOKMARKED\",\n    \"experience\": \"MID\",\n    \"remotePolicy\": \"HYBRID\",\n    \"compatibility\": \"PERFECT\",\n    \"address\": {\n        \"city\": \"Paris\",\n        \"postalCode\": \"75001\"\n    },\n    \"skills\": [\"NestJS\", \"React\", \"TypeScript\"],\n    \"contacts\": [\n        {\n            \"firstname\": \"Jean\",\n            \"lastname\": \"Dupont\",\n            \"email\": \"jean.dupont@techcorp.com\",\n            \"profession\": \"Recruteur\"\n        }\n    ]\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/jobs",
+							"raw": "{{baseUrl}}/application",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"jobs"
+								"application"
 							]
 						},
-						"description": "Créer un nouveau job. Requiert authentification. L'adresse est optionnelle et sera créée si elle n'existe pas."
+						"description": "Créer une nouvelle candidature. L'adresse, les skills et les contacts sont optionnels."
 					},
 					"response": []
 				},
 				{
-					"name": "Get All Jobs",
+					"name": "Get All Applications",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
 						"url": {
-							"raw": "{{baseUrl}}/jobs",
+							"raw": "{{baseUrl}}/application",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"jobs"
+								"application"
 							]
 						},
-						"description": "Récupérer tous les jobs de l'utilisateur connecté."
+						"description": "Récupérer toutes les candidatures de l'utilisateur connecté."
 					},
 					"response": []
 				},
 				{
-					"name": "Get Job by ID",
+					"name": "Get Application by ID",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
 						"url": {
-							"raw": "{{baseUrl}}/jobs/{{jobId}}",
+							"raw": "{{baseUrl}}/application/{{applicationId}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"jobs",
-								"{{jobId}}"
+								"application",
+								"{{applicationId}}"
 							]
 						},
-						"description": "Récupérer un job par son ID. L'utilisateur doit être propriétaire du job."
+						"description": "Récupérer une candidature par son ID. L'utilisateur doit être propriétaire."
 					},
 					"response": []
 				},
 				{
-					"name": "Update Job",
+					"name": "Update Application",
 					"request": {
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"status\": \"APPLIED\",\n    \"appliedAt\": \"2024-01-20T14:30:00.000Z\",\n    \"description\": \"Description mise à jour\"\n}"
+							"raw": "{\n    \"currentStatus\": \"APPLIED\",\n    \"appliedAt\": \"2024-01-20T14:30:00.000Z\",\n    \"isFavorite\": true,\n    \"description\": \"Description mise à jour\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/jobs/{{jobId}}",
+							"raw": "{{baseUrl}}/application/{{applicationId}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"jobs",
-								"{{jobId}}"
+								"application",
+								"{{applicationId}}"
 							]
 						},
-						"description": "Mettre à jour un job. Tous les champs sont optionnels. Pour supprimer l'adresse, envoyer address: null."
+						"description": "Mettre à jour une candidature. Tous les champs sont optionnels. Pour supprimer l'adresse, envoyer disconnectAddress: true."
 					},
 					"response": []
 				},
 				{
-					"name": "Delete Job",
+					"name": "Delete Application",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
 						"url": {
-							"raw": "{{baseUrl}}/jobs/{{jobId}}",
+							"raw": "{{baseUrl}}/application/{{applicationId}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"jobs",
-								"{{jobId}}"
+								"application",
+								"{{applicationId}}"
 							]
 						},
-						"description": "Supprimer un job. Retourne 204 No Content."
+						"description": "Supprimer une candidature. Retourne 204 No Content."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Contact",
+			"item": [
+				{
+					"name": "Get Contacts by Application",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/contact/application/{{applicationId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contact",
+								"application",
+								"{{applicationId}}"
+							]
+						},
+						"description": "Récupérer tous les contacts liés à une candidature."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Contact by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/contact/{{contactId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contact",
+								"{{contactId}}"
+							]
+						},
+						"description": "Récupérer un contact par son ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Contact",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstname\": \"Jean-Pierre\",\n    \"phone\": \"+33 6 12 34 56 78\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/contact/{{contactId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contact",
+								"{{contactId}}"
+							]
+						},
+						"description": "Mettre à jour un contact. Tous les champs sont optionnels (firstname, lastname, email, phone, profession)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Contact",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/contact/{{contactId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contact",
+								"{{contactId}}"
+							]
+						},
+						"description": "Supprimer un contact. Retourne 204 No Content."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Skill",
+			"item": [
+				{
+					"name": "Create Skill",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"NestJS\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/skill",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"skill"
+							]
+						},
+						"description": "Créer une nouvelle compétence."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Skills",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/skill",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"skill"
+							]
+						},
+						"description": "Récupérer toutes les compétences."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Skill by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/skill/{{skillId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"skill",
+								"{{skillId}}"
+							]
+						},
+						"description": "Récupérer une compétence par son ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Skill",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"React\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/skill/{{skillId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"skill",
+								"{{skillId}}"
+							]
+						},
+						"description": "Mettre à jour le libellé d'une compétence."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Skill",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/skill/{{skillId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"skill",
+								"{{skillId}}"
+							]
+						},
+						"description": "Supprimer une compétence. Retourne 204 No Content."
 					},
 					"response": []
 				}
