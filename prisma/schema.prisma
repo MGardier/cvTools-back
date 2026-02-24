@@ -112,8 +112,8 @@ model UserToken {
 // ================================================
 
 enum ExternalProvider {
-  CHATGPT
   CLAUDE
+  GEMINI
   ADZUNA
   FRANCE_TRAVAIL
   APIFY

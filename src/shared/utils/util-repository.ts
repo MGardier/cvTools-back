@@ -39,17 +39,18 @@ export abstract class UtilRepository {
 //                               APPLICATION
 // =============================================================================
 
+
+
 export function mapApplicationDtoToCreateData(
   dto: CreateApplicationRequestDto,
-  userId: number,
 ): ICreateApplication {
   const { address, skills, contacts, ...data } = dto;
-  return { ...data, userId };
+  return { ...data };
 }
 
 export function mapApplicationDtoToUpdateData(
   dto: UpdateApplicationRequestDto,
-): IUpdateApplication {
+): any {
   const { address, skills, contacts, disconnectAddress, ...data } = dto;
   return { ...data };
 }

@@ -1,10 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { IFetchResult, IFetcher } from './types';
 
 @Injectable()
 export class JinaReaderFetcher implements IFetcher {
   private readonly logger = new Logger(JinaReaderFetcher.name);
-  private readonly JINA_BASE_URL = 'https://r.jina.ai/';
+
+  constructor(private readonly configService: ConfigService) {}
 
   // =============================================================================
   //                               FETCH
@@ -13,7 +15,8 @@ export class JinaReaderFetcher implements IFetcher {
 
   async fetch(url: string): Promise<IFetchResult> {
     try {
-      const response = await fetch(`${this.JINA_BASE_URL}${url}`, {
+      const baseUrl = this.configService.get<string>('JINA_READER_BASE_URL');
+      const response = await fetch(`${baseUrl}${url}`, {
         headers: {
           Accept: 'application/json',
         },

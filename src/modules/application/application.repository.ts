@@ -13,6 +13,9 @@ import {
 export class ApplicationRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
+//TODO: mapper le typage avec Prisma + mappage dans le service 
+
+
   // =============================================================================
   //                               CREATE
   // =============================================================================
@@ -23,10 +26,24 @@ export class ApplicationRepository {
     tx?: Prisma.TransactionClient,
   ): Promise<Application> {
     const client = tx ?? this.prismaService;
-    const data = mapApplicationDtoToCreateData(dto, userId);
 
-    return await client.application.create({ data });
+    const data = mapApplicationDtoToCreateData(dto);
+
+    return await client.application.create({ data :{ ...data, userId
+
+    } });
   }
+
+  //   async create2(
+  //   dto: any,
+  //   tx?: Prisma.TransactionClient,
+  // ): Promise<Application> {
+  //   const client = tx ?? this.prismaService;
+
+  //   const data = mapApplicationDtoToCreateData(dto);
+
+  //   return await client.application.create({ data : dto });
+  // }
 
   // =============================================================================
   //                               UPDATE

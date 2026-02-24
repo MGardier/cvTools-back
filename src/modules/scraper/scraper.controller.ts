@@ -1,7 +1,9 @@
-import { Controller, Post, Body, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, Req } from '@nestjs/common';
 import { ScraperService } from './scraper.service';
 import { ExtractUrlRequestDto } from './dto/request/extract-url.dto';
 import { SkipSerialize } from 'src/shared/decorators/serialize.decorator';
+import { IAuthenticatedRequest } from 'src/shared/types/request.types';
+import { TExtractedApplication } from '../llm/types';
 
 @Controller('scraper')
 export class ScraperController {
@@ -11,11 +13,12 @@ export class ScraperController {
   //                               EXTRACT
   // =============================================================================
 
-
   @Post('offer/extract')
   @SkipSerialize()
-  @HttpCode(204)
-  async extract(@Body() dto: ExtractUrlRequestDto): Promise<void> {
-    await this.scraperService.extract(dto.url);
+  async extract(
+    @Req() req: IAuthenticatedRequest,
+    @Body() dto: ExtractUrlRequestDto,
+  ): Promise<TExtractedApplication> {
+    return await this.scraperService.extract(dto.url, req.user.sub);
   }
 }
