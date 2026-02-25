@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback } from 'passport-github2';
+import { Strategy, StrategyOptions } from 'passport-github2';
+import { VerifyCallback } from 'passport-oauth2';
 import { User } from '@prisma/client';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { AuthService } from 'src/modules/auth/auth.service';
@@ -14,12 +15,12 @@ export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
     private authService: AuthService,
   ) {
     super({
-      clientID: configService.get<string>('GITHUB_CLIENT_ID'),
-      clientSecret: configService.get<string>('GITHUB_CLIENT_SECRET'),
-      callbackURL: configService.get<string>('GITHUB_CALLBACK_URL'),
+      clientID: configService.get<string>('GITHUB_CLIENT_ID')!,
+      clientSecret: configService.get<string>('GITHUB_CLIENT_SECRET')!,
+      callbackURL: configService.get<string>('GITHUB_CALLBACK_URL')!,
       scope: ['user:email'],
       state: true,
-    });
+    } as StrategyOptions & { state: boolean });
   }
 
   async validate(

@@ -1,5 +1,5 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback } from 'passport-google-oauth20';
+import { Strategy, StrategyOptionsWithRequest, VerifyCallback } from 'passport-google-oauth20';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
@@ -15,15 +15,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     private authService: AuthService,
   ) {
     super({
-      clientID: configService.get('GOOGLE_CLIENT_ID'),
-      clientSecret: configService.get('GOOGLE_CLIENT_SECRET'),
-      callbackURL: configService.get('GOOGLE_CALLBACK_URL'),
+      clientID: configService.get<string>('GOOGLE_CLIENT_ID')!,
+      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET')!,
+      callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL')!,
       scope: ['openid', 'email', 'profile'],
       passReqToCallback: true,
       prompt: 'select_account',
       accessType: 'offline',
       state: true,
-    });
+    } as StrategyOptionsWithRequest & { state: boolean });
   }
 
   async validate(

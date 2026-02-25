@@ -26,12 +26,14 @@ export abstract class UtilRepository {
   }
 
   static toPrismaTokenType(tokenType: TokenType): PrismaTokenType {
-    const mapping = {
+    const mapping: Partial<Record<TokenType, PrismaTokenType>> = {
       [TokenType.REFRESH]: PrismaTokenType.REFRESH,
       [TokenType.FORGOT_PASSWORD]: PrismaTokenType.FORGOT_PASSWORD,
       [TokenType.CONFIRM_ACCOUNT]: PrismaTokenType.CONFIRM_ACCOUNT,
     };
-    return mapping[tokenType];
+    const result = mapping[tokenType];
+    if (!result) throw new Error(`No Prisma mapping for token type: ${tokenType}`);
+    return result;
   }
 }
 
@@ -50,7 +52,7 @@ export function mapApplicationDtoToCreateData(
 
 export function mapApplicationDtoToUpdateData(
   dto: UpdateApplicationRequestDto,
-): any {
+): Partial<IUpdateApplication> {
   const { address, skills, contacts, disconnectAddress, ...data } = dto;
   return { ...data };
 }
