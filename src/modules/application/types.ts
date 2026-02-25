@@ -7,6 +7,7 @@ import {
   ExperienceLevel,
   RemotePolicy,
   CompatibilityJob,
+  Jobboard,
 } from '@prisma/client';
 
 export type TApplicationWithAddress = Application & { address: Address | null };
@@ -14,7 +15,7 @@ export type TApplicationWithAddress = Application & { address: Address | null };
 export interface ICreateApplication {
   title: string;
   url: string;
-  jobboardId: number;
+  jobboard: Jobboard;
   contractType: ContractType;
   publishedAt?: Date;
   salaryMin?: number;

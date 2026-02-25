@@ -16,6 +16,7 @@ import {
   ApiProvider,
   ContractType,
   ExperienceLevel,
+  Jobboard,
   RemotePolicy,
   CompatibilityJob,
 } from '@prisma/client';
@@ -26,11 +27,6 @@ export class CreateApplicationRequestDto {
   // =============================================================================
   //                            INTEGER FIELDS
   // =============================================================================
-
-  @IsNotEmpty({ message: "L'identifiant du jobboard ne peut pas être vide." })
-  @IsInt({ message: "L'identifiant du jobboard doit être un nombre entier." })
-  @IsPositive({ message: "L'identifiant du jobboard doit être positif." })
-  jobboardId: number;
 
   @IsOptional()
   @IsInt({ message: 'Le salaire minimum doit être un nombre entier.' })
@@ -81,6 +77,12 @@ export class CreateApplicationRequestDto {
   // =============================================================================
   //                             ENUM FIELDS
   // =============================================================================
+
+  @IsNotEmpty({ message: 'Le jobboard ne peut pas être vide.' })
+  @IsEnum(Jobboard, {
+    message: 'Le jobboard doit être une valeur valide.',
+  })
+  jobboard: Jobboard;
 
   @IsNotEmpty({ message: 'Le type de contrat ne peut pas être vide.' })
   @IsEnum(ContractType, {

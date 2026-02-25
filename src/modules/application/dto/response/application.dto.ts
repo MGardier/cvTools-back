@@ -4,6 +4,7 @@ import {
   ApiProvider,
   ContractType,
   ExperienceLevel,
+  Jobboard,
   RemotePolicy,
   CompatibilityJob,
 } from '@prisma/client';
@@ -31,7 +32,7 @@ export class ApplicationResponseDto {
   contractType: ContractType;
 
   @Expose()
-  jobboardId: number;
+  jobboard: Jobboard;
 
   @Expose()
   isFavorite: boolean;
