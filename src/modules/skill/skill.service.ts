@@ -26,7 +26,7 @@ export class SkillService {
   // =============================================================================
 
   async create(dto: CreateSkillRequestDto, userId: number): Promise<Skill> {
-    return await this.skillRepository.create(dto.label, userId);
+    return await this.skillRepository.create(this.__mapCreateData(dto.label, userId));
   }
 
   // =============================================================================
@@ -34,20 +34,17 @@ export class SkillService {
   // =============================================================================
 
   async findOrCreate(label: string, userId: number, tx?: Prisma.TransactionClient): Promise<Skill> {
-
     const existing = await this.skillRepository.findByLabel(label, tx);
     if (existing)
       return existing;
 
-    return await this.skillRepository.create(label, userId, tx);
+    return await this.skillRepository.create(this.__mapCreateData(label, userId), tx);
   }
 
   async findOrCreateMany(labels: string[], userId: number, tx?: Prisma.TransactionClient): Promise<Skill[]> {
-
     return await Promise.all(
       labels.map(async (label) => await this.findOrCreate(label, userId, tx)),
     );
-
   }
 
   // =============================================================================
@@ -58,9 +55,8 @@ export class SkillService {
     const skill = await this.__findOneAndCheckOwnership(id, userId);
     await this.__ensureSkillIsNotLinked(skill.id);
 
-    return await this.skillRepository.update(skill.id, dto);
+    return await this.skillRepository.update(skill.id, { label: dto.label });
   }
-
 
   // =============================================================================
   //                            DELETE
@@ -73,7 +69,6 @@ export class SkillService {
     await this.skillRepository.delete(skill.id);
   }
 
-
   // =============================================================================
   //                            FIND
   // =============================================================================
@@ -82,12 +77,11 @@ export class SkillService {
     return await this.skillRepository.findAll();
   }
 
-  async findOneById
-    (id: number): Promise<Skill> {
+  async findOneById(id: number): Promise<Skill> {
     const skill = await this.skillRepository.findOneById(id);
-    if (!skill) {
+    if (!skill)
       throw new NotFoundException(ErrorCodeEnum.SKILL_NOT_FOUND_ERROR);
-    }
+
     return skill;
   }
 
@@ -99,7 +93,6 @@ export class SkillService {
 
     return await this.skillRepository.findAllByApplicationId(applicationId);
   }
-
 
   // =============================================================================
   //                  APPLICATION-SKILL (RELATION LINK)
@@ -142,6 +135,13 @@ export class SkillService {
   // =============================================================================
   //                               PRIVATE
   // =============================================================================
+
+  private __mapCreateData(
+    label: string,
+    userId: number,
+  ): Prisma.SkillUncheckedCreateInput {
+    return { label, createdBy: userId };
+  }
 
   private async __findOneAndCheckOwnership(
     id: number,

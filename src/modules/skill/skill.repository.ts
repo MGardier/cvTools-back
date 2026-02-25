@@ -2,9 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ApplicationHasSkill, Prisma, Skill } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
 
-import { TUpdateSkill } from './types';
-import { mapSkillDtoToCreateData } from 'src/shared/utils/util-repository';
-
 @Injectable()
 export class SkillRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -13,9 +10,8 @@ export class SkillRepository {
   //                                 CREATE
   // =============================================================================
 
-  async create(label: string, userId: number, tx?: Prisma.TransactionClient): Promise<Skill> {
+  async create(data: Prisma.SkillUncheckedCreateInput, tx?: Prisma.TransactionClient): Promise<Skill> {
     const client = tx ?? this.prismaService;
-    const data = mapSkillDtoToCreateData(label, userId);
 
     return await client.skill.create({ data });
   }
@@ -23,7 +19,8 @@ export class SkillRepository {
   // =============================================================================
   //                               UPDATE
   // =============================================================================
-  async update(id: number, data: TUpdateSkill): Promise<Skill> {
+
+  async update(id: number, data: Prisma.SkillUncheckedUpdateInput): Promise<Skill> {
     return await this.prismaService.skill.update({
       where: { id },
       data,
@@ -33,6 +30,7 @@ export class SkillRepository {
   // =============================================================================
   //                               DELETE
   // =============================================================================
+
   async delete(id: number): Promise<Skill> {
     return await this.prismaService.skill.delete({
       where: { id },

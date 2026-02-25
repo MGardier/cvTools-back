@@ -33,7 +33,7 @@ export class ContactService {
     if (!dto.applicationId)
       throw new BadRequestException('L\'identifiant de la candidature est requis.');
 
-    return await this.contactRepository.create(dto, userId, tx);
+    return await this.contactRepository.create(this.__mapCreateDto(dto, userId), tx);
   }
 
   async createMany(
@@ -42,12 +42,11 @@ export class ContactService {
     applicationId: number,
     tx?: Prisma.TransactionClient,
   ): Promise<void> {
-    await this.contactRepository.createMany(dtos, userId, applicationId, tx);
+    const data = dtos.map((dto) => this.__mapCreateDto({ ...dto, applicationId }, userId));
+
+    await this.contactRepository.createMany(data, tx);
   }
 
-
-
-  
   // =============================================================================
   //                               UPDATE
   // =============================================================================
@@ -59,7 +58,7 @@ export class ContactService {
   ): Promise<Contact> {
     const contact = await this.__findOneAndCheckOwnership(id, userId);
 
-    return await this.contactRepository.update(contact.id, dto);
+    return await this.contactRepository.update(contact.id, this.__mapUpdateDto(dto));
   }
 
   // =============================================================================
@@ -98,6 +97,33 @@ export class ContactService {
   // =============================================================================
   //                               PRIVATE
   // =============================================================================
+
+  private __mapCreateDto(
+    dto: CreateContactRequestDto,
+    userId: number,
+  ): Prisma.ContactUncheckedCreateInput {
+    return {
+      firstname: dto.firstname,
+      lastname: dto.lastname,
+      email: dto.email,
+      phone: dto.phone,
+      profession: dto.profession,
+      createdBy: userId,
+      applicationId: dto.applicationId!,
+    };
+  }
+
+  private __mapUpdateDto(
+    dto: UpdateContactRequestDto,
+  ): Prisma.ContactUncheckedUpdateInput {
+    return {
+      firstname: dto.firstname,
+      lastname: dto.lastname,
+      email: dto.email,
+      phone: dto.phone,
+      profession: dto.profession,
+    };
+  }
 
   private async __findOneAndCheckOwnership(
     id: number,

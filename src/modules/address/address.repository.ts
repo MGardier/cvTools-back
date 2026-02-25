@@ -1,13 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Address, AddressTable, Prisma } from '@prisma/client';
+import { Address, Prisma } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
 
-import { AddressInputDto } from './dto/request/create-address.dto';
 import { IFindByEntity } from './types';
-import {
-  mapAddressDtoToCreateData,
-  mapAddressDtoToUpdateData,
-} from 'src/shared/utils/util-repository';
 
 @Injectable()
 export class AddressRepository {
@@ -18,13 +13,10 @@ export class AddressRepository {
   // =============================================================================
 
   async create(
-    dto: AddressInputDto,
-    tableName: AddressTable,
-    tableId: number,
+    data: Prisma.AddressUncheckedCreateInput,
     tx?: Prisma.TransactionClient,
   ): Promise<Address> {
     const client = tx ?? this.prismaService;
-    const data = mapAddressDtoToCreateData(dto, tableName, tableId);
 
     return await client.address.create({ data });
   }
@@ -35,11 +27,10 @@ export class AddressRepository {
 
   async update(
     id: number,
-    dto: AddressInputDto,
+    data: Prisma.AddressUncheckedUpdateInput,
     tx?: Prisma.TransactionClient,
   ): Promise<Address> {
     const client = tx ?? this.prismaService;
-    const data = mapAddressDtoToUpdateData(dto);
 
     return await client.address.update({
       where: { id },
