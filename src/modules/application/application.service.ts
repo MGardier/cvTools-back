@@ -27,7 +27,7 @@ export class ApplicationService {
     @Inject(forwardRef(() => ContactService))
     private readonly contactService: ContactService,
     private readonly prismaService: PrismaService,
-  ) {}
+  ) { }
 
   // =============================================================================
   //                               CREATE
@@ -38,30 +38,18 @@ export class ApplicationService {
     dto: CreateApplicationRequestDto,
   ): Promise<TApplicationWithAddress> {
     return this.prismaService.$transaction(async (tx) => {
-      let address: Address | null = null;
+      const data = this.__mapCreateDto(dto, userId);
+      const application = await this.applicationRepository.create(data, tx);
 
-      //Application
-      const application = await this.applicationRepository.create(dto, userId, tx);
+      const address = dto.address
+        ? await this.addressService.upsert(dto.address, AddressOwnerEnum.APPLICATION, application.id, tx)
+        : null;
 
-      //Address
-      if (dto.address) 
-        address = await this.addressService.upsert(
-          dto.address,
-          AddressOwnerEnum.APPLICATION,
-          application.id,
-          tx,
-        );
-      
-
-      //Skills
       if (dto.skills)
         await this.skillService.syncForApplication(dto.skills, application.id, userId, tx);
-      
 
-      //Contacts
       if (dto.contacts)
         await this.contactService.createMany(userId, dto.contacts, application.id, tx);
-    
 
       return { ...application, address };
     });
@@ -76,28 +64,20 @@ export class ApplicationService {
     userId: number,
     dto: UpdateApplicationRequestDto,
   ): Promise<TApplicationWithAddress> {
-    const existingApplication = await this.applicationRepository.findOneById(
-      id,
-      userId,
-    );
-
-    if (!existingApplication) 
-      throw new NotFoundException(ErrorCodeEnum.APPLICATION_NOT_FOUND_ERROR);
-    
     return this.prismaService.$transaction(async (tx) => {
+      const existing = await this.applicationRepository.findOneByIdAndByUserId(id, userId, tx);
+      if (!existing)
+        throw new NotFoundException(ErrorCodeEnum.APPLICATION_NOT_FOUND_ERROR);
 
-      const application = await this.applicationRepository.update(id, dto, tx);
+      const data = this.__mapUpdateDto(dto);
+      const application = await this.applicationRepository.update(id, data, tx);
 
-      //Address
       const address = await this.__resolveAddress(dto, id, tx);
 
-      //Skills
       if (dto.skills) {
         await this.skillService.unlinkAllFromApplication(id, tx);
         await this.skillService.syncForApplication(dto.skills, id, userId, tx);
       }
-
-      //Contact
 
       return { ...application, address };
     });
@@ -108,11 +88,8 @@ export class ApplicationService {
   // =============================================================================
 
   async delete(id: number, userId: number): Promise<void> {
-    const existingApplication = await this.applicationRepository.findOneById(
-      id,
-      userId,
-    );
-    if (!existingApplication)
+    const existing = await this.applicationRepository.findOneByIdAndByUserId(id, userId);
+    if (!existing)
       throw new NotFoundException(ErrorCodeEnum.APPLICATION_NOT_FOUND_ERROR);
 
     await this.addressService.deleteByEntity(AddressOwnerEnum.APPLICATION, id);
@@ -124,7 +101,7 @@ export class ApplicationService {
   // =============================================================================
 
   async findAll(userId: number): Promise<TApplicationWithAddress[]> {
-    const applications = await this.applicationRepository.findAll(userId);
+    const applications = await this.applicationRepository.findAllByUserId(userId);
 
     return Promise.all(
       applications.map(async (app) => {
@@ -135,13 +112,9 @@ export class ApplicationService {
   }
 
   async findOne(id: number, userId: number): Promise<TApplicationWithAddress> {
-    const application = await this.applicationRepository.findOneById(
-      id,
-      userId,
-    );
-    if (!application) 
+    const application = await this.applicationRepository.findOneByIdAndByUserId(id, userId);
+    if (!application)
       throw new NotFoundException(ErrorCodeEnum.APPLICATION_NOT_FOUND_ERROR);
-    
 
     const address = await this.addressService.findByEntity(AddressOwnerEnum.APPLICATION, id);
 
@@ -151,6 +124,21 @@ export class ApplicationService {
   // =============================================================================
   //                               PRIVATE
   // =============================================================================
+
+  private __mapCreateDto(
+    dto: CreateApplicationRequestDto,
+    userId: number,
+  ): Prisma.ApplicationUncheckedCreateInput {
+    const { address, skills, contacts, ...data } = dto;
+    return { ...data, userId };
+  }
+
+  private __mapUpdateDto(
+    dto: UpdateApplicationRequestDto,
+  ): Prisma.ApplicationUncheckedUpdateInput {
+    const { address, skills, contacts, disconnectAddress, ...data } = dto;
+    return { ...data };
+  }
 
   private async __resolveAddress(
     dto: UpdateApplicationRequestDto,

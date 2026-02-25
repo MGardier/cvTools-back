@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Delete,
   Body,
@@ -11,6 +12,7 @@ import {
 } from '@nestjs/common';
 
 import { ContactService } from './contact.service';
+import { CreateContactRequestDto } from './dto/request/create-contact.dto';
 import { UpdateContactRequestDto } from './dto/request/update-contact.dto';
 import { ContactResponseDto } from './dto/response/contact.dto';
 import {
@@ -23,6 +25,18 @@ import { IAuthenticatedRequest } from 'src/shared/types/request.types';
 export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
+  // =============================================================================
+  //                               CREATE
+  // =============================================================================
+
+  @Post()
+  @SerializeWith(ContactResponseDto)
+  async create(
+    @Req() req: IAuthenticatedRequest,
+    @Body() dto: CreateContactRequestDto,
+  ): Promise<ContactResponseDto> {
+    return await this.contactService.create(req.user.sub, dto);
+  }
 
   // =============================================================================
   //                               UPDATE

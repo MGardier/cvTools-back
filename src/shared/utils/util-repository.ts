@@ -2,9 +2,6 @@ import { Prisma, PrismaTokenType, AddressTable } from '@prisma/client';
 import { TSortItem } from 'src/shared/types/repository.types';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 
-import { CreateApplicationRequestDto } from 'src/modules/application/dto/request/create-application.dto';
-import { UpdateApplicationRequestDto } from 'src/modules/application/dto/request/update-application.dto';
-import { ICreateApplication, IUpdateApplication } from 'src/modules/application/types';
 import { AddressInputDto } from 'src/modules/address/dto/request/create-address.dto';
 import { TCreateAddress, TUpdateAddress } from 'src/modules/address/types';
 import { CreateContactRequestDto } from 'src/modules/contact/dto/request/create-contact.dto';
@@ -35,26 +32,6 @@ export abstract class UtilRepository {
     if (!result) throw new Error(`No Prisma mapping for token type: ${tokenType}`);
     return result;
   }
-}
-
-// =============================================================================
-//                               APPLICATION
-// =============================================================================
-
-
-
-export function mapApplicationDtoToCreateData(
-  dto: CreateApplicationRequestDto,
-): ICreateApplication {
-  const { address, skills, contacts, ...data } = dto;
-  return { ...data };
-}
-
-export function mapApplicationDtoToUpdateData(
-  dto: UpdateApplicationRequestDto,
-): Partial<IUpdateApplication> {
-  const { address, skills, contacts, disconnectAddress, ...data } = dto;
-  return { ...data };
 }
 
 // =============================================================================

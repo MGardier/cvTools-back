@@ -29,7 +29,6 @@ export class SkillController {
   //                               CREATE
   // =============================================================================
 
-
   @Post()
   @SerializeWith(SkillResponseDto)
   async create(
@@ -42,7 +41,6 @@ export class SkillController {
   // =============================================================================
   //                               UPDATE
   // =============================================================================
-
 
   @Patch(':id')
   @SerializeWith(SkillResponseDto)
@@ -58,7 +56,6 @@ export class SkillController {
   //                               DELETE
   // =============================================================================
 
-
   @Delete(':id')
   @HttpCode(204)
   @SkipSerialize()
@@ -73,22 +70,51 @@ export class SkillController {
   //                               FIND
   // =============================================================================
 
-
   @Get()
   @SerializeWith(SkillResponseDto)
   async findAll(): Promise<SkillResponseDto[]> {
     return await this.skillService.findAll();
   }
 
+  @Get('application/:applicationId')
+  @SerializeWith(SkillResponseDto)
+  async findAllByApplicationId(
+    @Req() req: IAuthenticatedRequest,
+    @Param('applicationId', ParseIntPipe) applicationId: number,
+  ): Promise<SkillResponseDto[]> {
+    return await this.skillService.findAllByApplicationId(applicationId, req.user.sub);
+  }
 
   @Get(':id')
   @SerializeWith(SkillResponseDto)
   async findOneById(
     @Param('id', ParseIntPipe) id: number,
-  //): Promise<SkillResponseDto> {
-  ): Promise<void> {
-    //return await this.skillService.findOneById(id);
+  ): Promise<SkillResponseDto> {
+    return await this.skillService.findOneById(id);
   }
 
+  // =============================================================================
+  //                        APPLICATION-SKILL (LINK)
+  // =============================================================================
 
+  @Post('application/:applicationId/:skillId')
+  @HttpCode(201)
+  @SkipSerialize()
+  async linkToApplication(
+    @Param('applicationId', ParseIntPipe) applicationId: number,
+    @Param('skillId', ParseIntPipe) skillId: number,
+  ): Promise<void> {
+    await this.skillService.linkToApplicationDirect(applicationId, skillId);
+  }
+
+  @Delete('application/:applicationId/:skillId')
+  @HttpCode(204)
+  @SkipSerialize()
+  async unlinkFromApplication(
+    @Req() req: IAuthenticatedRequest,
+    @Param('applicationId', ParseIntPipe) applicationId: number,
+    @Param('skillId', ParseIntPipe) skillId: number,
+  ): Promise<void> {
+    await this.skillService.unlinkFromApplication(applicationId, skillId, req.user.sub);
+  }
 }
