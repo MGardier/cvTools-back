@@ -317,8 +317,8 @@ model Application {
   currentStatus  ApplicationStatus  @default(TO_APPLY) @map("current_status")
 
   // Decimal
-  salaryMin    Decimal?   @map("salary_min")
-  salaryMax    Decimal?   @map("salary_max")
+  salaryMin    Int?   @map("salary_min")
+  salaryMax    Int?   @map("salary_max")
 
   // Foreign keys
   userId       Int        @map("user_id")

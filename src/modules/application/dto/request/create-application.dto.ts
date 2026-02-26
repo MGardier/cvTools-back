@@ -94,11 +94,11 @@ export class CreateApplicationRequestDto {
   })
   contractType: ContractType;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsEnum(ApplicationStatus, {
     message: 'Le statut doit être une valeur valide.',
   })
-  currentStatus?: ApplicationStatus;
+  currentStatus: ApplicationStatus;
 
   @IsOptional()
   @IsEnum(ApiProvider, {

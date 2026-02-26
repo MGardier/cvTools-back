@@ -9,7 +9,6 @@ import {
   CompatibilityJob,
 } from '@prisma/client';
 
-import { Decimal } from '@prisma/client/runtime/library';
 import { AddressResponseDto } from 'src/modules/address/dto/response/address.dto';
 
 export class ApplicationResponseDto {
@@ -50,12 +49,10 @@ export class ApplicationResponseDto {
   updatedAt: Date | null;
 
   @Expose()
-  @Transform(({ value }) => (value != null ? Number(value) : null))
-  salaryMin: Decimal | null;
+  salaryMin: number | null;
 
   @Expose()
-  @Transform(({ value }) => (value != null ? Number(value) : null))
-  salaryMax: Decimal | null;
+  salaryMax: number | null;
 
   @Expose()
   apiOfferId: string | null;
