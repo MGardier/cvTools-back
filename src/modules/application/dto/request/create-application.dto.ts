@@ -9,6 +9,7 @@ import {
   IsArray,
   ValidateNested,
   IsDate,
+  MaxLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
@@ -44,6 +45,7 @@ export class CreateApplicationRequestDto {
 
   @IsNotEmpty({ message: 'Le titre ne peut pas être vide.' })
   @IsString({ message: 'Le titre doit être une chaîne de caractères.' })
+  @MaxLength(100, { message: 'Le titre ne peut pas dépasser 100 caractères.' })
   title: string;
 
   @IsNotEmpty({ message: "L'URL ne peut pas être vide." })
@@ -52,12 +54,14 @@ export class CreateApplicationRequestDto {
 
   @IsOptional()
   @IsString({ message: "L'entreprise doit être une chaîne de caractères." })
+  @MaxLength(100, { message: "L'entreprise ne peut pas dépasser 100 caractères." })
   company?: string;
 
   @IsOptional()
   @IsString({
     message: "L'identifiant de l'offre API doit être une chaîne de caractères.",
   })
+  @MaxLength(150, { message: "L'identifiant de l'offre API ne peut pas dépasser 150 caractères." })
   apiOfferId?: string;
 
   @IsOptional()
@@ -134,6 +138,10 @@ export class CreateApplicationRequestDto {
   @IsString({
     each: true,
     message: 'Chaque compétence doit être une chaîne de caractères.',
+  })
+  @MaxLength(100, {
+    each: true,
+    message: 'Chaque compétence ne peut pas dépasser 100 caractères.',
   })
   skills?: string[];
 

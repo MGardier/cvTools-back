@@ -265,10 +265,12 @@ enum RemotePolicy {
 }
 
 enum ApplicationStatus {
-  NEED_TO_APPLY
+  TO_APPLY
   APPLIED
-  IN_PROCESS
-  COMPANY_OFFER_RECEIVED
+  FIRST_CONTACT
+  FIRST_INTERVIEW
+  FOLLOW_UP_INTERVIEW
+  OFFER_RECEIVED
   ACCEPTED
   REJECTED
   GHOSTED
@@ -312,7 +314,7 @@ model Application {
   experience     ExperienceLevel?
   remotePolicy   RemotePolicy?      @map("remote_policy")
   compatibility  CompatibilityJob?
-  currentStatus  ApplicationStatus  @default(NEED_TO_APPLY) @map("current_status")
+  currentStatus  ApplicationStatus  @default(TO_APPLY) @map("current_status")
 
   // Decimal
   salaryMin    Decimal?   @map("salary_min")
