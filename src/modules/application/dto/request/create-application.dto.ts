@@ -22,22 +22,9 @@ import {
   CompatibilityJob,
 } from '@prisma/client';
 import { AddressInputDto } from 'src/modules/address/dto/request/create-address.dto';
-import { CreateContactRequestDto } from 'src/modules/contact/dto/request/create-contact.dto';
 
 export class CreateApplicationRequestDto {
-  // =============================================================================
-  //                            INTEGER FIELDS
-  // =============================================================================
 
-  @IsOptional()
-  @IsInt({ message: 'Le salaire minimum doit être un nombre entier.' })
-  @IsPositive({ message: 'Le salaire minimum doit être positif.' })
-  salaryMin?: number;
-
-  @IsOptional()
-  @IsInt({ message: 'Le salaire maximum doit être un nombre entier.' })
-  @IsPositive({ message: 'Le salaire maximum doit être positif.' })
-  salaryMax?: number;
 
   // =============================================================================
   //                            STRING FIELDS
@@ -67,6 +54,21 @@ export class CreateApplicationRequestDto {
   @IsOptional()
   @IsString({ message: 'La description doit être une chaîne de caractères.' })
   description?: string;
+
+  // =============================================================================
+  //                            INTEGER FIELDS
+  // =============================================================================
+
+  @IsOptional()
+  @IsInt({ message: 'Le salaire minimum doit être un nombre entier.' })
+  @IsPositive({ message: 'Le salaire minimum doit être positif.' })
+  salaryMin?: number;
+
+  @IsOptional()
+  @IsInt({ message: 'Le salaire maximum doit être un nombre entier.' })
+  @IsPositive({ message: 'Le salaire maximum doit être positif.' })
+  salaryMax?: number;
+
 
   // =============================================================================
   //                             DATE FIELDS
@@ -147,7 +149,6 @@ export class CreateApplicationRequestDto {
 
   @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateContactRequestDto)
-  contacts?: CreateContactRequestDto[];
+  @IsInt({ each: true, message: 'Chaque identifiant de contact doit être un nombre entier.' })
+  contactIds?: number[];
 }

@@ -325,7 +325,7 @@ model Application {
 
   // Relations
   user                 User       @relation(fields: [userId], references: [id])
-  contacts             Contact[]
+  applicationContacts  ApplicationHasContact[]
   applicationSkills    ApplicationHasSkill[]
   activities           ApplicationHistory[]
   todos                Todo[]
@@ -357,15 +357,30 @@ model Contact {
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime? @updatedAt @map("updated_at")
 
-  // Foreign keys
-  applicationId Int @map("application_id")
-
   // Relations
-  user        User        @relation(fields: [createdBy], references: [id])
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user                User                    @relation(fields: [createdBy], references: [id])
+  applicationContacts ApplicationHasContact[]
 
   @@index([createdBy])
-  @@index([applicationId])
+}
+
+// ================================================
+//        APPLICATION_HAS_CONTACT (junction table)
+// ================================================
+
+model ApplicationHasContact {
+  @@map("application_has_contact")
+
+  // Foreign keys
+  applicationId Int         @map("application_id")
+  contactId     Int         @map("contact_id")
+
+  //Relations
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  contact       Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@id([applicationId, contactId])
+  @@index([contactId])
 }
 
 // ================================================

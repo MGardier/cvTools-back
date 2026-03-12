@@ -3,7 +3,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsEmail,
-  IsInt,
   MaxLength,
 } from 'class-validator';
 export class CreateContactRequestDto {
@@ -32,7 +31,4 @@ export class CreateContactRequestDto {
   @MaxLength(50, { message: 'La profession ne peut pas dépasser 50 caractères.' })
   profession: string;
 
-  @IsOptional()
-  @IsInt({message: 'L\'id de la candidature doit être un number'})
-  applicationId?: number;
 }

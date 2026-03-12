@@ -74,6 +74,13 @@ export class ContactController {
   //                               FIND
   // =============================================================================
 
+  @Get()
+  @SerializeWith(ContactResponseDto)
+  async findAll(
+    @Req() req: IAuthenticatedRequest,
+  ): Promise<ContactResponseDto[]> {
+    return await this.contactService.findAllByUserId(req.user.sub);
+  }
 
   @Get('application/:applicationId')
   @SerializeWith(ContactResponseDto)
@@ -95,5 +102,36 @@ export class ContactController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ContactResponseDto> {
     return await this.contactService.findOne(id, req.user.sub);
+  }
+
+  // =============================================================================
+  //                  APPLICATION-CONTACT (RELATION LINK)
+  // =============================================================================
+
+  @Post(':contactId/application/:applicationId')
+  @HttpCode(204)
+  @SkipSerialize()
+  async linkToApplication(
+    @Req() req: IAuthenticatedRequest,
+    @Param('contactId', ParseIntPipe) contactId: number,
+    @Param('applicationId', ParseIntPipe) applicationId: number,
+  ): Promise<void> {
+    await this.contactService.findOne(contactId, req.user.sub);
+    await this.contactService.linkToApplication(applicationId, contactId);
+  }
+
+  @Delete(':contactId/application/:applicationId')
+  @HttpCode(204)
+  @SkipSerialize()
+  async unlinkFromApplication(
+    @Req() req: IAuthenticatedRequest,
+    @Param('contactId', ParseIntPipe) contactId: number,
+    @Param('applicationId', ParseIntPipe) applicationId: number,
+  ): Promise<void> {
+    await this.contactService.unlinkFromApplication(
+      applicationId,
+      contactId,
+      req.user.sub,
+    );
   }
 }

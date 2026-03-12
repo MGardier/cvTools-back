@@ -19,6 +19,4 @@ export class ContactResponseDto {
   @Expose()
   profession: string;
 
-  @Expose()
-  applicationId: number;
 }

@@ -48,8 +48,8 @@ export class ApplicationService {
       if (dto.skills)
         await this.skillService.syncForApplication(dto.skills, application.id, userId, tx);
 
-      if (dto.contacts)
-        await this.contactService.createMany(userId, dto.contacts, application.id, tx);
+      if (dto.contactIds)
+        await this.contactService.linkManyToApplication(application.id, dto.contactIds, userId, tx);
 
       return { ...application, address };
     });
@@ -77,6 +77,11 @@ export class ApplicationService {
       if (dto.skills) {
         await this.skillService.unlinkAllFromApplication(id, tx);
         await this.skillService.syncForApplication(dto.skills, id, userId, tx);
+      }
+
+      if (dto.contactIds) {
+        await this.contactService.unlinkAllFromApplication(id, tx);
+        await this.contactService.linkManyToApplication(id, dto.contactIds, userId, tx);
       }
 
       return { ...application, address };
@@ -129,14 +134,14 @@ export class ApplicationService {
     dto: CreateApplicationRequestDto,
     userId: number,
   ): Prisma.ApplicationUncheckedCreateInput {
-    const { address, skills, contacts, ...data } = dto;
+    const { address, skills, contactIds, ...data } = dto;
     return { ...data, userId };
   }
 
   private __mapUpdateDto(
     dto: UpdateApplicationRequestDto,
   ): Prisma.ApplicationUncheckedUpdateInput {
-    const { address, skills, contacts, disconnectAddress, ...data } = dto;
+    const { address, skills, contactIds, disconnectAddress, ...data } = dto;
     return { ...data };
   }
 
