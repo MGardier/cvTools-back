@@ -104,7 +104,7 @@ export class SkillController {
     @Param('applicationId', ParseIntPipe) applicationId: number,
     @Param('skillId', ParseIntPipe) skillId: number,
   ): Promise<void> {
-    await this.skillService.linkToApplicationDirect(applicationId, skillId);
+    await this.skillService.linkToApplication(applicationId, skillId);
   }
 
   @Delete('application/:applicationId/:skillId')

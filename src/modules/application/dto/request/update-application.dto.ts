@@ -1,10 +1,10 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { CreateApplicationRequestDto } from './create-application.dto';
 import { IsBoolean, IsDate, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class UpdateApplicationRequestDto extends PartialType(
-  CreateApplicationRequestDto,
+  OmitType(CreateApplicationRequestDto,['contactIds','skillIds','apiOfferId']),
 ) {
   @IsOptional()
   @IsDate({ message: 'La date doit être une date valide.' })
@@ -13,6 +13,7 @@ export class UpdateApplicationRequestDto extends PartialType(
   @IsOptional()
   @IsBoolean({ message: 'isFavorite doit être un booléen.' })
   isFavorite?: boolean;
+  
   // =============================================================================
   //                        OPTIONAL NESTED OBJECT
   // =============================================================================
