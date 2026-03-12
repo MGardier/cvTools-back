@@ -59,13 +59,8 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/signUp",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"signUp"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "signUp"]
 						},
 						"description": "Inscription d'un nouvel utilisateur. Le mot de passe doit contenir au moins 8 caractères avec majuscule, minuscule, chiffre et caractère spécial."
 					},
@@ -87,13 +82,8 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/signIn",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"signIn"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "signIn"]
 						},
 						"description": "Connexion d'un utilisateur. Retourne accessToken et refreshToken."
 					},
@@ -111,13 +101,8 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/auth/me",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"me"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "me"]
 						},
 						"description": "Récupérer les informations de l'utilisateur connecté."
 					},
@@ -143,13 +128,8 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/refresh",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"refresh"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "refresh"]
 						},
 						"description": "Rafraîchir le token d'accès en utilisant le refresh token."
 					},
@@ -171,13 +151,8 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/logout",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"logout"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "logout"]
 						},
 						"description": "Déconnexion de l'utilisateur. Invalide le refresh token."
 					},
@@ -199,13 +174,8 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/resendConfirmAccount",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"resendConfirmAccount"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "resendConfirmAccount"]
 						},
 						"description": "Renvoyer l'email de confirmation de compte."
 					},
@@ -227,13 +197,8 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/confirmAccount",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"confirmAccount"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "confirmAccount"]
 						},
 						"description": "Confirmer le compte avec le token reçu par email."
 					},
@@ -255,13 +220,8 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/forgotPassword",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"forgotPassword"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "forgotPassword"]
 						},
 						"description": "Demander un email de réinitialisation de mot de passe."
 					},
@@ -283,13 +243,8 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/resetPassword",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"resetPassword"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "resetPassword"]
 						},
 						"description": "Réinitialiser le mot de passe avec le token reçu par email."
 					},
@@ -302,13 +257,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/auth/google",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"google"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "google"]
 						},
 						"description": "Démarrer le flux OAuth Google. Redirige vers la page de connexion Google."
 					},
@@ -321,13 +271,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/auth/github",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"github"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "github"]
 						},
 						"description": "Démarrer le flux OAuth GitHub. Redirige vers la page de connexion GitHub."
 					},
@@ -354,18 +299,14 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"jobboard\": \"LINKEDIN\",\n    \"title\": \"Développeur Full Stack\",\n    \"url\": \"https://example.com/job/123\",\n    \"contractType\": \"CDI\",\n    \"company\": \"TechCorp\",\n    \"description\": \"Poste de développeur full stack avec NestJS et React\",\n    \"salaryMin\": 45000,\n    \"salaryMax\": 55000,\n    \"publishedAt\": \"2024-01-15T10:00:00.000Z\",\n    \"currentStatus\": \"TO_APPLY\",\n    \"experience\": \"MID\",\n    \"remotePolicy\": \"HYBRID\",\n    \"compatibility\": \"PERFECT\",\n    \"address\": {\n        \"city\": \"Paris\",\n        \"postalCode\": \"75001\"\n    },\n    \"skills\": [\"NestJS\", \"React\", \"TypeScript\"],\n    \"contacts\": [\n        {\n            \"firstname\": \"Jean\",\n            \"lastname\": \"Dupont\",\n            \"email\": \"jean.dupont@techcorp.com\",\n            \"profession\": \"Recruteur\"\n        }\n    ]\n}"
+							"raw": "{\n    \"jobboard\": \"LINKEDIN\",\n    \"title\": \"Développeur Full Stack\",\n    \"url\": \"https://example.com/job/123\",\n    \"contractType\": \"CDI\",\n    \"company\": \"TechCorp\",\n    \"description\": \"Poste de développeur full stack avec NestJS et React\",\n    \"salaryMin\": 45000,\n    \"salaryMax\": 55000,\n    \"publishedAt\": \"2024-01-15T10:00:00.000Z\",\n    \"currentStatus\": \"TO_APPLY\",\n    \"experience\": \"MID\",\n    \"remotePolicy\": \"HYBRID\",\n    \"compatibility\": \"PERFECT\",\n    \"address\": {\n        \"city\": \"Paris\",\n        \"postalCode\": \"75001\"\n    },\n    \"skillIds\": [1, 2, 3],\n    \"contactIds\": [1, 2]\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/application",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"application"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["application"]
 						},
-						"description": "Créer une nouvelle candidature. L'adresse, les skills et les contacts sont optionnels."
+						"description": "Créer une nouvelle candidature. L'adresse, les skillIds et les contactIds sont optionnels. Les skills et contacts doivent exister préalablement."
 					},
 					"response": []
 				},
@@ -381,12 +322,8 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/application",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"application"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["application"]
 						},
 						"description": "Récupérer toutes les candidatures de l'utilisateur connecté."
 					},
@@ -404,13 +341,8 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/application/{{applicationId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"application",
-								"{{applicationId}}"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}"]
 						},
 						"description": "Récupérer une candidature par son ID. L'utilisateur doit être propriétaire."
 					},
@@ -436,15 +368,10 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/application/{{applicationId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"application",
-								"{{applicationId}}"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}"]
 						},
-						"description": "Mettre à jour une candidature. Tous les champs sont optionnels. Pour supprimer l'adresse, envoyer disconnectAddress: true."
+						"description": "Mettre à jour une candidature. Tous les champs sont optionnels. Pour supprimer l'adresse, envoyer disconnectAddress: true. Les skills et contacts se gèrent via les endpoints dédiés link/unlink."
 					},
 					"response": []
 				},
@@ -460,13 +387,8 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/application/{{applicationId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"application",
-								"{{applicationId}}"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}"]
 						},
 						"description": "Supprimer une candidature. Retourne 204 No Content."
 					},
@@ -477,6 +399,52 @@
 		{
 			"name": "Contact",
 			"item": [
+				{
+					"name": "Create Contact",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstname\": \"Jean\",\n    \"lastname\": \"Dupont\",\n    \"email\": \"jean.dupont@techcorp.com\",\n    \"profession\": \"Recruteur\",\n    \"phone\": \"+33 6 12 34 56 78\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/contact",
+							"host": ["{{baseUrl}}"],
+							"path": ["contact"]
+						},
+						"description": "Créer un nouveau contact. Champs requis : firstname, lastname, email, profession. phone est optionnel."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Contacts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/contact",
+							"host": ["{{baseUrl}}"],
+							"path": ["contact"]
+						},
+						"description": "Récupérer tous les contacts de l'utilisateur connecté."
+					},
+					"response": []
+				},
 				{
 					"name": "Get Contacts by Application",
 					"request": {
@@ -489,14 +457,8 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/contact/application/{{applicationId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"contact",
-								"application",
-								"{{applicationId}}"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["contact", "application", "{{applicationId}}"]
 						},
 						"description": "Récupérer tous les contacts liés à une candidature."
 					},
@@ -514,13 +476,8 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/contact/{{contactId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"contact",
-								"{{contactId}}"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["contact", "{{contactId}}"]
 						},
 						"description": "Récupérer un contact par son ID."
 					},
@@ -546,13 +503,8 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/contact/{{contactId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"contact",
-								"{{contactId}}"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["contact", "{{contactId}}"]
 						},
 						"description": "Mettre à jour un contact. Tous les champs sont optionnels (firstname, lastname, email, phone, profession)."
 					},
@@ -570,15 +522,48 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/contact/{{contactId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"contact",
-								"{{contactId}}"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["contact", "{{contactId}}"]
 						},
 						"description": "Supprimer un contact. Retourne 204 No Content."
+					},
+					"response": []
+				},
+				{
+					"name": "Link Contact to Application",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/contact/{{contactId}}/application/{{applicationId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["contact", "{{contactId}}", "application", "{{applicationId}}"]
+						},
+						"description": "Associer un contact existant à une candidature. Retourne 204 No Content."
+					},
+					"response": []
+				},
+				{
+					"name": "Unlink Contact from Application",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/contact/{{contactId}}/application/{{applicationId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["contact", "{{contactId}}", "application", "{{applicationId}}"]
+						},
+						"description": "Dissocier un contact d'une candidature. Retourne 204 No Content."
 					},
 					"response": []
 				}
@@ -607,12 +592,8 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/skill",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"skill"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["skill"]
 						},
 						"description": "Créer une nouvelle compétence."
 					},
@@ -630,14 +611,29 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/skill",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"skill"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["skill"]
 						},
 						"description": "Récupérer toutes les compétences."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Skills by Application",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/skill/application/{{applicationId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["skill", "application", "{{applicationId}}"]
+						},
+						"description": "Récupérer toutes les compétences liées à une candidature."
 					},
 					"response": []
 				},
@@ -653,13 +649,8 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/skill/{{skillId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"skill",
-								"{{skillId}}"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["skill", "{{skillId}}"]
 						},
 						"description": "Récupérer une compétence par son ID."
 					},
@@ -685,15 +676,10 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/skill/{{skillId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"skill",
-								"{{skillId}}"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["skill", "{{skillId}}"]
 						},
-						"description": "Mettre à jour le libellé d'une compétence."
+						"description": "Mettre à jour le libellé d'une compétence. Uniquement si l'utilisateur en est le créateur et qu'elle n'est pas liée à une candidature."
 					},
 					"response": []
 				},
@@ -709,15 +695,48 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/skill/{{skillId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"skill",
-								"{{skillId}}"
-							]
+							"host": ["{{baseUrl}}"],
+							"path": ["skill", "{{skillId}}"]
 						},
-						"description": "Supprimer une compétence. Retourne 204 No Content."
+						"description": "Supprimer une compétence. Retourne 204 No Content. Impossible si liée à une candidature."
+					},
+					"response": []
+				},
+				{
+					"name": "Link Skill to Application",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/skill/application/{{applicationId}}/{{skillId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["skill", "application", "{{applicationId}}", "{{skillId}}"]
+						},
+						"description": "Associer une compétence existante à une candidature. Retourne 201."
+					},
+					"response": []
+				},
+				{
+					"name": "Unlink Skill from Application",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/skill/application/{{applicationId}}/{{skillId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["skill", "application", "{{applicationId}}", "{{skillId}}"]
+						},
+						"description": "Dissocier une compétence d'une candidature. Retourne 204 No Content."
 					},
 					"response": []
 				}
