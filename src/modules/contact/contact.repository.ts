@@ -70,14 +70,6 @@ export class ContactRepository {
     });
   }
 
-  async findOneById(id: number, tx?: Prisma.TransactionClient): Promise<Contact | null> {
-    const client = tx ?? this.prismaService;
-
-    return await client.contact.findUnique({
-      where: { id },
-    });
-  }
-
   async findOneByIdAndByUserId(
     id: number,
     userId: number,

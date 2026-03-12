@@ -73,14 +73,6 @@ export class SkillRepository {
     });
   }
 
-  async findByLabel(label: string, tx?: Prisma.TransactionClient): Promise<Skill | null> {
-    const client = tx ?? this.prismaService;
-
-    return await client.skill.findUnique({
-      where: { label },
-    });
-  }
-
   async countApplicationLinks(skillId: number, tx?: Prisma.TransactionClient): Promise<number> {
     const client = tx ?? this.prismaService;
 
