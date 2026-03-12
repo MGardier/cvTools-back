@@ -40,8 +40,10 @@ export class ContactRepository {
   //                               DELETE
   // =============================================================================
 
-  async delete(id: number): Promise<Contact> {
-    return await this.prismaService.contact.delete({
+  async delete(id: number, tx?: Prisma.TransactionClient): Promise<Contact> {
+    const client = tx ?? this.prismaService;
+
+    return await client.contact.delete({
       where: { id },
     });
   }
@@ -50,22 +52,28 @@ export class ContactRepository {
   //                               FIND
   // =============================================================================
 
-  async findAllByUserId(userId: number): Promise<Contact[]> {
-    return await this.prismaService.contact.findMany({
+  async findAllByUserId(userId: number, tx?: Prisma.TransactionClient): Promise<Contact[]> {
+    const client = tx ?? this.prismaService;
+
+    return await client.contact.findMany({
       where: { createdBy: userId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findAllByApplicationId(applicationId: number): Promise<Contact[]> {
-    return await this.prismaService.contact.findMany({
+  async findAllByApplicationId(applicationId: number, tx?: Prisma.TransactionClient): Promise<Contact[]> {
+    const client = tx ?? this.prismaService;
+
+    return await client.contact.findMany({
       where: { applicationContacts: { some: { applicationId } } },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findOneById(id: number): Promise<Contact | null> {
-    return await this.prismaService.contact.findUnique({
+  async findOneById(id: number, tx?: Prisma.TransactionClient): Promise<Contact | null> {
+    const client = tx ?? this.prismaService;
+
+    return await client.contact.findUnique({
       where: { id },
     });
   }
@@ -73,8 +81,11 @@ export class ContactRepository {
   async findOneByIdAndByUserId(
     id: number,
     userId: number,
+    tx?: Prisma.TransactionClient,
   ): Promise<Contact | null> {
-    return await this.prismaService.contact.findFirst({
+    const client = tx ?? this.prismaService;
+
+    return await client.contact.findFirst({
       where: { id, createdBy: userId },
     });
   }
@@ -111,8 +122,11 @@ export class ContactRepository {
   async removeApplicationLink(
     applicationId: number,
     contactId: number,
+    tx?: Prisma.TransactionClient,
   ): Promise<void> {
-    await this.prismaService.applicationHasContact.delete({
+    const client = tx ?? this.prismaService;
+
+    await client.applicationHasContact.delete({
       where: {
         applicationId_contactId: { applicationId, contactId },
       },
@@ -130,8 +144,10 @@ export class ContactRepository {
     });
   }
 
-  async countApplicationLinks(contactId: number): Promise<number> {
-    return await this.prismaService.applicationHasContact.count({
+  async countApplicationLinks(contactId: number, tx?: Prisma.TransactionClient): Promise<number> {
+    const client = tx ?? this.prismaService;
+
+    return await client.applicationHasContact.count({
       where: { contactId },
     });
   }

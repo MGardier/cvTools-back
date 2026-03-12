@@ -32,20 +32,6 @@ export class ContactService {
     return await this.contactRepository.create(this.__mapCreateDto(dto, userId), tx);
   }
 
-  async createMany(
-    userId: number,
-    dtos: CreateContactRequestDto[],
-    tx?: Prisma.TransactionClient,
-  ): Promise<Contact[]> {
-    const contacts: Contact[] = [];
-
-    for (const dto of dtos) {
-      const contact = await this.contactRepository.create(this.__mapCreateDto(dto, userId), tx);
-      contacts.push(contact);
-    }
-
-    return contacts;
-  }
 
   // =============================================================================
   //                               UPDATE
@@ -58,7 +44,7 @@ export class ContactService {
   ): Promise<Contact> {
     const contact = await this.__findOneAndCheckOwnership(id, userId);
 
-    return await this.contactRepository.update(contact.id, this.__mapUpdateDto(dto));
+    return await this.contactRepository.update(contact.id, dto);
   }
 
   // =============================================================================
@@ -96,17 +82,7 @@ export class ContactService {
   //                  APPLICATION-CONTACT (RELATION LINK)
   // =============================================================================
 
-  async syncForApplication(
-    dtos: CreateContactRequestDto[],
-    applicationId: number,
-    userId: number,
-    tx?: Prisma.TransactionClient,
-  ): Promise<void> {
-    const contacts = await this.createMany(userId, dtos, tx);
-    const contactIds = contacts.map((contact) => contact.id);
-
-    await this.contactRepository.addManyApplicationLinks(applicationId, contactIds, tx);
-  }
+ 
 
   async linkManyToApplication(
     applicationId: number,
@@ -122,9 +98,11 @@ export class ContactService {
   async linkToApplication(
     applicationId: number,
     contactId: number,
+    userId: number,
     tx?: Prisma.TransactionClient,
   ): Promise<ApplicationHasContact> {
-    return await this.contactRepository.addApplicationLink(applicationId, contactId, tx);
+    const contact  = await this.__findOneAndCheckOwnership(contactId, userId);
+    return await this.contactRepository.addApplicationLink(applicationId, contact.id, tx);
   }
 
   async unlinkFromApplication(
@@ -153,27 +131,12 @@ export class ContactService {
     userId: number,
   ): Prisma.ContactUncheckedCreateInput {
     return {
-      firstname: dto.firstname,
-      lastname: dto.lastname,
-      email: dto.email,
-      phone: dto.phone,
-      profession: dto.profession,
+      ...dto,
       createdBy: userId,
     };
   }
 
-  private __mapUpdateDto(
-    dto: UpdateContactRequestDto,
-  ): Prisma.ContactUncheckedUpdateInput {
-    return {
-      firstname: dto.firstname,
-      lastname: dto.lastname,
-      email: dto.email,
-      phone: dto.phone,
-      profession: dto.profession,
-    };
-  }
-
+ 
   private async __findOneAndCheckOwnership(
     id: number,
     userId: number,

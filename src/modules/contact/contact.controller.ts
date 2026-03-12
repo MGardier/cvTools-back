@@ -49,11 +49,7 @@ export class ContactController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateContactRequestDto,
   ): Promise<ContactResponseDto> {
-    return await this.contactService.update(
-      id,
-      req.user.sub,
-      dto,
-    );
+    return await this.contactService.update(id, req.user.sub, dto);
   }
 
   // =============================================================================
@@ -89,15 +85,12 @@ export class ContactController {
     @Param('applicationId', ParseIntPipe)
     applicationId: number,
   ): Promise<ContactResponseDto[]> {
-    return await this.contactService.findAllByApplicationId(
-      applicationId,
-      req.user.sub,
-    );
+    return await this.contactService.findAllByApplicationId(applicationId,req.user.sub);
   }
 
   @Get(':id')
   @SerializeWith(ContactResponseDto)
-  async findOneById(
+  async findOne(
     @Req() req: IAuthenticatedRequest,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ContactResponseDto> {
@@ -116,8 +109,7 @@ export class ContactController {
     @Param('contactId', ParseIntPipe) contactId: number,
     @Param('applicationId', ParseIntPipe) applicationId: number,
   ): Promise<void> {
-    await this.contactService.findOne(contactId, req.user.sub);
-    await this.contactService.linkToApplication(applicationId, contactId);
+    await this.contactService.linkToApplication(applicationId, contactId,req.user.sub);
   }
 
   @Delete(':contactId/application/:applicationId')

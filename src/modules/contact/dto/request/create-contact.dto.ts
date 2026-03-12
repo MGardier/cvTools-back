@@ -6,6 +6,7 @@ import {
   MaxLength,
 } from 'class-validator';
 export class CreateContactRequestDto {
+  
   @IsNotEmpty({ message: 'Le prénom ne peut pas être vide.' })
   @IsString({ message: 'Le prénom doit être une chaîne de caractères.' })
   @MaxLength(100, { message: 'Le prénom ne peut pas dépasser 100 caractères.' })
