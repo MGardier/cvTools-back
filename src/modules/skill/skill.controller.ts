@@ -101,10 +101,11 @@ export class SkillController {
   @HttpCode(201)
   @SkipSerialize()
   async linkToApplication(
+    @Req() req: IAuthenticatedRequest,
     @Param('applicationId', ParseIntPipe) applicationId: number,
     @Param('skillId', ParseIntPipe) skillId: number,
   ): Promise<void> {
-    await this.skillService.linkToApplication(applicationId, skillId);
+    await this.skillService.linkToApplication(applicationId, skillId, req.user.sub);
   }
 
   @Delete('application/:applicationId/:skillId')

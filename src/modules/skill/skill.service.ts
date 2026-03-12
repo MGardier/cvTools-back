@@ -93,9 +93,11 @@ export class SkillService {
   async linkToApplication(
     applicationId: number,
     skillId: number,
+    userId: number,
     tx?: Prisma.TransactionClient,
   ): Promise<ApplicationHasSkill> {
-    return await this.skillRepository.addApplicationLink(applicationId, skillId, tx);
+    const skill = await this.__findOneAndCheckOwnership(skillId, userId);
+    return await this.skillRepository.addApplicationLink(applicationId, skill.id, tx);
   }
 
   async unlinkFromApplication(
