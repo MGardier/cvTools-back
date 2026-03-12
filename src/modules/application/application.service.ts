@@ -45,8 +45,8 @@ export class ApplicationService {
         ? await this.addressService.upsert(dto.address, AddressOwnerEnum.APPLICATION, application.id, tx)
         : null;
 
-      if (dto.skills)
-        await this.skillService.syncForApplication(dto.skills, application.id, userId, tx);
+      if (dto.skillIds)
+        await this.skillService.linkManyToApplication(application.id, dto.skillIds, userId, tx);
 
       if (dto.contactIds)
         await this.contactService.linkManyToApplication(application.id, dto.contactIds, userId, tx);
@@ -74,9 +74,9 @@ export class ApplicationService {
 
       const address = await this.__resolveAddress(dto, id, tx);
 
-      if (dto.skills) {
+      if (dto.skillIds) {
         await this.skillService.unlinkAllFromApplication(id, tx);
-        await this.skillService.syncForApplication(dto.skills, id, userId, tx);
+        await this.skillService.linkManyToApplication(id, dto.skillIds, userId, tx);
       }
 
       if (dto.contactIds) {
@@ -134,14 +134,14 @@ export class ApplicationService {
     dto: CreateApplicationRequestDto,
     userId: number,
   ): Prisma.ApplicationUncheckedCreateInput {
-    const { address, skills, contactIds, ...data } = dto;
+    const { address, skillIds, contactIds, ...data } = dto;
     return { ...data, userId };
   }
 
   private __mapUpdateDto(
     dto: UpdateApplicationRequestDto,
   ): Prisma.ApplicationUncheckedUpdateInput {
-    const { address, skills, contactIds, disconnectAddress, ...data } = dto;
+    const { address, skillIds, contactIds, disconnectAddress, ...data } = dto;
     return { ...data };
   }
 

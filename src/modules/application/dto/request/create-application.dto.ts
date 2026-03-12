@@ -137,15 +137,8 @@ export class CreateApplicationRequestDto {
 
   @IsOptional()
   @IsArray()
-  @IsString({
-    each: true,
-    message: 'Chaque compétence doit être une chaîne de caractères.',
-  })
-  @MaxLength(100, {
-    each: true,
-    message: 'Chaque compétence ne peut pas dépasser 100 caractères.',
-  })
-  skills?: string[];
+  @IsInt({ each: true, message: 'Chaque identifiant de compétence doit être un nombre entier.' })
+  skillIds?: number[];
 
   @IsOptional()
   @IsArray()

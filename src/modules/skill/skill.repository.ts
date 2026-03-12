@@ -20,8 +20,10 @@ export class SkillRepository {
   //                               UPDATE
   // =============================================================================
 
-  async update(id: number, data: Prisma.SkillUncheckedUpdateInput): Promise<Skill> {
-    return await this.prismaService.skill.update({
+  async update(id: number, data: Prisma.SkillUncheckedUpdateInput, tx?: Prisma.TransactionClient): Promise<Skill> {
+    const client = tx ?? this.prismaService;
+
+    return await client.skill.update({
       where: { id },
       data,
     });
@@ -31,8 +33,10 @@ export class SkillRepository {
   //                               DELETE
   // =============================================================================
 
-  async delete(id: number): Promise<Skill> {
-    return await this.prismaService.skill.delete({
+  async delete(id: number, tx?: Prisma.TransactionClient): Promise<Skill> {
+    const client = tx ?? this.prismaService;
+
+    return await client.skill.delete({
       where: { id },
     });
   }
@@ -41,8 +45,10 @@ export class SkillRepository {
   //                               FIND
   // =============================================================================
 
-  async findAll(): Promise<Skill[]> {
-    return await this.prismaService.skill.findMany({
+  async findAll(tx?: Prisma.TransactionClient): Promise<Skill[]> {
+    const client = tx ?? this.prismaService;
+
+    return await client.skill.findMany({
       orderBy: { label: 'asc' },
     });
   }
@@ -58,8 +64,11 @@ export class SkillRepository {
   async findOneByIdAndByUserId(
     id: number,
     userId: number,
+    tx?: Prisma.TransactionClient,
   ): Promise<Skill | null> {
-    return await this.prismaService.skill.findFirst({
+    const client = tx ?? this.prismaService;
+
+    return await client.skill.findFirst({
       where: { id, createdBy: userId },
     });
   }
@@ -72,14 +81,18 @@ export class SkillRepository {
     });
   }
 
-  async countApplicationLinks(skillId: number): Promise<number> {
-    return await this.prismaService.applicationHasSkill.count({
+  async countApplicationLinks(skillId: number, tx?: Prisma.TransactionClient): Promise<number> {
+    const client = tx ?? this.prismaService;
+
+    return await client.applicationHasSkill.count({
       where: { skillId },
     });
   }
 
-  async findAllByApplicationId(applicationId: number): Promise<Skill[]> {
-    return await this.prismaService.skill.findMany({
+  async findAllByApplicationId(applicationId: number, tx?: Prisma.TransactionClient): Promise<Skill[]> {
+    const client = tx ?? this.prismaService;
+
+    return await client.skill.findMany({
       where: { applicationSkills: { some: { applicationId } } },
       orderBy: { label: 'asc' },
     });
@@ -117,8 +130,11 @@ export class SkillRepository {
   async removeApplicationLink(
     applicationId: number,
     skillId: number,
+    tx?: Prisma.TransactionClient,
   ): Promise<void> {
-    await this.prismaService.applicationHasSkill.delete({
+    const client = tx ?? this.prismaService;
+
+    await client.applicationHasSkill.delete({
       where: {
         applicationId_skillId: { applicationId, skillId },
       },

@@ -30,24 +30,6 @@ export class SkillService {
   }
 
   // =============================================================================
-  //                            FIND OR CREATE
-  // =============================================================================
-
-  async findOrCreate(label: string, userId: number, tx?: Prisma.TransactionClient): Promise<Skill> {
-    const existing = await this.skillRepository.findByLabel(label, tx);
-    if (existing)
-      return existing;
-
-    return await this.skillRepository.create(this.__mapCreateData(label, userId), tx);
-  }
-
-  async findOrCreateMany(labels: string[], userId: number, tx?: Prisma.TransactionClient): Promise<Skill[]> {
-    return await Promise.all(
-      labels.map(async (label) => await this.findOrCreate(label, userId, tx)),
-    );
-  }
-
-  // =============================================================================
   //                            UPDATE
   // =============================================================================
 
@@ -98,19 +80,17 @@ export class SkillService {
   //                  APPLICATION-SKILL (RELATION LINK)
   // =============================================================================
 
-  async syncForApplication(
-    labels: string[],
+  async linkManyToApplication(
     applicationId: number,
+    skillIds: number[],
     userId: number,
     tx?: Prisma.TransactionClient,
   ): Promise<void> {
-    const skills = await this.findOrCreateMany(labels, userId, tx);
-    const skillIds = skills.map((skill) => skill.id);
-
+    await Promise.all(skillIds.map((id) => this.__findOneAndCheckOwnership(id, userId)));
     await this.skillRepository.addManyApplicationLinks(applicationId, skillIds, tx);
   }
 
-  async linkToApplicationDirect(
+  async linkToApplication(
     applicationId: number,
     skillId: number,
     tx?: Prisma.TransactionClient,
