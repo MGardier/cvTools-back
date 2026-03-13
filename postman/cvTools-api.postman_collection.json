@@ -713,9 +713,9 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/skill/application/{{applicationId}}/{{skillId}}",
+							"raw": "{{baseUrl}}/skill/{{skillId}}/application/{{applicationId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["skill", "application", "{{applicationId}}", "{{skillId}}"]
+							"path": ["skill", "{{skillId}}", "application", "{{applicationId}}"]
 						},
 						"description": "Associer une compétence existante à une candidature. Retourne 201."
 					},
@@ -732,9 +732,9 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/skill/application/{{applicationId}}/{{skillId}}",
+							"raw": "{{baseUrl}}/skill/{{skillId}}/application/{{applicationId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["skill", "application", "{{applicationId}}", "{{skillId}}"]
+							"path": ["skill", "{{skillId}}", "application", "{{applicationId}}"]
 						},
 						"description": "Dissocier une compétence d'une candidature. Retourne 204 No Content."
 					},

@@ -97,24 +97,24 @@ export class SkillController {
   //                        APPLICATION-SKILL (LINK)
   // =============================================================================
 
-  @Post('application/:applicationId/:skillId')
+  @Post(':skillId/application/:applicationId')
   @HttpCode(201)
   @SkipSerialize()
   async linkToApplication(
     @Req() req: IAuthenticatedRequest,
-    @Param('applicationId', ParseIntPipe) applicationId: number,
     @Param('skillId', ParseIntPipe) skillId: number,
+    @Param('applicationId', ParseIntPipe) applicationId: number,
   ): Promise<void> {
     await this.skillService.linkToApplication(applicationId, skillId, req.user.sub);
   }
 
-  @Delete('application/:applicationId/:skillId')
+  @Delete(':skillId/application/:applicationId')
   @HttpCode(204)
   @SkipSerialize()
   async unlinkFromApplication(
     @Req() req: IAuthenticatedRequest,
-    @Param('applicationId', ParseIntPipe) applicationId: number,
     @Param('skillId', ParseIntPipe) skillId: number,
+    @Param('applicationId', ParseIntPipe) applicationId: number,
   ): Promise<void> {
     await this.skillService.unlinkFromApplication(applicationId, skillId, req.user.sub);
   }
