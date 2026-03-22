@@ -1,5 +1,4 @@
-import { Job, JobStatus, Prisma, ApplicationMethod } from '@prisma/client';
-import { ApiResponse } from 'nats/lib/jetstream/jsapi_types';
+import { Application, ApplicationStatus, Prisma } from '@prisma/client';
 
 export interface IOptionRepository<TDataSelectedColumns> {
   tx?: Prisma.TransactionClient;
@@ -16,26 +15,24 @@ export interface IFilterOptions<TData> extends IOptionRepository<TData> {
   skip: number;
   sort: TSortItem<TData>[];
   filters: {
-    jobTitle?: string;
-    enterprise?: string;
-    status?: JobStatus;
-    applicationMethod?: ApplicationMethod;
+    title?: string;
+    company?: string;
+    status?: ApplicationStatus;
   };
 }
 
 export interface IFindAllOptions<TData> extends IOptionRepository<TData> {
   page?: number;
   limit?: number;
-  sort: TSortItem<Job>[];
+  sort: TSortItem<Application>[];
   filters: {
-    jobTitle?: string;
-    enterprise?: string;
-    status?: JobStatus;
-    applicationMethod?: ApplicationMethod;
+    title?: string;
+    company?: string;
+    status?: ApplicationStatus;
   };
 }
 
-export interface IFindAllResponse extends ApiResponse {
+export interface IFindAllResponse {
   limit: number;
   count: number;
   page: number;

@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,104 +10,272 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-  enum UserStatus {
-    ALLOWED
-    PENDING
-    BANNED
-  }
-
-  enum UserRoles {
-    ADMIN
-    USER
-  }
 
 
-  enum PrismaTokenType {
-    REFRESH
-    FORGOT_PASSWORD
-    CONFIRM_ACCOUNT
-  }
 
 
- enum LoginMethod {
-    CLASSIC
-    GITHUB
-    GOOGLE
-  }
+
+// ================================================
+//                  USER
+// ================================================
+
+enum UserStatus {
+  ALLOWED
+  PENDING
+  BANNED
+}
+
+enum UserRoles {
+  ADMIN
+  USER
+}
+
+enum LoginMethod {
+  CLASSIC
+  GITHUB
+  GOOGLE
+}
 
 model User {
-    @@map("user")
+  @@map("user")
 
-    id              Int                     @id @default(autoincrement())
-    email           String                  @unique 
-    status          UserStatus              @default(ALLOWED)
-    password        String?             
-    createdAt       DateTime                @default(now()) @map("created_at")
-    updatedAt       DateTime?               @updatedAt      @map("updated_at")
-    roles           UserRoles        
-    tokens          UserToken[] 
-    jobs            Job[] 
-    loginMethod     LoginMethod
-    oauthId         String?                 @map("oauth_id")
+  // Int
+  id          Int        @id @default(autoincrement())
 
-    @@unique([loginMethod, oauthId], name: "unique_oauth_user")
-  }
+  // String
+  email       String     @unique @db.VarChar(100)
+  password    String?    @db.VarChar(150)
+  oauthId     String?    @map("oauth_id") @db.VarChar(150)
+
+  // DateTime
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime?  @updatedAt @map("updated_at")
+
+  // Enum
+  status      UserStatus  @default(ALLOWED)
+  roles       UserRoles
+  loginMethod LoginMethod @map("login_method")
+
+  // Relations
+  tokens                UserToken[]
+  applications          Application[]
+  skills                Skill[]
+  contacts              Contact[]
+  providerLogs          ProviderLogger[]
+  providerUsageRecords  ProviderUsageRecord[]
+
+  @@unique([loginMethod, oauthId], name: "unique_oauth_user")
+}
+
+
+// ================================================
+//                  USER TOKEN
+// ================================================
+
+
+
+enum PrismaTokenType {
+  REFRESH
+  FORGOT_PASSWORD
+  CONFIRM_ACCOUNT
+}
+
 
 model UserToken {
-    @@map("user_token")
+  @@map("user_token")
 
-    id              Int                    @id @default(autoincrement())
-    token           String                 @db.Text
-    type            PrismaTokenType
-    expiresIn       DateTime               @map("expires_in")
-    uuid            String?                @unique
-    createdAt       DateTime               @default(now()) @map("created_at")
-    userId          Int                    @map("user_id")
-    user            User                   @relation(fields: [userId], references: [id])
-  }
+  // Int
+  id        Int             @id @default(autoincrement())
+
+  // String
+  token     String          @db.Text
+  uuid      String?         @unique @db.VarChar(150)
+
+  // DateTime
+  expiresAt DateTime        @map("expires_at")
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  // Enum
+  type      PrismaTokenType
+
+  // Foreign keys
+  userId    Int             @map("user_id")
+
+  //Relations
+  user      User            @relation(fields: [userId], references: [id])
+}
+
+
+// ================================================
+//                  PROVIDER LOGGER
+// ================================================
+
+enum ExternalProvider {
+  CLAUDE
+  GEMINI
+  ADZUNA
+  FRANCE_TRAVAIL
+  APIFY
+}
+
+enum HttpMethod {
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
+}
+
+
+model ProviderLogger {
+  @@map("provider_logger")
+
+  // Int
+  id            Int    @id @default(autoincrement())
+  statusCode    Int    @map("status_code") @db.SmallInt
+
+  // String
+  operationPath String @map("operation_path") @db.VarChar(50)
+
+  // DateTime
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Enum
+  method        HttpMethod
+  provider      ExternalProvider
+
+  // Json
+  request       Json
+  response      Json
+
+  // Foreign keys
+  usedBy        Int  @map("used_by")
+  user          User @relation(fields: [usedBy], references: [id])
+
+  @@index([usedBy])
+  @@index([provider])
+}
+
+// ================================================
+//                  PROVIDER USAGE RECORD
+// ================================================
+
+model ProviderUsageRecord {
+  @@map("provider_usage_record")
+
+  // Int
+  id             Int    @id @default(autoincrement())
+  requestCount   Int    @default(0) @map("request_count")
+  tokensConsumed Int    @default(0) @map("tokens_consumed")
+
+  // DateTime
+  periodStartAt  DateTime  @map("period_start_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime? @updatedAt @map("updated_at")
+
+  // Enum
+  provider       ExternalProvider
+
+  // Foreign keys
+  userId         Int  @map("user_id")
+
+  //Relations
+  user           User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([provider])
+  @@unique([userId, provider, periodStartAt])
+}
+
+// ================================================
+//                  ADDRESS (polymorphic)
+// ================================================
+
+enum AddressTable {
+  APPLICATION
+}
+
 
 
 model Address {
-
   @@map("address")
 
-  id                Int                       @id @default(autoincrement())
-  city              String
-  postalCode        String                    @map("postal_code")
-  createdAt         DateTime                  @default(now())  @map("created_at")
-  updatedAt         DateTime?                 @updatedAt        @map("updated_at")
-  job               Job[]
-  @@unique([city,postalCode],name: "city_postalCode")
+  // Int
+  id           Int          @id @default(autoincrement())
 
+  // String
+  city         String       @db.VarChar(100)
+  postalCode   String       @map("postal_code") @db.VarChar(10)
+  street       String?      @db.VarChar(100)
+  complement   String?      @db.VarChar(100)
+  streetNumber String?      @map("street_number") @db.VarChar(10)
+
+  // DateTime
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime?    @updatedAt @map("updated_at")
+
+  // Relations
+  tableName    AddressTable @map("table_name")
+  tableId      Int          @map("table_id")
+
+  @@index([tableName, tableId])
 }
 
+// ================================================
+//                  APPLICATION
+// ================================================
 
 
-model Technology {
-  @@map("technology")
-
-  id                      Int     @id @default(autoincrement())
-  name                    String  @unique()
-  jobHasTechnology        JobHasTechnology[]   
+enum Jobboard {
+  LINKEDIN
+  INDEED
+  WTTJ
+  FRANCE_TRAVAIL
+  GLASSDOOR
+  APEC
+  HELLO_WORK
+  METEO_JOB
+  UNKNOW
 }
 
-
-enum TypeEnterprise {
-  ESN
-  START_UP
-  ENTERPRISE
+enum ApiProvider {
+  ADZUNA
+  APIFY
+  FRANCE_TRAVAIL
+  UNKNOW
 }
 
-enum JobStatus {
-  NEED_TO_CONTACT
-  NEED_TO_VALIDATE_MESSAGE
-  NEED_TO_SEND_MESSAGE
-  INTERVIEWS
-  TECHNICAL_TEST
-  NEED_TO_SEND_THANKS_AFTER_INTERVIEW
-  NEED_TO_SEND_MAIL_REMINDER
+enum ContractType {
+  CDI
+  CDD
+  FREELANCE
+  ALTERNANCE
 }
 
+enum ExperienceLevel {
+  JUNIOR
+  MID
+  SENIOR
+}
+
+enum RemotePolicy {
+  FULL
+  HYBRID
+  ONSITE
+}
+
+enum ApplicationStatus {
+  TO_APPLY
+  APPLIED
+  FIRST_CONTACT
+  FIRST_INTERVIEW
+  FOLLOW_UP_INTERVIEW
+  OFFER_RECEIVED
+  ACCEPTED
+  REJECTED
+  GHOSTED
+  WITHDRAWN
+}
 
 enum CompatibilityJob {
   PERFECT
@@ -118,72 +283,240 @@ enum CompatibilityJob {
   WHY_NOT
 }
 
+ 
 
+model Application {
+  @@map("application")
 
+  // Int
+  id           Int       @id @default(autoincrement())
 
-enum ApplicationMethod {
-  LINKEDIN
-  JOBBOARD
-  EMAIL
-  OTHER
-}
+  // String
+  apiOfferId   String?   @map("api_offer_id") @db.VarChar(150)
+  title        String    @db.VarChar(100)
+  company      String?   @db.VarChar(100)
+  url          String    @db.Text
+  description  String?   @db.Text
 
-model Job {
-  @@map("job")
-  
-  id                    Int                 @id @default(autoincrement())
-  interviewCount        Int                 @default(0) @map("interview_count")
-  rating                Int                 @default(0)
-  
+  // DateTime
+  publishedAt  DateTime?  @map("published_at")
+  appliedAt    DateTime?  @map("applied_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime?  @updatedAt @map("updated_at")
 
-  jobTitle              String              @map("job_title")
-  enterprise            String
-  link                  String
-  managerName           String?             @map("manager_name")
-  managerEmail          String?             @map("manager_email")
-  description           String?             @db.Text
-  notes                 String?             @db.Text
-  rejectedReason        String?             @map("rejection_reason")
+  // Boolean
+  isFavorite   Boolean    @default(false) @map("is_favorite")
 
+  // Enum
+  jobboard       Jobboard
+  apiProvider    ApiProvider?       @map("api_provider")
+  contractType   ContractType       @map("contract_type")
+  experience     ExperienceLevel?
+  remotePolicy   RemotePolicy?      @map("remote_policy")
+  compatibility  CompatibilityJob?
+  currentStatus  ApplicationStatus  @default(TO_APPLY) @map("current_status")
 
-  type                  TypeEnterprise
-  status                JobStatus
-  compatibility         CompatibilityJob
-  applicationMethod     ApplicationMethod
+  // Decimal
+  salaryMin    Int?   @map("salary_min")
+  salaryMax    Int?   @map("salary_max")
 
+  // Foreign keys
+  userId       Int        @map("user_id")
 
-  isArchived            Boolean             @default(false)
-  isFavorite            Boolean             @default(false)
-
-
-  createdAt             DateTime            @default(now())   @map("created_at")
-  updatedAt             DateTime?           @updatedAt        @map("updated_at")
-  appliedAt             DateTime?           @map("applied_at")
-  lastContactAt         DateTime?           @map("last_contact_at")
-
-
-  jobHasTechnology      JobHasTechnology[]
-  addressId             Int?                @map("address_id")
-  address               Address?            @relation(fields: [addressId], references: [id])
-  userId                Int                 @map("user_id")
-  user                  User                @relation(fields: [userId], references: [id])
-  
+  // Relations
+  user                 User       @relation(fields: [userId], references: [id])
+  applicationContacts  ApplicationHasContact[]
+  applicationSkills    ApplicationHasSkill[]
+  activities           ApplicationHistory[]
+  todos                Todo[]
+  notes                Note[]
 
   @@index([userId])
-
+  @@index([currentStatus])
 }
 
-model JobHasTechnology {
-  @@map("job_has_technology")
+// ================================================
+//                  CONTACT
+// ================================================
+
+model Contact {
+  @@map("contact")
+
+  // Int
+  id         Int       @id @default(autoincrement())
+  createdBy  Int       @map("created_by")
+
+  // String
+  firstname  String    @db.VarChar(100)
+  lastname   String    @db.VarChar(100)
+  email      String    @db.VarChar(100)
+  phone      String?   @db.VarChar(20)
+  profession String    @db.VarChar(50)
+
+  // DateTime
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
+
+  // Relations
+  user                User                    @relation(fields: [createdBy], references: [id])
+  applicationContacts ApplicationHasContact[]
+
+  @@index([createdBy])
+}
+
+// ================================================
+//        APPLICATION_HAS_CONTACT (junction table)
+// ================================================
+
+model ApplicationHasContact {
+  @@map("application_has_contact")
+
+  // Foreign keys
+  applicationId Int         @map("application_id")
+  contactId     Int         @map("contact_id")
+
+  //Relations
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  contact       Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@id([applicationId, contactId])
+  @@index([contactId])
+}
+
+// ================================================
+//                  SKILL
+// ================================================
+
+model Skill {
+  @@map("skill")
+
+  // Int
+  id        Int       @id @default(autoincrement())
+
+  // String
+  label     String    @unique @db.VarChar(100)
+
+  // DateTime
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  // Foreign keys
+  createdBy Int       @map("created_by")
   
-  jobId                Int                @map("job_id")
-  job                  Job                @relation(fields: [jobId], references: [id])
 
-  technologyId         Int                @map("technology_id")
-  technology           Technology         @relation(fields: [technologyId], references: [id])
+  // Relations
+  creator   User      @relation(fields: [createdBy], references: [id])
+  applicationSkills ApplicationHasSkill[]
+}
 
-  @@id([jobId, technologyId])
+// ================================================
+//        APPLICATION_HAS_SKILL (junction table)
+// ================================================
+
+model ApplicationHasSkill {
+  @@map("application_has_skill")
+
+  // Foreign keys
+  applicationId Int         @map("application_id")
+  skillId       Int         @map("skill_id")
+  
+  //Relations
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  skill         Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([applicationId, skillId])
+  @@index([skillId])
+}
+
+// ================================================
+//                  APPLICATION HISTORY
+// ================================================
+
+model ApplicationHistory {
+  @@map("application_history")
+
+  // Int
+  id          Int               @id @default(autoincrement())
+
+  // String
+  description String            @db.VarChar(255)
+
+  // DateTime
+  doneAt      DateTime?         @map("done_at")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime?         @updatedAt @map("updated_at")
+
+  // Enum
+  status      ApplicationStatus
+
+  // Foreign keys
+  applicationId Int         @map("application_id")
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@index([doneAt])
+}
+
+// ================================================
+//                  TODO
+// ================================================
+
+enum StatusTodo {
+  TO_MAKE
+  IN_PROGRESS
+  DONE
+  ARCHIVED
 }
 
 
+model Todo {
+  @@map("todo")
+
+  // Int
+  id          Int        @id @default(autoincrement())
+
+  // String
+  description String     @db.VarChar(150)
+
+  // DateTime
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime?  @updatedAt @map("updated_at")
+
+  // Enum
+  status      StatusTodo @default(TO_MAKE)
+
+  // Foreign keys
+  applicationId Int         @map("application_id")
+
+  //Relations
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+}
+
+// ================================================
+//                  NOTE
+// ================================================
+
+model Note {
+  @@map("note")
+
+  // Int
+  id          Int       @id @default(autoincrement())
+
+  // String
+  description String    @db.Text
+
+  // DateTime
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+
+  // Foreign keys
+  applicationId Int         @map("application_id")
+
+  //Relations
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+}
 

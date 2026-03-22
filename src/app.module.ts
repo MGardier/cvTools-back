@@ -17,6 +17,10 @@ import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
 import { CacheManagerModule } from './modules/cache/cache-manager.module';
 import { AddressModule } from './modules/address/address.module';
 import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
+import { ApplicationModule } from './modules/application/application.module';
+import { ContactModule } from './modules/contact/contact.module';
+import { SkillModule } from './modules/skill/skill.module';
+import { ScraperModule } from './modules/scraper/scraper.module';
 
 @Module({
   imports: [
@@ -33,6 +37,10 @@ import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
     UserTokenModule,
     JwtManagerModule,
     AddressModule,
+    ApplicationModule,
+    ContactModule,
+    SkillModule,
+    ScraperModule,
   ],
   controllers: [],
   providers: [

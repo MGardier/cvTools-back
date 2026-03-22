@@ -44,7 +44,7 @@ export class UserTokenService {
     const data = {
       token: hashedToken,
       type: UtilRepository.toPrismaTokenType(type),
-      expiresIn: UtilDate.__convertExpiresToDate(expiresIn),
+      expiresAt: UtilDate.__convertExpiresToDate(expiresIn),
       uuid,
     };
 

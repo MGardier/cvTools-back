@@ -3,10 +3,8 @@ import { z } from 'zod';
 export const envSchema = z.object({
   // HTTP
   PORT: z.coerce.number().optional(),
-  NODE_ENV: z
-    .enum(['dev', 'prod', 'test'])
-    .optional()
-    .default('dev'),
+  NODE_ENV: z.enum(['dev', 'prod', 'test']).optional().default('dev'),
+  LOG_FORMAT: z.enum(['json', 'visual', 'both']).optional().default('visual'),
 
   /* #################### DATABASE ########################### */
 
@@ -227,6 +225,17 @@ export const envSchema = z.object({
         ? 'You must provide RABBITMQ_PASSWORD.'
         : 'RABBITMQ_PASSWORD must be a string.',
   }),
+
+  // LLM
+  GEMINI_API_KEY: z.string({
+    error: (iss) =>
+      iss.input === undefined
+        ? 'You must provide GEMINI_API_KEY.'
+        : 'GEMINI_API_KEY must be a string.',
+  }),
+
+  // SCRAPER
+  JINA_READER_BASE_URL: z.url().optional().default('https://r.jina.ai/'),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
