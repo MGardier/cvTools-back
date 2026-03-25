@@ -72,7 +72,7 @@ export class LlmService {
     };
 
     this.logger.log(`Attempting fetchAndMap with Gemini for ${url}...`);
-    const geminiResponse = await this.geminiProvider.fetchAndMap!(request);
+    const geminiResponse = await this.geminiProvider.fetchAndMap(request);
 
     if (geminiResponse.success) {
       const parsed = this.__parseResponse(geminiResponse);
