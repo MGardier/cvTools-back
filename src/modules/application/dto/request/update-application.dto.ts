@@ -4,7 +4,11 @@ import { IsBoolean, IsDate, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class UpdateApplicationRequestDto extends PartialType(
-  OmitType(CreateApplicationRequestDto,['contactIds','skillIds','apiOfferId']),
+  OmitType(CreateApplicationRequestDto, [
+    'contactIds',
+    'skillIds',
+    'apiOfferId',
+  ]),
 ) {
   @IsOptional()
   @IsDate({ message: 'La date doit être une date valide.' })
@@ -13,7 +17,7 @@ export class UpdateApplicationRequestDto extends PartialType(
   @IsOptional()
   @IsBoolean({ message: 'isFavorite doit être un booléen.' })
   isFavorite?: boolean;
-  
+
   // =============================================================================
   //                        OPTIONAL NESTED OBJECT
   // =============================================================================
