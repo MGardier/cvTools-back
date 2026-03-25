@@ -10,7 +10,10 @@ export class SkillRepository {
   //                                 CREATE
   // =============================================================================
 
-  async create(data: Prisma.SkillUncheckedCreateInput, tx?: Prisma.TransactionClient): Promise<Skill> {
+  async create(
+    data: Prisma.SkillUncheckedCreateInput,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Skill> {
     const client = tx ?? this.prismaService;
 
     return await client.skill.create({ data });
@@ -20,7 +23,11 @@ export class SkillRepository {
   //                               UPDATE
   // =============================================================================
 
-  async update(id: number, data: Prisma.SkillUncheckedUpdateInput, tx?: Prisma.TransactionClient): Promise<Skill> {
+  async update(
+    id: number,
+    data: Prisma.SkillUncheckedUpdateInput,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Skill> {
     const client = tx ?? this.prismaService;
 
     return await client.skill.update({
@@ -53,7 +60,10 @@ export class SkillRepository {
     });
   }
 
-  async findOneById(id: number, tx?: Prisma.TransactionClient): Promise<Skill | null> {
+  async findOneById(
+    id: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Skill | null> {
     const client = tx ?? this.prismaService;
 
     return await client.skill.findUnique({
@@ -73,7 +83,10 @@ export class SkillRepository {
     });
   }
 
-  async countApplicationLinks(skillId: number, tx?: Prisma.TransactionClient): Promise<number> {
+  async countApplicationLinks(
+    skillId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<number> {
     const client = tx ?? this.prismaService;
 
     return await client.applicationHasSkill.count({
@@ -81,7 +94,10 @@ export class SkillRepository {
     });
   }
 
-  async findAllByApplicationId(applicationId: number, tx?: Prisma.TransactionClient): Promise<Skill[]> {
+  async findAllByApplicationId(
+    applicationId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Skill[]> {
     const client = tx ?? this.prismaService;
 
     return await client.skill.findMany({

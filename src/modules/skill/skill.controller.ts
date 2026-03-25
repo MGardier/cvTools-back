@@ -82,7 +82,10 @@ export class SkillController {
     @Req() req: IAuthenticatedRequest,
     @Param('applicationId', ParseIntPipe) applicationId: number,
   ): Promise<SkillResponseDto[]> {
-    return await this.skillService.findAllByApplicationId(applicationId, req.user.sub);
+    return await this.skillService.findAllByApplicationId(
+      applicationId,
+      req.user.sub,
+    );
   }
 
   @Get(':id')
@@ -105,7 +108,11 @@ export class SkillController {
     @Param('skillId', ParseIntPipe) skillId: number,
     @Param('applicationId', ParseIntPipe) applicationId: number,
   ): Promise<void> {
-    await this.skillService.linkToApplication(applicationId, skillId, req.user.sub);
+    await this.skillService.linkToApplication(
+      applicationId,
+      skillId,
+      req.user.sub,
+    );
   }
 
   @Delete(':skillId/application/:applicationId')
@@ -116,6 +123,10 @@ export class SkillController {
     @Param('skillId', ParseIntPipe) skillId: number,
     @Param('applicationId', ParseIntPipe) applicationId: number,
   ): Promise<void> {
-    await this.skillService.unlinkFromApplication(applicationId, skillId, req.user.sub);
+    await this.skillService.unlinkFromApplication(
+      applicationId,
+      skillId,
+      req.user.sub,
+    );
   }
 }

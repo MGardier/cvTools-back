@@ -19,21 +19,27 @@ export class SkillService {
     private readonly skillRepository: SkillRepository,
     @Inject(forwardRef(() => ApplicationService))
     private readonly applicationService: ApplicationService,
-  ) { }
+  ) {}
 
   // =============================================================================
   //                            CREATE
   // =============================================================================
 
   async create(dto: CreateSkillRequestDto, userId: number): Promise<Skill> {
-    return await this.skillRepository.create(this.__mapCreateData(dto.label, userId));
+    return await this.skillRepository.create(
+      this.__mapCreateData(dto.label, userId),
+    );
   }
 
   // =============================================================================
   //                            UPDATE
   // =============================================================================
 
-  async update(id: number, userId: number, dto: UpdateSkillRequestDto): Promise<Skill> {
+  async update(
+    id: number,
+    userId: number,
+    dto: UpdateSkillRequestDto,
+  ): Promise<Skill> {
     const skill = await this.__findOneAndCheckOwnership(id, userId);
     await this.__ensureSkillIsNotLinked(skill.id);
 
@@ -86,8 +92,14 @@ export class SkillService {
     userId: number,
     tx?: Prisma.TransactionClient,
   ): Promise<void> {
-    await Promise.all(skillIds.map((id) => this.__findOneAndCheckOwnership(id, userId)));
-    await this.skillRepository.addManyApplicationLinks(applicationId, skillIds, tx);
+    await Promise.all(
+      skillIds.map((id) => this.__findOneAndCheckOwnership(id, userId)),
+    );
+    await this.skillRepository.addManyApplicationLinks(
+      applicationId,
+      skillIds,
+      tx,
+    );
   }
 
   async linkToApplication(
@@ -97,7 +109,11 @@ export class SkillService {
     tx?: Prisma.TransactionClient,
   ): Promise<ApplicationHasSkill> {
     const skill = await this.__findOneAndCheckOwnership(skillId, userId);
-    return await this.skillRepository.addApplicationLink(applicationId, skill.id, tx);
+    return await this.skillRepository.addApplicationLink(
+      applicationId,
+      skill.id,
+      tx,
+    );
   }
 
   async unlinkFromApplication(
@@ -110,7 +126,10 @@ export class SkillService {
     await this.skillRepository.removeApplicationLink(applicationId, skillId);
   }
 
-  async unlinkAllFromApplication(applicationId: number, tx?: Prisma.TransactionClient): Promise<void> {
+  async unlinkAllFromApplication(
+    applicationId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<void> {
     await this.skillRepository.removeAllApplicationLinks(applicationId, tx);
   }
 
