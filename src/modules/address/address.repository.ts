@@ -67,4 +67,22 @@ export class AddressRepository {
       },
     });
   }
+
+  async findEntityIdsByCity(
+    tableName: Address['tableName'],
+    city: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<number[]> {
+    const client = tx ?? this.prismaService;
+
+    const addresses = await client.address.findMany({
+      where: {
+        tableName,
+        city: { contains: city, mode: 'insensitive' },
+      },
+      select: { tableId: true },
+    });
+
+    return addresses.map((a) => a.tableId);
+  }
 }

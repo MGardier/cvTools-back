@@ -51,6 +51,18 @@ export class AddressService {
     );
   }
 
+  async findEntityIdsByCity(
+    tableName: AddressTable,
+    city: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<number[]> {
+    return await this.addressRepository.findEntityIdsByCity(
+      tableName,
+      city,
+      tx,
+    );
+  }
+
   // =============================================================================
   //                               DELETE
   // =============================================================================
@@ -65,8 +77,7 @@ export class AddressService {
       tx,
     );
 
-    if (existing)
-      await this.addressRepository.delete(existing.id, tx);
+    if (existing) await this.addressRepository.delete(existing.id, tx);
   }
 
   // =============================================================================
