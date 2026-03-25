@@ -18,7 +18,7 @@ export class ContactService {
     private readonly contactRepository: ContactRepository,
     @Inject(forwardRef(() => ApplicationService))
     private readonly applicationService: ApplicationService,
-  ) { }
+  ) {}
 
   // =============================================================================
   //                               CREATE
@@ -29,9 +29,11 @@ export class ContactService {
     dto: CreateContactRequestDto,
     tx?: Prisma.TransactionClient,
   ): Promise<Contact> {
-    return await this.contactRepository.create(this.__mapCreateDto(dto, userId), tx);
+    return await this.contactRepository.create(
+      this.__mapCreateDto(dto, userId),
+      tx,
+    );
   }
-
 
   // =============================================================================
   //                               UPDATE
@@ -82,17 +84,21 @@ export class ContactService {
   //                  APPLICATION-CONTACT (RELATION LINK)
   // =============================================================================
 
- 
-
   async linkManyToApplication(
     applicationId: number,
     contactIds: number[],
     userId: number,
     tx?: Prisma.TransactionClient,
   ): Promise<void> {
-    await Promise.all(contactIds.map((id) => this.__findOneAndCheckOwnership(id, userId)));
+    await Promise.all(
+      contactIds.map((id) => this.__findOneAndCheckOwnership(id, userId)),
+    );
 
-    await this.contactRepository.addManyApplicationLinks(applicationId, contactIds, tx);
+    await this.contactRepository.addManyApplicationLinks(
+      applicationId,
+      contactIds,
+      tx,
+    );
   }
 
   async linkToApplication(
@@ -101,8 +107,12 @@ export class ContactService {
     userId: number,
     tx?: Prisma.TransactionClient,
   ): Promise<ApplicationHasContact> {
-    const contact  = await this.__findOneAndCheckOwnership(contactId, userId);
-    return await this.contactRepository.addApplicationLink(applicationId, contact.id, tx);
+    const contact = await this.__findOneAndCheckOwnership(contactId, userId);
+    return await this.contactRepository.addApplicationLink(
+      applicationId,
+      contact.id,
+      tx,
+    );
   }
 
   async unlinkFromApplication(
@@ -112,7 +122,10 @@ export class ContactService {
   ): Promise<void> {
     await this.applicationService.findOne(applicationId, userId);
 
-    await this.contactRepository.removeApplicationLink(applicationId, contactId);
+    await this.contactRepository.removeApplicationLink(
+      applicationId,
+      contactId,
+    );
   }
 
   async unlinkAllFromApplication(
@@ -136,17 +149,17 @@ export class ContactService {
     };
   }
 
- 
   private async __findOneAndCheckOwnership(
     id: number,
     userId: number,
   ): Promise<Contact> {
-    const contact = await this.contactRepository.findOneByIdAndByUserId(id, userId);
+    const contact = await this.contactRepository.findOneByIdAndByUserId(
+      id,
+      userId,
+    );
 
     if (!contact)
-      throw new NotFoundException(
-        ErrorCodeEnum.CONTACT_NOT_FOUND_ERROR,
-      );
+      throw new NotFoundException(ErrorCodeEnum.CONTACT_NOT_FOUND_ERROR);
 
     return contact;
   }

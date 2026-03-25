@@ -52,7 +52,10 @@ export class ContactRepository {
   //                               FIND
   // =============================================================================
 
-  async findAllByUserId(userId: number, tx?: Prisma.TransactionClient): Promise<Contact[]> {
+  async findAllByUserId(
+    userId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Contact[]> {
     const client = tx ?? this.prismaService;
 
     return await client.contact.findMany({
@@ -61,7 +64,10 @@ export class ContactRepository {
     });
   }
 
-  async findAllByApplicationId(applicationId: number, tx?: Prisma.TransactionClient): Promise<Contact[]> {
+  async findAllByApplicationId(
+    applicationId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Contact[]> {
     const client = tx ?? this.prismaService;
 
     return await client.contact.findMany({
@@ -136,7 +142,10 @@ export class ContactRepository {
     });
   }
 
-  async countApplicationLinks(contactId: number, tx?: Prisma.TransactionClient): Promise<number> {
+  async countApplicationLinks(
+    contactId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<number> {
     const client = tx ?? this.prismaService;
 
     return await client.applicationHasContact.count({

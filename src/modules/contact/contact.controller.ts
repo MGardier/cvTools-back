@@ -85,7 +85,10 @@ export class ContactController {
     @Param('applicationId', ParseIntPipe)
     applicationId: number,
   ): Promise<ContactResponseDto[]> {
-    return await this.contactService.findAllByApplicationId(applicationId,req.user.sub);
+    return await this.contactService.findAllByApplicationId(
+      applicationId,
+      req.user.sub,
+    );
   }
 
   @Get(':id')
@@ -109,7 +112,11 @@ export class ContactController {
     @Param('contactId', ParseIntPipe) contactId: number,
     @Param('applicationId', ParseIntPipe) applicationId: number,
   ): Promise<void> {
-    await this.contactService.linkToApplication(applicationId, contactId,req.user.sub);
+    await this.contactService.linkToApplication(
+      applicationId,
+      contactId,
+      req.user.sub,
+    );
   }
 
   @Delete(':contactId/application/:applicationId')
