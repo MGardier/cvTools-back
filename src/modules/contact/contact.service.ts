@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  ConflictException,
   Inject,
   forwardRef,
 } from '@nestjs/common';
@@ -55,6 +56,7 @@ export class ContactService {
 
   async delete(id: number, userId: number): Promise<void> {
     const contact = await this.__findOneAndCheckOwnership(id, userId);
+    await this.__ensureContactIsNotLinked(contact.id);
 
     await this.contactRepository.delete(contact.id);
   }
@@ -147,6 +149,13 @@ export class ContactService {
       ...dto,
       createdBy: userId,
     };
+  }
+
+  private async __ensureContactIsNotLinked(id: number): Promise<void> {
+    const count = await this.contactRepository.countApplicationLinks(id);
+
+    if (count > 0)
+      throw new ConflictException(ErrorCodeEnum.CONTACT_DELETE_CONFLICT);
   }
 
   private async __findOneAndCheckOwnership(
