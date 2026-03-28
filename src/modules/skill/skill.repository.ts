@@ -19,6 +19,20 @@ export class SkillRepository {
     return await client.skill.create({ data });
   }
 
+  async upsertByLabel(
+    label: string,
+    userId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Skill> {
+    const client = tx ?? this.prismaService;
+
+    return await client.skill.upsert({
+      where: { label },
+      create: { label, createdBy: userId },
+      update: {},
+    });
+  }
+
   // =============================================================================
   //                               UPDATE
   // =============================================================================

@@ -1,4 +1,9 @@
-import { Application, ApplicationStatus, Prisma } from '@prisma/client';
+import {
+  Application,
+  ApplicationStatus,
+  Jobboard,
+  Prisma,
+} from '@prisma/client';
 
 export interface IOptionRepository<TDataSelectedColumns> {
   tx?: Prisma.TransactionClient;
@@ -37,4 +42,19 @@ export interface IFindAllResponse {
   count: number;
   page: number;
   maxPage: number;
+}
+
+export interface IApplicationFindAllOptions {
+  skip?: number;
+  take?: number;
+  jobboard?: Jobboard;
+  currentStatus?: ApplicationStatus;
+  isFavorite?: boolean;
+  company?: string;
+  createdAt?: Date;
+  appliedAt?: Date;
+  keyword?: string;
+  cityApplicationIds?: number[];
+  sortField?: keyof Application;
+  sortDirection?: Prisma.SortOrder;
 }

@@ -1,5 +1,9 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, StrategyOptionsWithRequest, VerifyCallback } from 'passport-google-oauth20';
+import {
+  Strategy,
+  StrategyOptionsWithRequest,
+  VerifyCallback,
+} from 'passport-google-oauth20';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';

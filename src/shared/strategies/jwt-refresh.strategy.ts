@@ -26,13 +26,16 @@ export class JwtRefreshStrategy extends PassportStrategy(
         (req: Request) => req?.cookies?.refresh_token || null,
       ]),
       secretOrKey: configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
-        //Allow passport to deny if token is expired
+      //Allow passport to deny if token is expired
       ignoreExpiration: false,
       passReqToCallback: true,
     } as const);
   }
 
-  async validate(req: Request, payload: IPayloadJwt): Promise<IRefreshTokenPayload> {
+  async validate(
+    req: Request,
+    payload: IPayloadJwt,
+  ): Promise<IRefreshTokenPayload> {
     const refreshToken = req.cookies?.refresh_token;
 
     if (!refreshToken) {

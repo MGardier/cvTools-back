@@ -38,6 +38,15 @@ export class SkillController {
     return await this.skillService.create(dto, req.user.sub);
   }
 
+  @Post('find-or-create')
+  @SerializeWith(SkillResponseDto)
+  async findOrCreate(
+    @Req() req: IAuthenticatedRequest,
+    @Body() dto: CreateSkillRequestDto,
+  ): Promise<SkillResponseDto> {
+    return await this.skillService.findOrCreate(dto, req.user.sub);
+  }
+
   // =============================================================================
   //                               UPDATE
   // =============================================================================

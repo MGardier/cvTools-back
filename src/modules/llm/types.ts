@@ -30,5 +30,6 @@ export type TExtractedApplication = {
   publishedAt?: string;
   skills?: string[];
   address?: TExtractedAddress;
+  //TODO: Retirer contact non pertinent
   contacts?: TExtractedContact[];
 };

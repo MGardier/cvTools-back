@@ -31,6 +31,13 @@ export class SkillService {
     );
   }
 
+  async findOrCreate(
+    dto: CreateSkillRequestDto,
+    userId: number,
+  ): Promise<Skill> {
+    return await this.skillRepository.upsertByLabel(dto.label, userId);
+  }
+
   // =============================================================================
   //                            UPDATE
   // =============================================================================
