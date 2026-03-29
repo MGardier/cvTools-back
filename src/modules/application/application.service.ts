@@ -12,10 +12,7 @@ import { ContactService } from '../contact/contact.service';
 import { CreateApplicationRequestDto } from './dto/request/create-application.dto';
 import { UpdateApplicationRequestDto } from './dto/request/update-application.dto';
 import { FindAllApplicationRequestDto } from './dto/request/find-all-application.dto';
-import {
-  TApplicationWithAddress,
-  TApplicationDetail,
-} from './types';
+import { TApplicationWithAddress, TApplicationDetail } from './types';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { AddressOwnerEnum } from '../address/constants';
 import { PrismaService } from 'prisma/prisma.service';
@@ -178,18 +175,25 @@ export class ApplicationService {
       id,
     );
 
-    const skills = ('applicationSkills' in application && application.applicationSkills)
-      ? (application.applicationSkills as { skill: Skill }[]).map((as) => as.skill)
-      : [];
+    const skills =
+      'applicationSkills' in application && application.applicationSkills
+        ? (application.applicationSkills as { skill: Skill }[]).map(
+            (as) => as.skill,
+          )
+        : [];
 
-    const contacts = ('applicationContacts' in application && application.applicationContacts)
-      ? (application.applicationContacts as { contact: Contact }[]).map((ac) => ac.contact)
-      : [];
+    const contacts =
+      'applicationContacts' in application && application.applicationContacts
+        ? (application.applicationContacts as { contact: Contact }[]).map(
+            (ac) => ac.contact,
+          )
+        : [];
 
-    const { applicationSkills, applicationContacts, ...rest } = application as Application & {
-      applicationSkills?: unknown;
-      applicationContacts?: unknown;
-    };
+    const { applicationSkills, applicationContacts, ...rest } =
+      application as Application & {
+        applicationSkills?: unknown;
+        applicationContacts?: unknown;
+      };
 
     return { ...rest, address, skills, contacts };
   }

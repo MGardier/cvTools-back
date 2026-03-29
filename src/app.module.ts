@@ -21,6 +21,9 @@ import { ApplicationModule } from './modules/application/application.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { SkillModule } from './modules/skill/skill.module';
 import { ScraperModule } from './modules/scraper/scraper.module';
+import { NoteModule } from './modules/note/note.module';
+import { TodoModule } from './modules/todo/todo.module';
+import { ApplicationHistoryModule } from './modules/application-history/application-history.module';
 
 @Module({
   imports: [
@@ -41,6 +44,9 @@ import { ScraperModule } from './modules/scraper/scraper.module';
     ContactModule,
     SkillModule,
     ScraperModule,
+    NoteModule,
+    TodoModule,
+    ApplicationHistoryModule,
   ],
   controllers: [],
   providers: [
