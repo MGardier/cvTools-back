@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Todo, Prisma } from '@prisma/client';
+import { Todo, Prisma, StatusTodo } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
 
 @Injectable()
@@ -50,10 +50,17 @@ export class TodoRepository {
   //                               FIND
   // =============================================================================
 
-  async findAllByApplicationId(applicationId: number): Promise<Todo[]> {
+  async findAllByApplicationId(
+    applicationId: number,
+    sort: 'asc' | 'desc' = 'desc',
+    status?: StatusTodo,
+  ): Promise<Todo[]> {
     return await this.prismaService.todo.findMany({
-      where: { applicationId },
-      orderBy: { createdAt: 'desc' },
+      where: {
+        applicationId,
+        ...(status && { status }),
+      },
+      orderBy: { createdAt: sort },
     });
   }
 

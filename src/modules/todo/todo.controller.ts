@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   ParseIntPipe,
   Req,
   HttpCode,
@@ -15,6 +16,7 @@ import { TodoService } from './todo.service';
 import { CreateTodoRequestDto } from './dto/request/create-todo.dto';
 import { UpdateTodoRequestDto } from './dto/request/update-todo.dto';
 import { TodoResponseDto } from './dto/response/todo.dto';
+import { StatusTodo } from '@prisma/client';
 import {
   SerializeWith,
   SkipSerialize,
@@ -78,10 +80,14 @@ export class TodoController {
   async findAll(
     @Req() req: IAuthenticatedRequest,
     @Param('applicationId', ParseIntPipe) applicationId: number,
+    @Query('sort') sort?: 'asc' | 'desc',
+    @Query('status') status?: StatusTodo,
   ): Promise<TodoResponseDto[]> {
     return await this.todoService.findAllByApplicationId(
       applicationId,
       req.user.sub,
+      sort,
+      status,
     );
   }
 }

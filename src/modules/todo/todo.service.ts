@@ -10,7 +10,7 @@ import { ApplicationService } from '../application/application.service';
 import { CreateTodoRequestDto } from './dto/request/create-todo.dto';
 import { UpdateTodoRequestDto } from './dto/request/update-todo.dto';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { Todo } from '@prisma/client';
+import { Todo, StatusTodo } from '@prisma/client';
 
 @Injectable()
 export class TodoService {
@@ -76,10 +76,12 @@ export class TodoService {
   async findAllByApplicationId(
     applicationId: number,
     userId: number,
+    sort: 'asc' | 'desc' = 'desc',
+    status?: StatusTodo,
   ): Promise<Todo[]> {
     await this.applicationService.findOne(applicationId, userId);
 
-    return this.todoRepository.findAllByApplicationId(applicationId);
+    return this.todoRepository.findAllByApplicationId(applicationId, sort, status);
   }
 
   // =============================================================================
