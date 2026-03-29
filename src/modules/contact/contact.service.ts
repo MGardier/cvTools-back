@@ -65,8 +65,8 @@ export class ContactService {
   //                               FIND
   // =============================================================================
 
-  async findAllByUserId(userId: number) {
-    const contacts = await this.contactRepository.findAllByUserId(userId);
+  async search(userId: number, search?: string) {
+    const contacts = await this.contactRepository.search(userId, search);
     return contacts.map((contact) => ({
       ...contact,
       isUsed: contact._count.applicationContacts > 0,
@@ -78,10 +78,7 @@ export class ContactService {
     return this.__enrichWithMeta(contact);
   }
 
-  async findAllByApplicationId(
-    applicationId: number,
-    userId: number,
-  ) {
+  async findAllByApplicationId(applicationId: number, userId: number) {
     await this.applicationService.findOne(applicationId, userId);
 
     const contacts =

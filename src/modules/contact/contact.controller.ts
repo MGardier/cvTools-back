@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   ParseIntPipe,
   Req,
   HttpCode,
@@ -74,8 +75,9 @@ export class ContactController {
   @SerializeWith(ContactResponseDto)
   async findAll(
     @Req() req: IAuthenticatedRequest,
+    @Query('search') search?: string,
   ): Promise<ContactResponseDto[]> {
-    return await this.contactService.findAllByUserId(req.user.sub);
+    return await this.contactService.search(req.user.sub, search);
   }
 
   @Get('application/:applicationId')

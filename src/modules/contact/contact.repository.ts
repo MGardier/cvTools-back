@@ -52,16 +52,29 @@ export class ContactRepository {
   //                               FIND
   // =============================================================================
 
-  async findAllByUserId(
+  async search(
     userId: number,
+    search?: string,
+    limit = 20,
     tx?: Prisma.TransactionClient,
   ) {
     const client = tx ?? this.prismaService;
 
     return await client.contact.findMany({
-      where: { createdBy: userId },
-      orderBy: { createdAt: 'desc' },
+      where: {
+        createdBy: userId,
+        ...(search && {
+          OR: [
+            { firstname: { contains: search, mode: 'insensitive' } },
+            { lastname: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+            { profession: { contains: search, mode: 'insensitive' } },
+          ],
+        }),
+      },
       include: { _count: { select: { applicationContacts: true } } },
+      orderBy: { lastname: 'asc' },
+      take: limit,
     });
   }
 
