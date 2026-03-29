@@ -50,10 +50,13 @@ export class NoteRepository {
   //                               FIND
   // =============================================================================
 
-  async findAllByApplicationId(applicationId: number): Promise<Note[]> {
+  async findAllByApplicationId(
+    applicationId: number,
+    sort: 'asc' | 'desc' = 'desc',
+  ): Promise<Note[]> {
     return await this.prismaService.note.findMany({
       where: { applicationId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: sort },
     });
   }
 

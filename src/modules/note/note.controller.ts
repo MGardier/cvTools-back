@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   ParseIntPipe,
   Req,
   HttpCode,
@@ -78,10 +79,12 @@ export class NoteController {
   async findAll(
     @Req() req: IAuthenticatedRequest,
     @Param('applicationId', ParseIntPipe) applicationId: number,
+    @Query('sort') sort?: 'asc' | 'desc',
   ): Promise<NoteResponseDto[]> {
     return await this.noteService.findAllByApplicationId(
       applicationId,
       req.user.sub,
+      sort,
     );
   }
 }

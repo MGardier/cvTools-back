@@ -75,10 +75,11 @@ export class NoteService {
   async findAllByApplicationId(
     applicationId: number,
     userId: number,
+    sort: 'asc' | 'desc' = 'desc',
   ): Promise<Note[]> {
     await this.applicationService.findOne(applicationId, userId);
 
-    return this.noteRepository.findAllByApplicationId(applicationId);
+    return this.noteRepository.findAllByApplicationId(applicationId, sort);
   }
 
   // =============================================================================
