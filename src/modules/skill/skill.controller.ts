@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   ParseIntPipe,
   Req,
   HttpCode,
@@ -81,8 +82,11 @@ export class SkillController {
 
   @Get()
   @SerializeWith(SkillResponseDto)
-  async findAll(): Promise<SkillResponseDto[]> {
-    return await this.skillService.findAll();
+  async findAll(
+    @Req() req: IAuthenticatedRequest,
+    @Query('search') search?: string,
+  ): Promise<SkillResponseDto[]> {
+    return await this.skillService.search(req.user.sub, search);
   }
 
   @Get('application/:applicationId')
@@ -100,9 +104,10 @@ export class SkillController {
   @Get(':id')
   @SerializeWith(SkillResponseDto)
   async findOneById(
+    @Req() req: IAuthenticatedRequest,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SkillResponseDto> {
-    return await this.skillService.findOneById(id);
+    return await this.skillService.findOneById(id, req.user.sub);
   }
 
   // =============================================================================

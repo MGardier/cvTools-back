@@ -54,7 +54,7 @@ export class ApplicationRepository {
   async findAllByUserId(
     userId: number,
     options: IApplicationFindAllOptions = {},
-  ): Promise<{ items: Application[]; total: number }> {
+  ) {
     const where: Prisma.ApplicationWhereInput = { userId };
 
     if (options.jobboard !== undefined) where.jobboard = options.jobboard;
@@ -95,6 +95,11 @@ export class ApplicationRepository {
         orderBy,
         skip: options.skip ?? 0,
         take: options.take ?? 10,
+        include: {
+          applicationSkills: {
+            include: { skill: true },
+          },
+        },
       }),
       this.prismaService.application.count({ where }),
     ]);
@@ -106,11 +111,15 @@ export class ApplicationRepository {
     id: number,
     userId: number,
     tx?: Prisma.TransactionClient,
-  ): Promise<Application | null> {
+  ) {
     const client = tx ?? this.prismaService;
 
     return await client.application.findFirst({
       where: { id, userId },
+      include: {
+        applicationSkills: { include: { skill: true } },
+        applicationContacts: { include: { contact: true } },
+      },
     });
   }
 }

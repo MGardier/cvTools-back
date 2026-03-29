@@ -12,11 +12,15 @@ import { ContactService } from '../contact/contact.service';
 import { CreateApplicationRequestDto } from './dto/request/create-application.dto';
 import { UpdateApplicationRequestDto } from './dto/request/update-application.dto';
 import { FindAllApplicationRequestDto } from './dto/request/find-all-application.dto';
-import { TApplicationWithAddress } from './types';
+import {
+  TApplicationWithAddress,
+  TApplicationDetail,
+} from './types';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { AddressOwnerEnum } from '../address/constants';
 import { PrismaService } from 'prisma/prisma.service';
-import { Address, Application, Prisma } from '@prisma/client';
+import { Address, Application, Contact, Prisma, Skill } from '@prisma/client';
+import { PaginatedApplicationResponseDto } from './dto/response/paginated-application.dto';
 
 @Injectable()
 export class ApplicationService {
@@ -121,7 +125,7 @@ export class ApplicationService {
   async findAll(
     userId: number,
     dto: FindAllApplicationRequestDto,
-  ): Promise<{ items: TApplicationWithAddress[]; total: number; page: number; limit: number }> {
+  ): Promise<PaginatedApplicationResponseDto> {
     const cityApplicationIds = dto.city
       ? await this.addressService.findEntityIdsByCity(
           AddressOwnerEnum.APPLICATION,
@@ -157,14 +161,16 @@ export class ApplicationService {
           AddressOwnerEnum.APPLICATION,
           app.id,
         );
-        return { ...app, address };
+        const skills = app.applicationSkills.map((as) => as.skill);
+        const { applicationSkills, ...rest } = app;
+        return { ...rest, address, skills };
       }),
     );
 
     return { items: enrichedItems, total, page, limit };
   }
 
-  async findOne(id: number, userId: number): Promise<TApplicationWithAddress> {
+  async findOne(id: number, userId: number): Promise<TApplicationDetail> {
     const application = await this.__findOneAndCheckOwnership(id, userId);
 
     const address = await this.addressService.findByEntity(
@@ -172,7 +178,20 @@ export class ApplicationService {
       id,
     );
 
-    return { ...application, address };
+    const skills = ('applicationSkills' in application && application.applicationSkills)
+      ? (application.applicationSkills as { skill: Skill }[]).map((as) => as.skill)
+      : [];
+
+    const contacts = ('applicationContacts' in application && application.applicationContacts)
+      ? (application.applicationContacts as { contact: Contact }[]).map((ac) => ac.contact)
+      : [];
+
+    const { applicationSkills, applicationContacts, ...rest } = application as Application & {
+      applicationSkills?: unknown;
+      applicationContacts?: unknown;
+    };
+
+    return { ...rest, address, skills, contacts };
   }
 
   // =============================================================================

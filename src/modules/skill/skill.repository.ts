@@ -74,6 +74,23 @@ export class SkillRepository {
     });
   }
 
+  async search(
+    search?: string,
+    limit = 20,
+    tx?: Prisma.TransactionClient,
+  ): Promise<(Skill & { _count: { applicationSkills: number } })[]> {
+    const client = tx ?? this.prismaService;
+
+    return await client.skill.findMany({
+      where: search
+        ? { label: { contains: search, mode: 'insensitive' } }
+        : undefined,
+      include: { _count: { select: { applicationSkills: true } } },
+      orderBy: { label: 'asc' },
+      take: limit,
+    });
+  }
+
   async findOneById(
     id: number,
     tx?: Prisma.TransactionClient,

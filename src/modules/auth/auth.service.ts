@@ -28,10 +28,9 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-
   private readonly ACCESS_TOKEN_COOKIE = 'access_token';
   private readonly REFRESH_TOKEN_COOKIE = 'refresh_token';
-  
+
   // =============================================================================
   //                            AUTHENTIFICATION
   // =============================================================================
@@ -47,26 +46,24 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.userService.findOneByEmail(email);
 
-    if (!user) 
+    if (!user)
       throw new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS);
-    
 
-    if (!user.password) 
+    if (!user.password)
       throw new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS);
-    
 
-    const isPasswordValid = await this.__comparePassword(password, user.password);
-    if (!isPasswordValid) 
+    const isPasswordValid = await this.__comparePassword(
+      password,
+      user.password,
+    );
+    if (!isPasswordValid)
       throw new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS);
-    
 
-    if (user.status === UserStatus.PENDING) 
+    if (user.status === UserStatus.PENDING)
       throw new ForbiddenException(ErrorCodeEnum.ACCOUNT_PENDING);
-    
 
-    if (user.status === UserStatus.BANNED) 
+    if (user.status === UserStatus.BANNED)
       throw new ForbiddenException(ErrorCodeEnum.USER_BANNED);
-    
 
     return user;
   }
@@ -365,7 +362,6 @@ export class AuthService {
   // =============================================================================
   //                               COOKIES
   // =============================================================================
-
 
   private __setAccessTokenCookie(res: Response, token: string): void {
     res.cookie(this.ACCESS_TOKEN_COOKIE, token, {

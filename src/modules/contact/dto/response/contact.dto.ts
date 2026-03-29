@@ -18,5 +18,4 @@ export class ContactResponseDto {
 
   @Expose()
   profession: string;
-
 }

@@ -25,32 +25,30 @@ export class SkillService {
   //                            CREATE
   // =============================================================================
 
-  async create(dto: CreateSkillRequestDto, userId: number): Promise<Skill> {
-    return await this.skillRepository.create(
+  async create(dto: CreateSkillRequestDto, userId: number) {
+    const skill = await this.skillRepository.create(
       this.__mapCreateData(dto.label, userId),
     );
+    return { ...skill, isOwner: true, isUsed: false };
   }
 
-  async findOrCreate(
-    dto: CreateSkillRequestDto,
-    userId: number,
-  ): Promise<Skill> {
-    return await this.skillRepository.upsertByLabel(dto.label, userId);
+  async findOrCreate(dto: CreateSkillRequestDto, userId: number) {
+    const skill = await this.skillRepository.upsertByLabel(dto.label, userId);
+    return this.__enrichWithMeta(skill, userId);
   }
 
   // =============================================================================
   //                            UPDATE
   // =============================================================================
 
-  async update(
-    id: number,
-    userId: number,
-    dto: UpdateSkillRequestDto,
-  ): Promise<Skill> {
+  async update(id: number, userId: number, dto: UpdateSkillRequestDto) {
     const skill = await this.__findOneAndCheckOwnership(id, userId);
     await this.__ensureSkillIsNotLinked(skill.id);
 
-    return await this.skillRepository.update(skill.id, { label: dto.label });
+    const updated = await this.skillRepository.update(skill.id, {
+      label: dto.label,
+    });
+    return { ...updated, isOwner: true, isUsed: false };
   }
 
   // =============================================================================
@@ -68,25 +66,34 @@ export class SkillService {
   //                            FIND
   // =============================================================================
 
-  async findAll(): Promise<Skill[]> {
-    return await this.skillRepository.findAll();
+  async search(userId: number, search?: string) {
+    const skills = await this.skillRepository.search(search);
+    return skills.map((skill) => ({
+      ...skill,
+      isOwner: skill.createdBy === userId,
+      isUsed: skill._count.applicationSkills > 0,
+    }));
   }
 
-  async findOneById(id: number): Promise<Skill> {
+  async findOneById(id: number, userId?: number) {
     const skill = await this.skillRepository.findOneById(id);
     if (!skill)
       throw new NotFoundException(ErrorCodeEnum.SKILL_NOT_FOUND_ERROR);
 
-    return skill;
+    if (userId !== undefined) {
+      return this.__enrichWithMeta(skill, userId);
+    }
+    return { ...skill, isOwner: false, isUsed: false };
   }
 
-  async findAllByApplicationId(
-    applicationId: number,
-    userId: number,
-  ): Promise<Skill[]> {
+  async findAllByApplicationId(applicationId: number, userId: number) {
     await this.applicationService.findOne(applicationId, userId);
 
-    return await this.skillRepository.findAllByApplicationId(applicationId);
+    const skills =
+      await this.skillRepository.findAllByApplicationId(applicationId);
+    return Promise.all(
+      skills.map((skill) => this.__enrichWithMeta(skill, userId)),
+    );
   }
 
   // =============================================================================
@@ -96,12 +103,10 @@ export class SkillService {
   async linkManyToApplication(
     applicationId: number,
     skillIds: number[],
-    userId: number,
+    _userId: number,
     tx?: Prisma.TransactionClient,
   ): Promise<void> {
-    await Promise.all(
-      skillIds.map((id) => this.__findOneAndCheckOwnership(id, userId)),
-    );
+    await Promise.all(skillIds.map((id) => this.findOneById(id)));
     await this.skillRepository.addManyApplicationLinks(
       applicationId,
       skillIds,
@@ -112,10 +117,10 @@ export class SkillService {
   async linkToApplication(
     applicationId: number,
     skillId: number,
-    userId: number,
+    _userId: number,
     tx?: Prisma.TransactionClient,
   ): Promise<ApplicationHasSkill> {
-    const skill = await this.__findOneAndCheckOwnership(skillId, userId);
+    const skill = await this.findOneById(skillId);
     return await this.skillRepository.addApplicationLink(
       applicationId,
       skill.id,
@@ -143,6 +148,15 @@ export class SkillService {
   // =============================================================================
   //                               PRIVATE
   // =============================================================================
+
+  private async __enrichWithMeta(skill: Skill, userId: number) {
+    const count = await this.skillRepository.countApplicationLinks(skill.id);
+    return {
+      ...skill,
+      isOwner: skill.createdBy === userId,
+      isUsed: count > 0,
+    };
+  }
 
   private __mapCreateData(
     label: string,

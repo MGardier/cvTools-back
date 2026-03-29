@@ -20,10 +20,7 @@ export class ScraperService {
   //                               EXTRACT
   // =============================================================================
 
-  async extract(
-    url: string,
-    userId: number,
-  ): Promise<TExtractedApplication> {
+  async extract(url: string, userId: number): Promise<TExtractedApplication> {
     // STEP 1: Native fetch + JSON-LD extraction -> LLM structureText
     const nativeResult = await this.nativeFetcher.fetch(url);
 
@@ -99,18 +96,14 @@ export class ScraperService {
     return null;
   }
 
-  private __findJobPosting(
-    parsed: unknown,
-  ): Record<string, unknown> | null {
+  private __findJobPosting(parsed: unknown): Record<string, unknown> | null {
     // Direct JobPosting object
-    if (this.__isJobPosting(parsed))
-      return parsed as Record<string, unknown>;
+    if (this.__isJobPosting(parsed)) return parsed as Record<string, unknown>;
 
     // Array of objects
     if (Array.isArray(parsed)) {
       for (const item of parsed) {
-        if (this.__isJobPosting(item))
-          return item as Record<string, unknown>;
+        if (this.__isJobPosting(item)) return item as Record<string, unknown>;
       }
     }
 
@@ -118,8 +111,7 @@ export class ScraperService {
     const record = parsed as Record<string, unknown>;
     if (record?.['@graph'] && Array.isArray(record['@graph'])) {
       for (const item of record['@graph']) {
-        if (this.__isJobPosting(item))
-          return item as Record<string, unknown>;
+        if (this.__isJobPosting(item)) return item as Record<string, unknown>;
       }
     }
 
