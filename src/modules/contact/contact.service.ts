@@ -65,21 +65,30 @@ export class ContactService {
   //                               FIND
   // =============================================================================
 
-  async findAllByUserId(userId: number): Promise<Contact[]> {
-    return await this.contactRepository.findAllByUserId(userId);
+  async findAllByUserId(userId: number) {
+    const contacts = await this.contactRepository.findAllByUserId(userId);
+    return contacts.map((contact) => ({
+      ...contact,
+      isUsed: contact._count.applicationContacts > 0,
+    }));
   }
 
-  async findOne(id: number, userId: number): Promise<Contact> {
-    return await this.__findOneAndCheckOwnership(id, userId);
+  async findOne(id: number, userId: number) {
+    const contact = await this.__findOneAndCheckOwnership(id, userId);
+    return this.__enrichWithMeta(contact);
   }
 
   async findAllByApplicationId(
     applicationId: number,
     userId: number,
-  ): Promise<Contact[]> {
+  ) {
     await this.applicationService.findOne(applicationId, userId);
 
-    return await this.contactRepository.findAllByApplicationId(applicationId);
+    const contacts =
+      await this.contactRepository.findAllByApplicationId(applicationId);
+    return Promise.all(
+      contacts.map((contact) => this.__enrichWithMeta(contact)),
+    );
   }
 
   // =============================================================================
@@ -148,6 +157,16 @@ export class ContactService {
     return {
       ...dto,
       createdBy: userId,
+    };
+  }
+
+  private async __enrichWithMeta(contact: Contact) {
+    const count = await this.contactRepository.countApplicationLinks(
+      contact.id,
+    );
+    return {
+      ...contact,
+      isUsed: count > 0,
     };
   }
 

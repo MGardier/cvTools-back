@@ -55,12 +55,13 @@ export class ContactRepository {
   async findAllByUserId(
     userId: number,
     tx?: Prisma.TransactionClient,
-  ): Promise<Contact[]> {
+  ) {
     const client = tx ?? this.prismaService;
 
     return await client.contact.findMany({
       where: { createdBy: userId },
       orderBy: { createdAt: 'desc' },
+      include: { _count: { select: { applicationContacts: true } } },
     });
   }
 
