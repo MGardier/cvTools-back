@@ -12,7 +12,6 @@ export class JinaReaderFetcher implements IFetcher {
   //                               FETCH
   // =============================================================================
 
-
   async fetch(url: string): Promise<IFetchResult> {
     try {
       const baseUrl = this.configService.get<string>('JINA_READER_BASE_URL');
@@ -41,7 +40,12 @@ export class JinaReaderFetcher implements IFetcher {
         };
       }
 
-      return { data: JSON.stringify(json, null, 2), success: true };
+      const content =
+        typeof json.data === 'string'
+          ? json.data
+          : (json.data?.content ?? JSON.stringify(json.data));
+
+      return { data: content, success: true };
     } catch (error) {
       const message = (error as Error).message;
       this.logger.warn(`Jina Reader fetch failed for ${url}: ${message}`);

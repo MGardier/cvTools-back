@@ -10,6 +10,8 @@ import {
   FETCH_AND_MAP_PROMPT,
 } from './constants/prompts';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { extractedApplicationSchema } from './validation/extracted-application.schema';
+import { NotAJobPostingError } from './errors/not-a-job-posting.error';
 
 @Injectable()
 export class LlmService {
@@ -27,19 +29,21 @@ export class LlmService {
   async structureText(
     text: string,
     userId: number,
+    url?: string,
   ): Promise<TExtractedApplication> {
-    const prompt = STRUCTURE_TEXT_PROMPT + text;
+    const urlContext = url ? `\n\nSource URL: ${url}\n` : '';
+    const prompt = STRUCTURE_TEXT_PROMPT + urlContext + text;
     const request = {
       prompt,
-      maxTokens: 1000,
-      jsonSchema: APPLICATION_JSON_SCHEMA as unknown as Record<string, unknown>,
+      maxTokens: 4096,
+      jsonSchema: APPLICATION_JSON_SCHEMA  as Record<string, unknown>,
     };
 
     this.logger.log('Attempting structureText with Gemini...');
     const geminiResponse = await this.geminiProvider.structureText(request);
 
     if (geminiResponse.success) {
-      const parsed = this.__parseResponse(geminiResponse);
+      const parsed = this.__parseAndValidate(geminiResponse);
       if (parsed) {
         await this.__logAndTrack(
           geminiResponse,
@@ -67,7 +71,7 @@ export class LlmService {
     const prompt = `${FETCH_AND_MAP_PROMPT}\n\nURL to analyze: ${url}`;
     const request = {
       prompt,
-      maxTokens: 2048,
+      maxTokens: 4096,
       jsonSchema: APPLICATION_JSON_SCHEMA as unknown as Record<string, unknown>,
     };
 
@@ -75,7 +79,7 @@ export class LlmService {
     const geminiResponse = await this.geminiProvider.fetchAndMap(request);
 
     if (geminiResponse.success) {
-      const parsed = this.__parseResponse(geminiResponse);
+      const parsed = this.__parseAndValidate(geminiResponse);
       if (parsed) {
         await this.__logAndTrack(
           geminiResponse,
@@ -94,24 +98,39 @@ export class LlmService {
 
   /********* PRIVATE *********/
 
-  private __parseResponse(
+  private __parseAndValidate(
     response: ILlmResponse,
   ): TExtractedApplication | null {
+    let raw: unknown;
     try {
-      const parsed = JSON.parse(response.content) as TExtractedApplication;
+      raw = JSON.parse(response.content);
+    } catch {
+      this.logger.error('Failed to parse LLM JSON response');
+      return null;
+    }
 
-      if (!parsed.title) {
-        this.logger.warn('LLM response missing required "title" field');
-        return null;
-      }
+    const result = extractedApplicationSchema.safeParse(raw);
 
-      return parsed;
-    } catch (error) {
-      this.logger.error(
-        `Failed to parse LLM response: ${(error as Error).message}`,
+    if (!result.success) {
+      this.logger.warn(
+        `Zod validation failed: ${result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')}`,
       );
       return null;
     }
+
+    const validated = result.data;
+
+    if (!validated.isSuccess) {
+      this.logger.warn('LLM reported isSuccess=false: insufficient data');
+      throw new NotAJobPostingError();
+    }
+
+    if (!validated.title) {
+      this.logger.warn('LLM response missing required "title" field');
+      return null;
+    }
+
+    return validated as TExtractedApplication;
   }
 
   private async __logAndTrack(
