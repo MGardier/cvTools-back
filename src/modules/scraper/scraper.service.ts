@@ -34,7 +34,7 @@ export class ScraperService {
     if (rawContent) {
       this.logger.log('Extracting from raw content (user paste)');
       try {
-        return await this.llmService.structureText(rawContent, userId);
+        return await this.llmService.structureText({ userRawText: rawContent }, userId);
       } catch (error) {
         if (error instanceof NotAJobPostingError) {
           this.logger.warn('Raw content is not a job posting');
@@ -67,9 +67,8 @@ export class ScraperService {
         this.logger.log(`JSON-LD JobPosting found for ${url}`);
         try {
           return await this.llmService.structureText(
-            JSON.stringify(jsonLd),
+            { fetchText: JSON.stringify(jsonLd), sourceUrl: url },
             userId,
-            url,
           );
         } catch (error) {
           if (error instanceof NotAJobPostingError)
@@ -93,7 +92,10 @@ export class ScraperService {
           `Visible text extracted (${visibleText.length} chars), sending to LLM`,
         );
         try {
-          return await this.llmService.structureText(visibleText, userId, url);
+          return await this.llmService.structureText(
+            { fetchText: visibleText, sourceUrl: url },
+            userId,
+          );
         } catch (error) {
           this.logger.warn(
             `LLM structureText failed for visible text: ${(error as Error).message}`,
@@ -110,9 +112,8 @@ export class ScraperService {
       this.logger.log(`Jina Reader fetch succeeded for ${url}`);
       try {
         return await this.llmService.structureText(
-          jinaResult.data,
+          { fetchText: jinaResult.data, sourceUrl: url },
           userId,
-          url,
         );
       } catch (error) {
         if (error instanceof NotAJobPostingError)

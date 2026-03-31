@@ -2,9 +2,16 @@ import type { Application, Address } from '@prisma/client';
 
 /********* TYPES *********/
 
+export type TExtractStructureTextParams = {
+  fetchText?: string;
+  userRawText?: string;
+  sourceUrl?: string;
+}
+
 export type TExtractedAddress = Partial<
   Pick<Address, 'city' | 'postalCode' | 'street' | 'complement' | 'streetNumber'>
 >;
+
 
 export type TExtractedApplication = Pick<Application, 'title'> &
   Partial<
