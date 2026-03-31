@@ -1,4 +1,7 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { createHash } from 'crypto';
 import * as cheerio from 'cheerio';
 import { NativeFetcher } from './fetchers/native.fetcher';
 import { JinaReaderFetcher } from './fetchers/jina-reader.fetcher';
@@ -9,6 +12,9 @@ import { NotAJobPostingError } from '../llm/errors/not-a-job-posting.error';
 import { ALLOWED_DOMAINS, BLOCKED_IP_PATTERNS, HARD_BLOCK_PATTERNS, MAX_TEXT_LENGTH, MAX_URL_LENGTH, SOFT_BLOCK_PATTERNS } from './constants';
 
 
+const EXTRACT_CACHE_PREFIX = 'extract:';
+const EXTRACT_CACHE_TTL = 1000 * 60 * 60 * 24; // 24h
+
 @Injectable()
 export class ScraperService {
   private readonly logger = new Logger(ScraperService.name);
@@ -17,6 +23,7 @@ export class ScraperService {
     private readonly nativeFetcher: NativeFetcher,
     private readonly jinaReaderFetcher: JinaReaderFetcher,
     private readonly llmService: LlmService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   // =============================================================================
@@ -29,12 +36,22 @@ export class ScraperService {
     rawContent?: string,
   ): Promise<TExtractedApplication> {
 
+    const cacheKey = this.__buildCacheKey(url, rawContent);
+
+    // Check cache first
+    const cached = await this.cacheManager.get<TExtractedApplication>(cacheKey);
+    if (cached) {
+      this.logger.log(`Cache hit for key ${cacheKey}`);
+      return cached;
+    }
 
     //--------- RAW CONTENT PATH: user pasted text directly --------------------\\
     if (rawContent) {
       this.logger.log('Extracting from raw content (user paste)');
       try {
-        return await this.llmService.structureText({ userRawText: rawContent }, userId);
+        const result = await this.llmService.structureText({ userRawText: rawContent }, userId);
+        await this.__cacheResult(cacheKey, result);
+        return result;
       } catch (error) {
         if (error instanceof NotAJobPostingError) {
           this.logger.warn('Raw content is not a job posting');
@@ -69,10 +86,12 @@ export class ScraperService {
       if (jsonLd) {
         this.logger.log(`JSON-LD JobPosting found for ${validatedUrl}`);
         try {
-          return await this.llmService.structureText(
+          const result = await this.llmService.structureText(
             { fetchText: JSON.stringify(jsonLd), sourceUrl: validatedUrl },
             userId,
           );
+          await this.__cacheResult(cacheKey, result);
+          return result;
         } catch (error) {
           if (error instanceof NotAJobPostingError)
             throw new BadRequestException(
@@ -95,10 +114,12 @@ export class ScraperService {
           `Visible text extracted (${visibleText.length} chars), sending to LLM`,
         );
         try {
-          return await this.llmService.structureText(
+          const result = await this.llmService.structureText(
             { fetchText: visibleText, sourceUrl: validatedUrl },
             userId,
           );
+          await this.__cacheResult(cacheKey, result);
+          return result;
         } catch (error) {
           this.logger.warn(
             `LLM structureText failed for visible text: ${(error as Error).message}`,
@@ -114,10 +135,12 @@ export class ScraperService {
     if (jinaResult.success && jinaResult.data && this.__isUsableContent(jinaResult.data)) {
       this.logger.log(`Jina Reader fetch succeeded for ${validatedUrl}`);
       try {
-        return await this.llmService.structureText(
+        const result = await this.llmService.structureText(
           { fetchText: jinaResult.data, sourceUrl: validatedUrl },
           userId,
         );
+        await this.__cacheResult(cacheKey, result);
+        return result;
       } catch (error) {
         if (error instanceof NotAJobPostingError)
           throw new BadRequestException(
@@ -134,7 +157,9 @@ export class ScraperService {
       `All fetchers failed, attempting Gemini fetchAndMap for ${validatedUrl}`,
     );
     try {
-      return await this.llmService.fetchAndMap(validatedUrl, userId);
+      const result = await this.llmService.fetchAndMap(validatedUrl, userId);
+      await this.__cacheResult(cacheKey, result);
+      return result;
     } catch {
       this.logger.error(`All extraction methods failed for ${validatedUrl}`);
       throw new BadRequestException(
@@ -147,9 +172,23 @@ export class ScraperService {
   //                               PRIVATE
   // =============================================================================
 
+  private __buildCacheKey(url?: string, rawContent?: string): string {
+    if (url) return `${EXTRACT_CACHE_PREFIX}${url}`;
+
+    const normalized = (rawContent ?? '').toLowerCase().trim().replace(/\s+/g, ' ');
+    const hash = createHash('sha256').update(normalized).digest('hex');
+    return `${EXTRACT_CACHE_PREFIX}${hash}`;
+  }
+
+  private async __cacheResult(key: string, result: TExtractedApplication): Promise<void> {
+    if (!result.isSuccess) return;
+    await this.cacheManager.set(key, result, EXTRACT_CACHE_TTL);
+    this.logger.log(`Cached extraction result for key ${key}`);
+  }
+
   /**
    * Extract ld+json from html and return JobPosting object
-   * 
+   *
    */
   private __extractJsonLd(html: string): Record<string, unknown> | null {
     const $ = cheerio.load(html);
