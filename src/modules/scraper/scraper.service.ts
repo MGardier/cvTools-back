@@ -6,7 +6,7 @@ import { LlmService } from '../llm/llm.service';
 import { TExtractedApplication } from '../llm/types';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { NotAJobPostingError } from '../llm/errors/not-a-job-posting.error';
-import { HARD_BLOCK_PATTERNS, MAX_TEXT_LENGTH, SOFT_BLOCK_PATTERNS } from './constants';
+import { ALLOWED_DOMAINS, BLOCKED_IP_PATTERNS, HARD_BLOCK_PATTERNS, MAX_TEXT_LENGTH, MAX_URL_LENGTH, SOFT_BLOCK_PATTERNS } from './constants';
 
 
 @Injectable()
@@ -54,20 +54,23 @@ export class ScraperService {
       );
     }
 
+    // Validate & sanitize URL before any fetch
+    const validatedUrl = this.__validateUrl(url);
+
     //---------------- URL PATH: multi-stage fallback ------------------------\\
 
     // STEP 1: Native fetch + JSON-LD extraction -> LLM structureText
-    const nativeResult = await this.nativeFetcher.fetch(url);
+    const nativeResult = await this.nativeFetcher.fetch(validatedUrl);
 
     if (nativeResult.success && nativeResult.data) {
       const jsonLd = this.__extractJsonLd(nativeResult.data);
 
       //JSON-LD found -> LLM structureText
       if (jsonLd) {
-        this.logger.log(`JSON-LD JobPosting found for ${url}`);
+        this.logger.log(`JSON-LD JobPosting found for ${validatedUrl}`);
         try {
           return await this.llmService.structureText(
-            { fetchText: JSON.stringify(jsonLd), sourceUrl: url },
+            { fetchText: JSON.stringify(jsonLd), sourceUrl: validatedUrl },
             userId,
           );
         } catch (error) {
@@ -83,7 +86,7 @@ export class ScraperService {
 
       // STEP 1.5: No JSON-LD → extract visible text from HTML → structureText
       this.logger.log(
-        `No JSON-LD JobPosting found for ${url}, trying visible text extraction`,
+        `No JSON-LD JobPosting found for ${validatedUrl}, trying visible text extraction`,
       );
       const visibleText = this.__extractVisibleText(nativeResult.data);
 
@@ -93,7 +96,7 @@ export class ScraperService {
         );
         try {
           return await this.llmService.structureText(
-            { fetchText: visibleText, sourceUrl: url },
+            { fetchText: visibleText, sourceUrl: validatedUrl },
             userId,
           );
         } catch (error) {
@@ -105,14 +108,14 @@ export class ScraperService {
     }
 
     // STEP 2: Fallback to Jina Reader -> LLM structureText
-    this.logger.log(`Falling back to Jina Reader for ${url}`);
-    const jinaResult = await this.jinaReaderFetcher.fetch(url);
+    this.logger.log(`Falling back to Jina Reader for ${validatedUrl}`);
+    const jinaResult = await this.jinaReaderFetcher.fetch(validatedUrl);
 
     if (jinaResult.success && jinaResult.data && this.__isUsableContent(jinaResult.data)) {
-      this.logger.log(`Jina Reader fetch succeeded for ${url}`);
+      this.logger.log(`Jina Reader fetch succeeded for ${validatedUrl}`);
       try {
         return await this.llmService.structureText(
-          { fetchText: jinaResult.data, sourceUrl: url },
+          { fetchText: jinaResult.data, sourceUrl: validatedUrl },
           userId,
         );
       } catch (error) {
@@ -128,12 +131,12 @@ export class ScraperService {
 
     // STEP 3: Both fetchers failed -> Gemini fetchAndMap with urlContext
     this.logger.log(
-      `All fetchers failed, attempting Gemini fetchAndMap for ${url}`,
+      `All fetchers failed, attempting Gemini fetchAndMap for ${validatedUrl}`,
     );
     try {
-      return await this.llmService.fetchAndMap(url, userId);
+      return await this.llmService.fetchAndMap(validatedUrl, userId);
     } catch {
-      this.logger.error(`All extraction methods failed for ${url}`);
+      this.logger.error(`All extraction methods failed for ${validatedUrl}`);
       throw new BadRequestException(
         ErrorCodeEnum.SCRAPER_EXTRACTION_FAILED_ERROR,
       );
@@ -276,4 +279,51 @@ export class ScraperService {
 
     return false;
   }
+
+
+
+/**
+ * Validates and sanitizes a URL for scraping.
+ * Returns the cleaned URL string or throws BadRequestException.
+ */
+private  __validateUrl  (input: string): string {
+  const trimmed = input.trim();
+
+  if (trimmed.length > MAX_URL_LENGTH)
+    throw new BadRequestException(ErrorCodeEnum.SCRAPER_URL_TOO_LONG);
+
+
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    throw new BadRequestException(ErrorCodeEnum.SCRAPER_URL_INVALID);
+  }
+
+  if (parsed.protocol !== 'https:')
+    throw new BadRequestException(ErrorCodeEnum.SCRAPER_URL_INVALID);
+
+
+  if (parsed.username || parsed.password)
+    throw new BadRequestException(ErrorCodeEnum.SCRAPER_URL_INVALID);
+
+
+  const hostname = parsed.hostname;
+
+  if (BLOCKED_IP_PATTERNS.some((p) => p.test(hostname)))
+    throw new BadRequestException(ErrorCodeEnum.SCRAPER_URL_INVALID);
+
+
+  // Check domain against allowlist (match root domain to handle subdomains like fr.indeed.com)
+  const parts = hostname.split('.');
+  const rootDomain = parts.length >= 2 ? parts.slice(-2).join('.') : hostname;
+
+  if (!ALLOWED_DOMAINS.has(hostname) && !ALLOWED_DOMAINS.has(rootDomain)) {
+    throw new BadRequestException(
+      ErrorCodeEnum.SCRAPER_URL_DOMAIN_NOT_SUPPORTED,
+    );
+  }
+
+  return parsed.toString();
+}
 }
