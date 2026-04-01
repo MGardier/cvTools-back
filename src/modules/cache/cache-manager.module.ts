@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import KeyvRedis, { Keyv } from '@keyv/redis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CacheManagerService } from './cache-manager.service';
 
 @Module({
   imports: [
@@ -25,5 +26,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),
   ],
+  providers: [CacheManagerService],
+  exports: [CacheManagerService],
 })
 export class CacheManagerModule {}
