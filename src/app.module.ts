@@ -24,6 +24,7 @@ import { ScraperModule } from './modules/scraper/scraper.module';
 import { NoteModule } from './modules/note/note.module';
 import { TodoModule } from './modules/todo/todo.module';
 import { ApplicationHistoryModule } from './modules/application-history/application-history.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ApplicationHistoryModule } from './modules/application-history/applicat
       isGlobal: true,
       validate: validateEnv,
     }),
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 10 }]),
     RabbitmqModule,
     CacheManagerModule,
     UserModule,
