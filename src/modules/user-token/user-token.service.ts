@@ -9,7 +9,7 @@ import { IGeneratedJwt, IPayloadJwt } from 'src/modules/jwt-manager/types';
 import { UtilRepository } from 'src/shared/utils/repository.util';
 import { UtilHash } from 'src/shared/utils/hash.util';
 import { UserToken } from '@prisma/client';
-import { IValidatedToken } from './types';
+import { IGeneratedAndSaveToken, IValidatedToken } from './types';
 import { UtilDate } from 'src/shared/utils/date.util';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 
@@ -31,7 +31,7 @@ export class UserTokenService {
   async generateAndSave(
     payload: IPayloadJwt,
     type: TokenType,
-  ): Promise<UserToken & { token: string }> {
+  ): Promise<IGeneratedAndSaveToken> {
     const uuid: string = uuidv4();
     const { token, expiresIn } = await this.generate(
       { ...payload, uuid },
@@ -49,7 +49,7 @@ export class UserTokenService {
     };
 
     const userToken = await this.userTokenRepository.create(data, payload.sub);
-    return { ...userToken, token };
+    return { userToken, token };
   }
 
   async decode(token: string, type: TokenType): Promise<IPayloadJwt> {
