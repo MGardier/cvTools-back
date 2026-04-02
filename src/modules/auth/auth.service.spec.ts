@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { LoginMethod, PrismaTokenType, User, UserRoles, UserStatus, UserToken } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
@@ -84,6 +84,8 @@ describe('AuthService', () => {
           provide: EmailService,
           useValue: {
             sendAccountConfirmationLink: jest.fn(),
+            reSendAccountConfirmationLink: jest.fn(),
+            sendResetPasswordLink: jest.fn(),
           },
         },
         {
@@ -220,7 +222,7 @@ describe('AuthService', () => {
       expect(userTokenService.remove).toHaveBeenCalledWith(userToken.id);
     });
 
-    it('should throw UnauthorizedException when userToken.id is unedefined', async () => {
+    it('should throw UnauthorizedException when userToken.id is undefined', async () => {
       userTokenService.decodeAndGet.mockResolvedValue({
         userToken: makeUserToken({ id: null } as any),
         payload: mockPayload,
@@ -428,6 +430,198 @@ describe('AuthService', () => {
       );
 
 
+    });
+  });
+
+  // =============================================================================
+  //                            GET CURRENT USER
+  // =============================================================================
+
+  describe('getCurrentUser', () => {
+    it('should return the user when found', async () => {
+      const user = makeUser();
+      userService.findOneById.mockResolvedValue(user);
+
+      const result = await authService.getCurrentUser(1);
+
+      expect(result).toEqual(user);
+      expect(userService.findOneById).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw UnauthorizedException when user is not found', async () => {
+      userService.findOneById.mockResolvedValue(null);
+
+      await expect(authService.getCurrentUser(999)).rejects.toThrow(
+        new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR),
+      );
+    });
+  });
+
+  // =============================================================================
+  //                            LOGOUT
+  // =============================================================================
+
+  describe('logout', () => {
+    const mockToken = 'valid_refresh_token';
+
+    it('should remove the token when valid', async () => {
+      const userToken = makeUserToken();
+      userTokenService.decodeAndGet.mockResolvedValue({ 
+        userToken, 
+        payload: { sub: 1, email: 'test@test.com' } 
+      });
+
+      await authService.logout(mockToken);
+
+      expect(userTokenService.decodeAndGet).toHaveBeenCalledWith(mockToken, TokenType.REFRESH);
+      expect(userTokenService.remove).toHaveBeenCalledWith(userToken.id);
+    });
+
+    it('should throw UnauthorizedException when token has no id', async () => {
+      userTokenService.decodeAndGet.mockResolvedValue({
+        userToken: makeUserToken({ id: null } as any),
+        payload: { sub: 1, email: 'test@test.com' },
+      });
+
+      await expect(authService.logout(mockToken)).rejects.toThrow(
+        new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID),
+      );
+    });
+  });
+
+  // =============================================================================
+  //                         RE-SEND CONFIRM ACCOUNT
+  // =============================================================================
+
+  describe('reSendConfirmAccount', () => {
+    const email = 'test@test.com';
+    const frontUrl = 'http://front.test/confirm';
+    const confirmToken = 'confirm_token_value';
+
+    it(`should return the user, generate CONFIRM_ACCOUNT token and
+       send confirmation email when user is PENDING`, async () => {
+      const user = makeUser({ status: UserStatus.PENDING });
+      const userToken = makeUserToken({ token: confirmToken, type: PrismaTokenType.CONFIRM_ACCOUNT });
+
+      userService.findOneByEmail.mockResolvedValue(user);
+      userTokenService.generateAndSave.mockResolvedValue(userToken);
+      configService.get.mockReturnValue(frontUrl);
+
+      const result = await authService.reSendConfirmAccount(email);
+
+      expect(result).toEqual(user);
+
+      expect(userTokenService.generateAndSave).toHaveBeenCalledWith(
+        { sub: user.id, email },
+        TokenType.CONFIRM_ACCOUNT,
+      );
+
+      expect(emailService.reSendAccountConfirmationLink).toHaveBeenCalledWith(
+        user.id,
+        email,
+        `${frontUrl}?token=${confirmToken}`,
+      );
+    });
+
+    it('should throw NotFoundException when user is not found', async () => {
+      userService.findOneByEmail.mockResolvedValue(null);
+
+      await expect(authService.reSendConfirmAccount(email)).rejects.toThrow(
+        new NotFoundException(ErrorCodeEnum.USER_NOT_FOUND_ERROR),
+      );
+    });
+
+    it('should throw UnauthorizedException when user status is not PENDING', async () => {
+      userService.findOneByEmail.mockResolvedValue(makeUser({ status: UserStatus.ALLOWED }));
+
+      await expect(authService.reSendConfirmAccount(email)).rejects.toThrow(
+        new UnauthorizedException(ErrorCodeEnum.ACCOUNT_ALREADY_CONFIRM),
+      );
+    });
+  });
+
+  // =============================================================================
+  //                          FORGOT PASSWORD
+  // =============================================================================
+
+  describe('forgotPassword', () => {
+    const email = 'test@test.com';
+    const frontUrl = 'http://front.test/reset';
+    const resetToken = 'reset_token_value';
+
+    it('should return the user, generate FORGOT_PASSWORD token and send reset email', async () => {
+      const user = makeUser();
+      const userToken = makeUserToken({ token: resetToken });
+
+      userService.findOneByEmail.mockResolvedValue(user);
+      userTokenService.generateAndSave.mockResolvedValue(userToken);
+      configService.get.mockReturnValue(frontUrl);
+
+      const result = await authService.forgotPassword(email);
+
+      expect(result).toEqual(user);
+
+      expect(userTokenService.generateAndSave).toHaveBeenCalledWith(
+        { email: user.email, sub: user.id },
+        TokenType.FORGOT_PASSWORD,
+      );
+
+      expect(emailService.sendResetPasswordLink).toHaveBeenCalledWith(
+        user.id,
+        user.email,
+        `${frontUrl}?token=${resetToken}`,
+      );
+    });
+
+    it('should throw NotFoundException when user is not found', async () => {
+      userService.findOneByEmail.mockResolvedValue(null);
+
+      await expect(authService.forgotPassword(email)).rejects.toThrow(
+        new NotFoundException(ErrorCodeEnum.USER_NOT_FOUND_ERROR),
+      );
+    });
+  });
+
+  // =============================================================================
+  //                          RESET PASSWORD
+  // =============================================================================
+
+  describe('resetPassword', () => {
+    const resetDto = { token: 'valid_reset_token', password: 'NewPassword1!' };
+    const hashedPassword = 'new_hashed_password';
+    const mockPayload = { sub: 1, email: 'test@test.com' };
+
+    it('should decode with FORGOT_PASSWORD type, hash password, update user and remove token', async () => {
+      const userToken = makeUserToken();
+
+      userTokenService.decodeAndGet.mockResolvedValue({ userToken, payload: mockPayload });
+      jest.spyOn(UtilHash, 'hash').mockResolvedValue(hashedPassword);
+      userService.update.mockResolvedValue(makeUser());
+      userTokenService.remove.mockResolvedValue(userToken);
+
+      await authService.resetPassword(resetDto);
+
+      expect(userTokenService.decodeAndGet).toHaveBeenCalledWith(
+        resetDto.token,
+        TokenType.FORGOT_PASSWORD,
+      );
+
+      expect(userService.update).toHaveBeenCalledWith(mockPayload.sub, {
+        password: hashedPassword,
+      });
+
+      expect(userTokenService.remove).toHaveBeenCalledWith(userToken.id);
+    });
+
+    it('should throw NotFoundException when token has no id', async () => {
+      userTokenService.decodeAndGet.mockResolvedValue({
+        userToken: makeUserToken({ id: null } as any),
+        payload: mockPayload,
+      });
+
+      await expect(authService.resetPassword(resetDto)).rejects.toThrow(
+        new NotFoundException(ErrorCodeEnum.TOKEN_INVALID),
+      );
     });
   });
 });
