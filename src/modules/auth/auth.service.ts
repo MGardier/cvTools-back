@@ -231,40 +231,11 @@ export class AuthService {
     googleId: string,
     googleEmail: string,
   ): Promise<User> {
-    const existingUser = await this.userService.findOneByOauthId({
-      oauthId: googleId,
-      loginMethod: LoginMethod.GOOGLE,
-    });
-
-    if (existingUser) return existingUser;
-
-    const existingEmailUser =
-      await this.userService.findOneByEmail(googleEmail);
-
-    if (existingEmailUser) {
-      if (existingEmailUser.password)
-        throw new ConflictException(
-          ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR,
-        );
-      if (existingEmailUser.loginMethod !== LoginMethod.GOOGLE)
-        throw new ConflictException(
-          ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR,
-        );
-
-      return await this.userService.update(existingEmailUser.id, {
-        email: googleEmail,
-        loginMethod: LoginMethod.GOOGLE,
-        status: UserStatus.ALLOWED,
-        oauthId: googleId,
-      });
-    }
-
-    return await this.userService.create({
-      email: googleEmail,
-      loginMethod: LoginMethod.GOOGLE,
-      status: UserStatus.ALLOWED,
-      oauthId: googleId,
-    });
+    return this.__validateOrCreateOauthUser(
+      googleId,
+      googleEmail,
+      LoginMethod.GOOGLE,
+    );
   }
 
   // =============================================================================
@@ -275,40 +246,11 @@ export class AuthService {
     githubId: string,
     githubEmail: string,
   ): Promise<User> {
-    const existingUser = await this.userService.findOneByOauthId({
-      oauthId: githubId,
-      loginMethod: LoginMethod.GITHUB,
-    });
-
-    if (existingUser) return existingUser;
-
-    const existingEmailUser =
-      await this.userService.findOneByEmail(githubEmail);
-
-    if (existingEmailUser) {
-      if (existingEmailUser.password)
-        throw new ConflictException(
-          ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR,
-        );
-      if (existingEmailUser.loginMethod !== LoginMethod.GITHUB)
-        throw new ConflictException(
-          ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR,
-        );
-
-      return await this.userService.update(existingEmailUser.id, {
-        email: githubEmail,
-        status: UserStatus.ALLOWED,
-        loginMethod: LoginMethod.GITHUB,
-        oauthId: githubId,
-      });
-    }
-
-    return await this.userService.create({
-      email: githubEmail,
-      loginMethod: LoginMethod.GITHUB,
-      status: UserStatus.ALLOWED,
-      oauthId: githubId,
-    });
+    return this.__validateOrCreateOauthUser(
+      githubId,
+      githubEmail,
+      LoginMethod.GITHUB,
+    );
   }
 
   // =============================================================================
@@ -346,6 +288,46 @@ export class AuthService {
   // =============================================================================
   //                               PRIVATE
   // =============================================================================
+
+  private async __validateOrCreateOauthUser(
+    oauthId: string,
+    email: string,
+    loginMethod: LoginMethod,
+  ): Promise<User> {
+    const existingUser = await this.userService.findOneByOauthId({
+      oauthId,
+      loginMethod,
+    });
+
+    if (existingUser) return existingUser;
+
+    const existingEmailUser = await this.userService.findOneByEmail(email);
+
+    if (existingEmailUser) {
+      if (existingEmailUser.password)
+        throw new ConflictException(
+          ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR,
+        );
+      if (existingEmailUser.loginMethod !== loginMethod)
+        throw new ConflictException(
+          ErrorCodeEnum.OAUTH_ACCOUNT_ALREADY_EXISTS_ERROR,
+        );
+
+      return await this.userService.update(existingEmailUser.id, {
+        email,
+        loginMethod,
+        status: UserStatus.ALLOWED,
+        oauthId,
+      });
+    }
+
+    return await this.userService.create({
+      email,
+      loginMethod,
+      status: UserStatus.ALLOWED,
+      oauthId,
+    });
+  }
 
   private async __hashPassword(password: string): Promise<string> {
     const saltRound = Number(this.configService.get('HASH_SALT_ROUND')) || 12;
