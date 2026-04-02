@@ -48,8 +48,7 @@ export class UserTokenService {
       uuid,
     };
 
-    const userToken = await this.userTokenRepository.create(data, payload.sub);
-    return { ...userToken };
+    return await this.userTokenRepository.create(data, payload.sub);
   }
 
   async decode(token: string, type: TokenType): Promise<IPayloadJwt> {
