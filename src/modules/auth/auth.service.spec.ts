@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
-import { LoginMethod, User, UserRoles, UserStatus } from '@prisma/client';
+import { LoginMethod, PrismaTokenType, User, UserRoles, UserStatus, UserToken } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { UserTokenService } from '../user-token/user-token.service';
@@ -8,6 +8,7 @@ import { EmailService } from '../email/email.service';
 import { ConfigService } from '@nestjs/config';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { UtilHash } from 'src/shared/utils/hash.util';
+import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 
 
 
@@ -28,6 +29,17 @@ const makeUser = (overrides: Partial<User> = {}): User => ({
   ...overrides,
 });
 
+const makeUserToken = (overrides: Partial<UserToken> = {}): UserToken => ({
+  id: 1,
+  token: 'hashed_token',
+  type: PrismaTokenType.REFRESH,
+  uuid: 'uuid-123',
+  expiresAt: new Date(),
+  userId: 1,
+  createdAt: new Date(),
+  ...overrides,
+});
+
 
 // =============================================================================
 //                           DESCRIBE
@@ -36,10 +48,19 @@ const makeUser = (overrides: Partial<User> = {}): User => ({
 describe('AuthService', () => {
   let authService: AuthService;
   let userService: jest.Mocked<UserService>;
+  let userTokenService: jest.Mocked<UserTokenService>;
 
 
   const mockUserService = {
-    findOneByEmail: jest.fn()
+    findOneByEmail: jest.fn(),
+    findOneById: jest.fn(),
+  }
+
+  const mockUserTokenService = {
+    decodeAndGet: jest.fn(),
+    generate: jest.fn(),
+    generateAndSave: jest.fn(),
+    remove: jest.fn(),
   }
 
 
@@ -53,7 +74,7 @@ describe('AuthService', () => {
         },
         {
           provide: UserTokenService,
-          useValue: {},
+          useValue: mockUserTokenService,
         },
         {
           provide: EmailService,
@@ -70,6 +91,7 @@ describe('AuthService', () => {
 
     authService = module.get<AuthService>(AuthService);
     userService = module.get(UserService);
+    userTokenService = module.get(UserTokenService);
 
     jest.clearAllMocks();
   });
@@ -81,7 +103,8 @@ describe('AuthService', () => {
   describe('validateUser', () => {
 
     it('should return the user when credentials are valid', async () => {
-      userService.findOneByEmail.mockResolvedValue(makeUser());
+      const user = makeUser();
+      userService.findOneByEmail.mockResolvedValue(user);
       jest.spyOn(UtilHash, 'compare').mockResolvedValue(true);
 
       const result = await authService.validateUser(
@@ -89,7 +112,7 @@ describe('AuthService', () => {
         'password',
       );
 
-      expect(result).toEqual(makeUser());
+      expect(result).toEqual(user);
       expect(userService.findOneByEmail).toHaveBeenCalledWith('test@test.com');
     });
 
@@ -150,6 +173,75 @@ describe('AuthService', () => {
         authService.validateUser('test@test.com', 'password'),
       ).rejects.toThrow(
         new ForbiddenException(ErrorCodeEnum.USER_BANNED),
+      );
+    });
+  });
+
+  // =============================================================================
+  //                            REFRESH
+  // =============================================================================
+
+  describe('refresh', () => {
+    const mockToken = 'valid_refresh_token';
+    const mockAccessToken = 'new_access_token';
+    const mockRefreshToken = 'new_refresh_token';
+    const mockPayload = { sub: 1, email: 'test@test.com', uuid: 'uuid-123' };
+
+    it('should return new tokens, user and remove old refresh token', async () => {
+      const user = makeUser();
+      const userToken = makeUserToken();
+      const expectedPayload = { sub: user.id, email: user.email };
+
+      userTokenService.decodeAndGet.mockResolvedValue({ userToken, payload: mockPayload });
+      userService.findOneById.mockResolvedValue(user);
+      userTokenService.generate.mockResolvedValue({ token: mockAccessToken, expiresIn: 900 });
+      userTokenService.generateAndSave.mockResolvedValue(userToken);
+      userTokenService.remove.mockResolvedValue(userToken);
+
+      const result = await authService.refresh(mockToken);
+
+      expect(result).toEqual({
+        tokens: {
+          accessToken: mockAccessToken,
+          refreshToken: mockRefreshToken,
+        },
+        user,
+      });
+
+      expect(userTokenService.remove).toHaveBeenCalledWith(userToken.id);
+    });
+
+    it('should throw UnauthorizedException when userToken.id is unedefined', async () => {
+      userTokenService.decodeAndGet.mockResolvedValue({
+        userToken: makeUserToken({ id: null } as any ),
+        payload: mockPayload,
+      });
+
+      await expect(authService.refresh(mockToken)).rejects.toThrow(
+        new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID),
+      );
+    });
+
+    it('should throw UnauthorizedException when userToken.token is undefined', async () => {
+      userTokenService.decodeAndGet.mockResolvedValue({
+        userToken: makeUserToken({  token: null } as any),
+        payload: mockPayload,
+      });
+
+      await expect(authService.refresh(mockToken)).rejects.toThrow(
+        new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID),
+      );
+    });
+
+    it('should throw UnauthorizedException when user does not exist', async () => {
+      userTokenService.decodeAndGet.mockResolvedValue({
+        userToken: makeUserToken(),
+        payload: mockPayload,
+      });
+      userService.findOneById.mockResolvedValue(null);
+
+      await expect(authService.refresh(mockToken)).rejects.toThrow(
+        new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR),
       );
     });
   });
