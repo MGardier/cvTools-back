@@ -12,7 +12,6 @@ import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 
 
 
-
 // =============================================================================
 //                            MOCK DATA
 // =============================================================================
@@ -49,6 +48,8 @@ describe('AuthService', () => {
   let authService: AuthService;
   let userService: jest.Mocked<UserService>;
   let userTokenService: jest.Mocked<UserTokenService>;
+  let emailService: jest.Mocked<EmailService>;
+  let configService: jest.Mocked<ConfigService>;
 
 
   const mockUserService = {
@@ -81,7 +82,9 @@ describe('AuthService', () => {
         },
         {
           provide: EmailService,
-          useValue: {},
+          useValue: {
+            sendAccountConfirmationLink: jest.fn(),
+          },
         },
         {
           provide: ConfigService,
@@ -95,6 +98,8 @@ describe('AuthService', () => {
     authService = module.get<AuthService>(AuthService);
     userService = module.get(UserService);
     userTokenService = module.get(UserTokenService);
+    emailService = module.get(EmailService);
+    configService = module.get(ConfigService);
 
     jest.clearAllMocks();
   });
@@ -131,16 +136,16 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException when user has no password (OAuth account)',
       async () => {
-      userService.findOneByEmail.mockResolvedValue(makeUser({
-        password: null,
-      }));
+        userService.findOneByEmail.mockResolvedValue(makeUser({
+          password: null,
+        }));
 
-      await expect(
-        authService.validateUser('test@test.com', 'password'),
-      ).rejects.toThrow(
-        new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS),
-      );
-    });
+        await expect(
+          authService.validateUser('test@test.com', 'password'),
+        ).rejects.toThrow(
+          new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS),
+        );
+      });
 
     it('should throw UnauthorizedException when password is invalid', async () => {
       userService.findOneByEmail.mockResolvedValue(makeUser());
@@ -193,7 +198,7 @@ describe('AuthService', () => {
     it('should return new tokens, user and remove old refresh token', async () => {
       const user = makeUser();
       const userToken = makeUserToken();
-  
+
 
       userTokenService.decodeAndGet.mockResolvedValue({ userToken, payload: mockPayload });
       userService.findOneById.mockResolvedValue(user);
@@ -217,7 +222,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException when userToken.id is unedefined', async () => {
       userTokenService.decodeAndGet.mockResolvedValue({
-        userToken: makeUserToken({ id: null } as any ),
+        userToken: makeUserToken({ id: null } as any),
         payload: mockPayload,
       });
 
@@ -228,7 +233,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException when userToken.token is undefined', async () => {
       userTokenService.decodeAndGet.mockResolvedValue({
-        userToken: makeUserToken({  token: null } as any),
+        userToken: makeUserToken({ token: null } as any),
         payload: mockPayload,
       });
 
@@ -354,7 +359,7 @@ describe('AuthService', () => {
     const githubId = 'github-oauth-id-456';
     const githubEmail = 'github@test.com';
 
-   
+
     it('should create and return a new user when no user is found', async () => {
       const newUser = makeUser({
         oauthId: githubId,
@@ -377,6 +382,52 @@ describe('AuthService', () => {
         status: UserStatus.ALLOWED,
         oauthId: githubId,
       });
+    });
+  });
+
+  // =============================================================================
+  //                            SIGN UP
+  // =============================================================================
+
+  describe('signUp', () => {
+    const signUpDto = { email: 'new@test.com', password: 'PlainPassword1!' };
+    const hashedPassword = 'hashed_password_result';
+    const frontUrl = 'http://front.test/confirm';
+    const confirmToken = 'confirm_token_value';
+
+    it(`should hash password, create user with CLASSIC loginMethod, generate CONFIRM_ACCOUNT token 
+      and build confirmation link`, async () => {
+      const createdUser = makeUser({ email: signUpDto.email, password: hashedPassword });
+      const userToken = makeUserToken({ token: confirmToken, type: PrismaTokenType.CONFIRM_ACCOUNT });
+
+      jest.spyOn(UtilHash, 'hash').mockResolvedValue(hashedPassword);
+      configService.get.mockReturnValue(frontUrl);
+      userService.create.mockResolvedValue(createdUser);
+      userTokenService.generateAndSave.mockResolvedValue(userToken);
+
+     const result =  await authService.signUp(signUpDto);
+
+    expect(result).toEqual(createdUser);
+
+      expect(userService.create).toHaveBeenCalledWith({ 
+          email: signUpDto.email, 
+          password: hashedPassword, 
+          loginMethod: LoginMethod.CLASSIC 
+      });
+
+
+      expect(userTokenService.generateAndSave).toHaveBeenCalledWith(
+        { sub: createdUser.id, email: createdUser.email },
+        TokenType.CONFIRM_ACCOUNT,
+      );
+
+      expect(emailService.sendAccountConfirmationLink).toHaveBeenCalledWith(
+        createdUser.id,
+        createdUser.email,
+        `${frontUrl}?token=${confirmToken}`,
+      );
+
+
     });
   });
 });
