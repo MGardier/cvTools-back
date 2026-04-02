@@ -38,7 +38,7 @@ export class AuthService {
   async getCurrentUser(userId: number): Promise<User> {
     const user = await this.userService.findOneById(userId);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
     }
     return user;
   }
@@ -110,7 +110,7 @@ export class AuthService {
       token,
       TokenType.REFRESH,
     );
-    if (!userToken.id) throw new UnauthorizedException();
+    if (!userToken.id) throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
     await this.userTokenService.remove(userToken.id);
   }
 
@@ -120,10 +120,10 @@ export class AuthService {
       TokenType.REFRESH,
     );
 
-    if (!userToken.id || !userToken.token) throw new UnauthorizedException();
+    if (!userToken.id || !userToken.token) throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
 
     const user = await this.userService.findOneById(+payload.sub);
-    if (!user) throw new UnauthorizedException('User was not found');
+    if (!user) throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
 
     const accessToken = await this.userTokenService.generate(
       { sub: user.id, email: user.email },
@@ -211,7 +211,7 @@ export class AuthService {
       TokenType.FORGOT_PASSWORD,
     );
 
-    if (!userToken.id) throw new NotFoundException();
+    if (!userToken.id) throw new NotFoundException(ErrorCodeEnum.TOKEN_INVALID);
 
     const hashedPassword = await this.__hashPassword(data.password);
 
