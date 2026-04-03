@@ -205,8 +205,8 @@ describe('AuthService', () => {
       userTokenService.decodeAndGet.mockResolvedValue({ userToken, payload: mockPayload });
       userService.findOneById.mockResolvedValue(user);
       userTokenService.generate.mockResolvedValue({ token: mockAccessToken, expiresIn: 900 });
-      const refreshUserToken = makeUserToken({ token: mockRefreshToken });
-      userTokenService.generateAndSave.mockResolvedValue(refreshUserToken);
+      const refreshUserToken = makeUserToken({ token: 'hashed_token' });
+      userTokenService.generateAndSave.mockResolvedValue({ userToken: refreshUserToken, rawToken: mockRefreshToken });
       userTokenService.remove.mockResolvedValue(userToken);
 
       const result = await authService.refresh(mockToken);
@@ -400,21 +400,21 @@ describe('AuthService', () => {
     it(`should hash password, create user with CLASSIC loginMethod, generate CONFIRM_ACCOUNT token 
       and build confirmation link`, async () => {
       const createdUser = makeUser({ email: signUpDto.email, password: hashedPassword });
-      const userToken = makeUserToken({ token: confirmToken, type: PrismaTokenType.CONFIRM_ACCOUNT });
+      const userToken = makeUserToken({ token: 'hashed_token', type: PrismaTokenType.CONFIRM_ACCOUNT });
 
       jest.spyOn(UtilHash, 'hash').mockResolvedValue(hashedPassword);
       configService.get.mockReturnValue(frontUrl);
       userService.create.mockResolvedValue(createdUser);
-      userTokenService.generateAndSave.mockResolvedValue(userToken);
+      userTokenService.generateAndSave.mockResolvedValue({ userToken, rawToken: confirmToken });
 
      const result =  await authService.signUp(signUpDto);
 
     expect(result).toEqual(createdUser);
 
-      expect(userService.create).toHaveBeenCalledWith({ 
-          email: signUpDto.email, 
-          password: hashedPassword, 
-          loginMethod: LoginMethod.CLASSIC 
+      expect(userService.create).toHaveBeenCalledWith({
+          email: signUpDto.email,
+          password: hashedPassword,
+          loginMethod: LoginMethod.CLASSIC
       });
 
 
@@ -501,10 +501,10 @@ describe('AuthService', () => {
     it(`should return the user, generate CONFIRM_ACCOUNT token and
        send confirmation email when user is PENDING`, async () => {
       const user = makeUser({ status: UserStatus.PENDING });
-      const userToken = makeUserToken({ token: confirmToken, type: PrismaTokenType.CONFIRM_ACCOUNT });
+      const userToken = makeUserToken({ token: 'hashed_token', type: PrismaTokenType.CONFIRM_ACCOUNT });
 
       userService.findOneByEmail.mockResolvedValue(user);
-      userTokenService.generateAndSave.mockResolvedValue(userToken);
+      userTokenService.generateAndSave.mockResolvedValue({ userToken, rawToken: confirmToken });
       configService.get.mockReturnValue(frontUrl);
 
       const result = await authService.reSendConfirmAccount(email);
@@ -551,10 +551,10 @@ describe('AuthService', () => {
 
     it('should return the user, generate FORGOT_PASSWORD token and send reset email', async () => {
       const user = makeUser();
-      const userToken = makeUserToken({ token: resetToken });
+      const userToken = makeUserToken({ token: 'hashed_token' });
 
       userService.findOneByEmail.mockResolvedValue(user);
-      userTokenService.generateAndSave.mockResolvedValue(userToken);
+      userTokenService.generateAndSave.mockResolvedValue({ userToken, rawToken: resetToken });
       configService.get.mockReturnValue(frontUrl);
 
       const result = await authService.forgotPassword(email);
