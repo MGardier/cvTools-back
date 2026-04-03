@@ -1,17 +1,15 @@
 import { IsEmail, IsNotEmpty, Matches, MinLength } from 'class-validator';
+import { DtoErrorCodeEnum } from 'src/shared/enums/dto-error-codes.enum';
 
 export class SignUpRequestDto {
-  @IsEmail({}, { message: "L'email doit être un email valide." })
-  @IsNotEmpty({ message: "L'email ne peut pas être vide." })
+  @IsEmail({}, { message: DtoErrorCodeEnum.EMAIL_INVALID })
+  @IsNotEmpty({ message: DtoErrorCodeEnum.EMAIL_REQUIRED })
   email: string;
 
-  @IsNotEmpty({ message: 'Le mot de passe ne peut pas être vide.' })
-  @MinLength(8, {
-    message: 'Le mot de passe doit comporter au moins 8 caractères.',
-  })
+  @IsNotEmpty({ message: DtoErrorCodeEnum.PASSWORD_REQUIRED })
+  @MinLength(8, { message: DtoErrorCodeEnum.PASSWORD_MIN_LENGTH })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/, {
-    message:
-      'Le mot de passe doit contenir des lettres minuscules et majuscules, des caractéres spéciaux et des chiffres.',
+    message: DtoErrorCodeEnum.PASSWORD_WEAK,
   })
   password: string;
 }
