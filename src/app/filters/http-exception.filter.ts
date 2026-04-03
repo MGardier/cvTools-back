@@ -9,6 +9,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 
+import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { IHttpLogContext, IStructuredLog } from 'src/shared/types/api.types';
 
 type LogFormat = 'json' | 'visual' | 'both';
@@ -29,12 +30,25 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const logContext = this.buildLogContext(exception, request, statusCode);
     this.logStructuredError(logContext);
 
+    const exceptionResponse = exception.getResponse();
+    const isValidationError =
+      typeof exceptionResponse === 'object' &&
+      exceptionResponse !== null &&
+      'message' in exceptionResponse &&
+      Array.isArray((exceptionResponse as Record<string, unknown>).message);
+
     response.status(statusCode).json({
       success: false,
       statusCode,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message: exception.message,
+      ...(isValidationError
+        ? {
+            message: ErrorCodeEnum.VALIDATION_ERROR,
+            errors: (exceptionResponse as Record<string, unknown>)
+              .message as string[],
+          }
+        : { message: exception.message }),
     });
   }
 
