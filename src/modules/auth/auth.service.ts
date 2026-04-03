@@ -85,7 +85,7 @@ export class AuthService {
     this.emailService.sendAccountConfirmationLink(
       user.id,
       user.email,
-      `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}?token=${userToken.token}`,
+      `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}?token=${userToken.rawToken}`,
     );
 
     return user;
@@ -102,7 +102,7 @@ export class AuthService {
       TokenType.REFRESH,
     );
 
-    return { accessToken: access.token, refreshToken: refresh.token };
+    return { accessToken: access.token, refreshToken: refresh.rawToken };
   }
 
   async logout(token: string): Promise<void> {
@@ -139,7 +139,7 @@ export class AuthService {
     return {
       tokens: {
         accessToken: accessToken.token,
-        refreshToken: refreshToken.token,
+        refreshToken: refreshToken.rawToken,
       },
       user,
     };
@@ -164,7 +164,7 @@ export class AuthService {
     await this.emailService.reSendAccountConfirmationLink(
       user.id,
       email,
-      `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}?token=${userToken.token}`,
+      `${this.configService.get('FRONT_URL_CONFIRMATION_ACCOUNT')}?token=${userToken.rawToken}`,
     );
 
     return user;
@@ -199,7 +199,7 @@ export class AuthService {
     await this.emailService.sendResetPasswordLink(
       user.id,
       user.email,
-      `${this.configService.get('FRONT_URL_RESET_PASSWORD')}?token=${userToken.token}`,
+      `${this.configService.get('FRONT_URL_RESET_PASSWORD')}?token=${userToken.rawToken}`,
     );
 
     return user;
@@ -280,7 +280,7 @@ export class AuthService {
     );
 
     return {
-      tokens: { accessToken: access.token, refreshToken: refresh.token },
+      tokens: { accessToken: access.token, refreshToken: refresh.rawToken },
       user,
     };
   }

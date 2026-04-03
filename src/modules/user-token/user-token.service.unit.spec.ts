@@ -128,7 +128,7 @@ describe('UserTokenService', () => {
         mockPayload.sub,
       );
 
-      expect(result).toEqual(createdUserToken);
+      expect(result).toEqual({ userToken: createdUserToken, rawToken: rawToken });
     });
   });
 
