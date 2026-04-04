@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { UserStatus } from '@prisma/client';
+import { LoginMethod, User, UserRoles, UserStatus } from '@prisma/client';
 
 import { PrismaService } from 'prisma/prisma.service';
 import { EmailService } from 'src/modules/email/email.service';
@@ -127,4 +127,25 @@ export function extractTokenFromMockUrl(
   if (!tokenMatch) throw new Error(`No token found in URL: ${url}`);
 
   return tokenMatch[1];
+}
+
+
+// =============================================================================
+//                            OAUTH HELPERS
+// =============================================================================
+
+export async function createOAuthUser(
+  prisma: PrismaService,
+  loginMethod: LoginMethod,
+  overrides: { email?: string; oauthId?: string; status?: UserStatus } = {},
+): Promise<User> {
+  return prisma.user.create({
+    data: {
+      email: overrides.email ?? `oauth-${loginMethod.toLowerCase()}@example.com`,
+      oauthId: overrides.oauthId ?? `${loginMethod.toLowerCase()}-oauth-id-123`,
+      loginMethod,
+      status: overrides.status ?? UserStatus.ALLOWED,
+      roles: UserRoles.USER,
+    },
+  });
 }

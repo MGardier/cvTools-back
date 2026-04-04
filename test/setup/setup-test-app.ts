@@ -1,12 +1,30 @@
 // test/setup/setup-test-app.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AppModule } from 'src/app.module';
 import { EmailService } from 'src/modules/email/email.service';
+import { GoogleOauthGuard } from 'src/shared/guards/google-oauth.guard';
+import { GithubOauthGuard } from 'src/shared/guards/github-oauth.guard';
+import { IMockUserRef } from './types';
 
 import * as session from 'express-session';
 import * as cookieParser from 'cookie-parser';
 import * as passport from 'passport';
+
+export const oauthMockUserRef: IMockUserRef = { current: {} };
+
+const mockOAuthGuard: CanActivate = {
+  canActivate(context: ExecutionContext): boolean {
+    const req = context.switchToHttp().getRequest();
+    req.user = oauthMockUserRef.current;
+    return true;
+  },
+};
 
 export async function setupTestApp(): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -18,6 +36,10 @@ export async function setupTestApp(): Promise<INestApplication> {
       reSendAccountConfirmationLink: jest.fn(),
       sendResetPasswordLink: jest.fn(),
     })
+    .overrideGuard(GoogleOauthGuard)
+    .useValue(mockOAuthGuard)
+    .overrideGuard(GithubOauthGuard)
+    .useValue(mockOAuthGuard)
     .compile();
 
   const app = moduleFixture.createNestApplication();
