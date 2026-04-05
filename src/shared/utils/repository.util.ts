@@ -22,7 +22,8 @@ export abstract class UtilRepository {
       [TokenType.CONFIRM_ACCOUNT]: PrismaTokenType.CONFIRM_ACCOUNT,
     };
     const result = mapping[tokenType];
-    if (!result) throw new Error(`No Prisma mapping for token type: ${tokenType}`);
+    if (!result)
+      throw new Error(`No Prisma mapping for token type: ${tokenType}`);
     return result;
   }
 }

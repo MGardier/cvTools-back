@@ -10,22 +10,16 @@ export class JwtManagerService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   async generate(
     payload: IPayloadJwt,
     type: TokenType,
   ): Promise<IGeneratedJwt> {
     const expiresIn = this.__getExpiration(type);
-    const token = await this.jwtService.signAsync(
-      {
-        ...payload,
-      },
-      {
-        secret: this.__getSecret(type),
-        expiresIn,
-      },
-    );
+    const secret = this.__getSecret(type);
+    
+    const token = await this.jwtService.signAsync(payload,{ secret, expiresIn });
 
     return { token, expiresIn };
   }
@@ -36,7 +30,10 @@ export class JwtManagerService {
     });
   }
 
-  /********************************************* PRIVATE METHOD *********************************************************************************************** */
+
+  // =============================================================================
+  //                               PRIVATE
+  // =============================================================================
 
   private __getSecret(type: TokenType): string {
     switch (type) {

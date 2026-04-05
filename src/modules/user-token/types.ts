@@ -8,7 +8,14 @@ export interface ICreateUserToken {
   uuid?: string;
 }
 
+
+export interface ISavedToken {
+  userToken: UserToken;
+  rawToken: string;
+}
+
 export interface IValidatedToken {
   userToken: UserToken;
   payload: IPayloadJwt;
 }
+

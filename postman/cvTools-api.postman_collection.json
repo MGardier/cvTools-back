@@ -37,6 +37,18 @@
 		{
 			"key": "skillId",
 			"value": ""
+		},
+		{
+			"key": "noteId",
+			"value": ""
+		},
+		{
+			"key": "todoId",
+			"value": ""
+		},
+		{
+			"key": "historyId",
+			"value": ""
 		}
 	],
 	"item": [
@@ -321,11 +333,83 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/application",
+							"raw": "{{baseUrl}}/application?page=1&limit=10",
 							"host": ["{{baseUrl}}"],
-							"path": ["application"]
+							"path": ["application"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Numéro de page (défaut: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Nombre d'éléments par page (défaut: 10)"
+								},
+								{
+									"key": "currentStatus",
+									"value": "TO_APPLY",
+									"description": "Filtrer par statut (TO_APPLY, APPLIED, INTERVIEW, OFFER, REJECTED, etc.)",
+									"disabled": true
+								},
+								{
+									"key": "jobboard",
+									"value": "LINKEDIN",
+									"description": "Filtrer par jobboard (LINKEDIN, INDEED, WELCOME_TO_THE_JUNGLE, etc.)",
+									"disabled": true
+								},
+								{
+									"key": "isFavorite",
+									"value": "true",
+									"description": "Filtrer les favoris",
+									"disabled": true
+								},
+								{
+									"key": "city",
+									"value": "Paris",
+									"description": "Filtrer par ville",
+									"disabled": true
+								},
+								{
+									"key": "company",
+									"value": "TechCorp",
+									"description": "Filtrer par entreprise",
+									"disabled": true
+								},
+								{
+									"key": "keyword",
+									"value": "react",
+									"description": "Recherche par mot-clé (titre, entreprise, description)",
+									"disabled": true
+								},
+								{
+									"key": "sortField",
+									"value": "CREATED_AT",
+									"description": "Champ de tri (CREATED_AT, APPLIED_AT, TITLE, COMPANY, SALARY_MIN)",
+									"disabled": true
+								},
+								{
+									"key": "sortDirection",
+									"value": "desc",
+									"description": "Direction du tri (asc, desc)",
+									"disabled": true
+								},
+								{
+									"key": "createdAt",
+									"value": "2024-01-01T00:00:00.000Z",
+									"description": "Filtrer par date de création (après cette date)",
+									"disabled": true
+								},
+								{
+									"key": "appliedAt",
+									"value": "2024-01-01T00:00:00.000Z",
+									"description": "Filtrer par date de candidature (après cette date)",
+									"disabled": true
+								}
+							]
 						},
-						"description": "Récupérer toutes les candidatures de l'utilisateur connecté."
+						"description": "Récupérer toutes les candidatures de l'utilisateur connecté avec pagination et filtres optionnels."
 					},
 					"response": []
 				},
@@ -439,9 +523,17 @@
 						"url": {
 							"raw": "{{baseUrl}}/contact",
 							"host": ["{{baseUrl}}"],
-							"path": ["contact"]
+							"path": ["contact"],
+							"query": [
+								{
+									"key": "search",
+									"value": "dupont",
+									"description": "Recherche par nom, prénom, email ou profession",
+									"disabled": true
+								}
+							]
 						},
-						"description": "Récupérer tous les contacts de l'utilisateur connecté."
+						"description": "Récupérer tous les contacts de l'utilisateur connecté. Supporte la recherche par query param ?search=."
 					},
 					"response": []
 				},
@@ -525,7 +617,7 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["contact", "{{contactId}}"]
 						},
-						"description": "Supprimer un contact. Retourne 204 No Content."
+						"description": "Supprimer un contact. Retourne 204 No Content. Impossible si lié à une candidature (409 CONTACT_DELETE_CONFLICT)."
 					},
 					"response": []
 				},
@@ -600,6 +692,33 @@
 					"response": []
 				},
 				{
+					"name": "Find or Create Skill",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"React\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/skill/find-or-create",
+							"host": ["{{baseUrl}}"],
+							"path": ["skill", "find-or-create"]
+						},
+						"description": "Trouver une compétence existante par label ou la créer si elle n'existe pas."
+					},
+					"response": []
+				},
+				{
 					"name": "Get All Skills",
 					"request": {
 						"method": "GET",
@@ -612,9 +731,17 @@
 						"url": {
 							"raw": "{{baseUrl}}/skill",
 							"host": ["{{baseUrl}}"],
-							"path": ["skill"]
+							"path": ["skill"],
+							"query": [
+								{
+									"key": "search",
+									"value": "react",
+									"description": "Recherche par label de compétence",
+									"disabled": true
+								}
+							]
 						},
-						"description": "Récupérer toutes les compétences."
+						"description": "Récupérer toutes les compétences. Supporte la recherche par query param ?search=."
 					},
 					"response": []
 				},
@@ -698,7 +825,7 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["skill", "{{skillId}}"]
 						},
-						"description": "Supprimer une compétence. Retourne 204 No Content. Impossible si liée à une candidature."
+						"description": "Supprimer une compétence. Retourne 204 No Content. Impossible si liée à une candidature (409 SKILL_DELETE_CONFLICT)."
 					},
 					"response": []
 				},
@@ -737,6 +864,378 @@
 							"path": ["skill", "{{skillId}}", "application", "{{applicationId}}"]
 						},
 						"description": "Dissocier une compétence d'une candidature. Retourne 204 No Content."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Application History",
+			"item": [
+				{
+					"name": "Create History Entry",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Candidature envoyée\",\n    \"status\": \"APPLIED\",\n    \"doneAt\": \"2024-01-20T14:30:00.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/history",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "history"]
+						},
+						"description": "Créer une entrée d'historique pour une candidature. Champs requis : description, status. doneAt est optionnel."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All History Entries",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/history",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "history"]
+						},
+						"description": "Récupérer toutes les entrées d'historique d'une candidature."
+					},
+					"response": []
+				},
+				{
+					"name": "Update History Entry",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Candidature envoyée via LinkedIn\",\n    \"status\": \"APPLIED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/history/{{historyId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "history", "{{historyId}}"]
+						},
+						"description": "Mettre à jour une entrée d'historique. Tous les champs sont optionnels."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete History Entry",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/history/{{historyId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "history", "{{historyId}}"]
+						},
+						"description": "Supprimer une entrée d'historique. Retourne 204 No Content."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Note",
+			"item": [
+				{
+					"name": "Create Note",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Penser à relancer le recruteur la semaine prochaine.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/note",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "note"]
+						},
+						"description": "Créer une note pour une candidature. Champ requis : description."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Notes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/note",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "note"],
+							"query": [
+								{
+									"key": "sort",
+									"value": "desc",
+									"description": "Tri par date (asc, desc)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Récupérer toutes les notes d'une candidature. Supporte le tri par query param ?sort=asc|desc."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Note",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Note mise à jour.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/note/{{noteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "note", "{{noteId}}"]
+						},
+						"description": "Mettre à jour une note. Tous les champs sont optionnels."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Note",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/note/{{noteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "note", "{{noteId}}"]
+						},
+						"description": "Supprimer une note. Retourne 204 No Content."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Todo",
+			"item": [
+				{
+					"name": "Create Todo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Préparer les questions pour l'entretien\",\n    \"status\": \"PENDING\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/todo",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "todo"]
+						},
+						"description": "Créer un todo pour une candidature. Champ requis : description (max 150 chars). status est optionnel (PENDING, DONE)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Todos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/todo",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "todo"],
+							"query": [
+								{
+									"key": "sort",
+									"value": "desc",
+									"description": "Tri par date (asc, desc)",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "PENDING",
+									"description": "Filtrer par statut (PENDING, DONE)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Récupérer tous les todos d'une candidature. Supporte le tri et le filtre par statut."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Todo",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"DONE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/todo/{{todoId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "todo", "{{todoId}}"]
+						},
+						"description": "Mettre à jour un todo. Tous les champs sont optionnels."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Todo",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/application/{{applicationId}}/todo/{{todoId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["application", "{{applicationId}}", "todo", "{{todoId}}"]
+						},
+						"description": "Supprimer un todo. Retourne 204 No Content."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Scraper",
+			"item": [
+				{
+					"name": "Extract Offer from URL",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"url\": \"https://www.linkedin.com/jobs/view/123456789\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/scraper/offer/extract",
+							"host": ["{{baseUrl}}"],
+							"path": ["scraper", "offer", "extract"]
+						},
+						"description": "Extraire les informations d'une offre d'emploi depuis une URL ou du contenu brut. Envoyer soit url, soit rawContent (pas les deux). Rate limité à 10 requêtes par minute."
+					},
+					"response": []
+				},
+				{
+					"name": "Extract Offer from Raw Content",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rawContent\": \"Développeur Full Stack - CDI - Paris\\nEntreprise: TechCorp\\nSalaire: 45-55k€\\nStack: NestJS, React, PostgreSQL\\nTélétravail: 2 jours/semaine\\nDescription du poste...\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/scraper/offer/extract",
+							"host": ["{{baseUrl}}"],
+							"path": ["scraper", "offer", "extract"]
+						},
+						"description": "Extraire les informations d'une offre depuis du texte brut copié/collé. Max 50 000 caractères. Rate limité à 10 requêtes par minute."
 					},
 					"response": []
 				}

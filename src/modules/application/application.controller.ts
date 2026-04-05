@@ -7,14 +7,17 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
   Req,
   HttpCode,
 } from '@nestjs/common';
 
 import { ApplicationService } from './application.service';
 import { CreateApplicationRequestDto } from './dto/request/create-application.dto';
+import { FindAllApplicationRequestDto } from './dto/request/find-all-application.dto';
 import { UpdateApplicationRequestDto } from './dto/request/update-application.dto';
 import { ApplicationResponseDto } from './dto/response/application.dto';
+import { PaginatedApplicationResponseDto } from './dto/response/paginated-application.dto';
 import {
   SerializeWith,
   SkipSerialize,
@@ -71,11 +74,12 @@ export class ApplicationController {
   // =============================================================================
 
   @Get()
-  @SerializeWith(ApplicationResponseDto)
+  @SerializeWith(PaginatedApplicationResponseDto)
   async findAll(
     @Req() req: IAuthenticatedRequest,
-  ): Promise<ApplicationResponseDto[]> {
-    return await this.applicationService.findAll(req.user.sub);
+    @Query() query: FindAllApplicationRequestDto,
+  ): Promise<PaginatedApplicationResponseDto> {
+    return await this.applicationService.findAll(req.user.sub, query);
   }
 
   @Get(':id')

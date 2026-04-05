@@ -52,16 +52,36 @@ export class ContactRepository {
   //                               FIND
   // =============================================================================
 
-  async findAllByUserId(userId: number, tx?: Prisma.TransactionClient): Promise<Contact[]> {
+  async search(
+    userId: number,
+    search?: string,
+    limit = 20,
+    tx?: Prisma.TransactionClient,
+  ) {
     const client = tx ?? this.prismaService;
 
     return await client.contact.findMany({
-      where: { createdBy: userId },
-      orderBy: { createdAt: 'desc' },
+      where: {
+        createdBy: userId,
+        ...(search && {
+          OR: [
+            { firstname: { contains: search, mode: 'insensitive' } },
+            { lastname: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+            { profession: { contains: search, mode: 'insensitive' } },
+          ],
+        }),
+      },
+      include: { _count: { select: { applicationContacts: true } } },
+      orderBy: { lastname: 'asc' },
+      take: limit,
     });
   }
 
-  async findAllByApplicationId(applicationId: number, tx?: Prisma.TransactionClient): Promise<Contact[]> {
+  async findAllByApplicationId(
+    applicationId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Contact[]> {
     const client = tx ?? this.prismaService;
 
     return await client.contact.findMany({
@@ -136,7 +156,10 @@ export class ContactRepository {
     });
   }
 
-  async countApplicationLinks(contactId: number, tx?: Prisma.TransactionClient): Promise<number> {
+  async countApplicationLinks(
+    contactId: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<number> {
     const client = tx ?? this.prismaService;
 
     return await client.applicationHasContact.count({

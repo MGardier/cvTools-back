@@ -1,11 +1,17 @@
 export const APPLICATION_JSON_SCHEMA = {
   type: 'object',
   properties: {
+    isSuccess: {
+      type: 'boolean',
+      description:
+        'true if enough information was found to extract a job posting, false otherwise',
+    },
     title: { type: 'string', description: 'Job title' },
     company: { type: 'string', description: 'Company name' },
     description: {
       type: 'string',
-      description: 'Job description summary (max 500 chars)',
+      description:
+        'Full job description in Markdown format (headings, lists, bold, etc.). Max 20000 characters.',
     },
     contractType: {
       type: 'string',
@@ -39,6 +45,22 @@ export const APPLICATION_JSON_SCHEMA = {
       items: { type: 'string' },
       description: 'List of required technical skills',
     },
+    jobboard: {
+      type: 'string',
+      enum: [
+        'LINKEDIN',
+        'INDEED',
+        'WTTJ',
+        'FRANCE_TRAVAIL',
+        'GLASSDOOR',
+        'APEC',
+        'HELLO_WORK',
+        'METEO_JOB',
+        'UNKNOW',
+      ],
+      description:
+        'The job board platform where this offer was posted. Infer from the URL domain if available.',
+    },
     address: {
       type: 'object',
       properties: {
@@ -51,22 +73,7 @@ export const APPLICATION_JSON_SCHEMA = {
       required: [],
       additionalProperties: false,
     },
-    contacts: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          firstname: { type: 'string' },
-          lastname: { type: 'string' },
-          email: { type: 'string' },
-          phone: { type: 'string' },
-          profession: { type: 'string' },
-        },
-        required: [],
-        additionalProperties: false,
-      },
-    },
   },
-  required: ['title'],
+  required: ['isSuccess', 'title'],
   additionalProperties: false,
 } as const;

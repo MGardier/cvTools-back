@@ -1,9 +1,11 @@
-import { Controller, Post, Body, Req } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ScraperService } from './scraper.service';
-import { ExtractUrlRequestDto } from './dto/request/extract-url.dto';
+import { ExtractOfferDto } from './dto/request/extract-offer.dto';
 import { SkipSerialize } from 'src/shared/decorators/serialize.decorator';
 import { IAuthenticatedRequest } from 'src/shared/types/request.types';
 import { TExtractedApplication } from '../llm/types';
+import { CustomThrottlerGuard } from 'src/shared/guards/custom-throttler.guard';
 
 @Controller('scraper')
 export class ScraperController {
@@ -15,10 +17,16 @@ export class ScraperController {
 
   @Post('offer/extract')
   @SkipSerialize()
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async extract(
     @Req() req: IAuthenticatedRequest,
-    @Body() dto: ExtractUrlRequestDto,
+    @Body() dto: ExtractOfferDto,
   ): Promise<TExtractedApplication> {
-    return await this.scraperService.extract(dto.url, req.user.sub);
+    return await this.scraperService.extract(
+      req.user.sub,
+      dto.url,
+      dto.rawContent,
+    );
   }
 }

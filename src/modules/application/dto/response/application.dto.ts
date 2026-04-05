@@ -10,6 +10,8 @@ import {
 } from '@prisma/client';
 
 import { AddressResponseDto } from 'src/modules/address/dto/response/address.dto';
+import { ContactResponseDto } from 'src/modules/contact/dto/response/contact.dto';
+import { SkillResponseDto } from 'src/modules/skill/dto/response/skill.dto';
 
 export class ApplicationResponseDto {
   @Expose()
@@ -75,4 +77,12 @@ export class ApplicationResponseDto {
   @Expose()
   @Type(() => AddressResponseDto)
   address: AddressResponseDto | null;
+
+  @Expose()
+  @Type(() => SkillResponseDto)
+  skills?: SkillResponseDto[];
+
+  @Expose()
+  @Type(() => ContactResponseDto)
+  contacts?: ContactResponseDto[];
 }

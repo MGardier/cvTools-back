@@ -30,9 +30,7 @@ export class ProviderService {
     try {
       await this.providerRepository.upsertUsage(data);
     } catch (error) {
-      this.logger.error(
-        `Failed to track usage: ${(error as Error).message}`,
-      );
+      this.logger.error(`Failed to track usage: ${(error as Error).message}`);
     }
   }
 }

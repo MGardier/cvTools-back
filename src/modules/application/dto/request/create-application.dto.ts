@@ -24,8 +24,6 @@ import {
 import { AddressInputDto } from 'src/modules/address/dto/request/create-address.dto';
 
 export class CreateApplicationRequestDto {
-
-
   // =============================================================================
   //                            STRING FIELDS
   // =============================================================================
@@ -41,14 +39,19 @@ export class CreateApplicationRequestDto {
 
   @IsOptional()
   @IsString({ message: "L'entreprise doit être une chaîne de caractères." })
-  @MaxLength(100, { message: "L'entreprise ne peut pas dépasser 100 caractères." })
+  @MaxLength(100, {
+    message: "L'entreprise ne peut pas dépasser 100 caractères.",
+  })
   company?: string;
 
   @IsOptional()
   @IsString({
     message: "L'identifiant de l'offre API doit être une chaîne de caractères.",
   })
-  @MaxLength(150, { message: "L'identifiant de l'offre API ne peut pas dépasser 150 caractères." })
+  @MaxLength(150, {
+    message:
+      "L'identifiant de l'offre API ne peut pas dépasser 150 caractères.",
+  })
   apiOfferId?: string;
 
   @IsOptional()
@@ -69,7 +72,6 @@ export class CreateApplicationRequestDto {
   @IsPositive({ message: 'Le salaire maximum doit être positif.' })
   salaryMax?: number;
 
-
   // =============================================================================
   //                             DATE FIELDS
   // =============================================================================
@@ -78,7 +80,6 @@ export class CreateApplicationRequestDto {
   @IsDate({ message: 'La date de publication doit être une date valide.' })
   @Type(() => Date)
   publishedAt?: Date;
-
 
   // =============================================================================
   //                             ENUM FIELDS
@@ -137,11 +138,17 @@ export class CreateApplicationRequestDto {
 
   @IsOptional()
   @IsArray()
-  @IsInt({ each: true, message: 'Chaque identifiant de compétence doit être un nombre entier.' })
+  @IsInt({
+    each: true,
+    message: 'Chaque identifiant de compétence doit être un nombre entier.',
+  })
   skillIds?: number[];
 
   @IsOptional()
   @IsArray()
-  @IsInt({ each: true, message: 'Chaque identifiant de contact doit être un nombre entier.' })
+  @IsInt({
+    each: true,
+    message: 'Chaque identifiant de contact doit être un nombre entier.',
+  })
   contactIds?: number[];
 }

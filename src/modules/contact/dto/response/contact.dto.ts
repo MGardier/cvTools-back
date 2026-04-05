@@ -19,4 +19,6 @@ export class ContactResponseDto {
   @Expose()
   profession: string;
 
+  @Expose()
+  isUsed?: boolean;
 }

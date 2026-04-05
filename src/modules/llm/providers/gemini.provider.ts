@@ -29,7 +29,7 @@ export class GeminiProvider implements ILlmProvider {
           maxOutputTokens: request.maxTokens,
           responseMimeType: 'application/json',
           responseSchema: request.jsonSchema,
-          thinkingConfig: { thinkingBudget: 0 },
+          thinkingConfig: { thinkingBudget: 1024 },
         },
       });
 
@@ -70,7 +70,7 @@ export class GeminiProvider implements ILlmProvider {
           maxOutputTokens: request.maxTokens,
           responseMimeType: 'application/json',
           responseSchema: request.jsonSchema,
-          thinkingConfig: { thinkingBudget: 0 },
+          thinkingConfig: { thinkingBudget: 1024 },
           tools: [{ urlContext: {} }],
         },
       });

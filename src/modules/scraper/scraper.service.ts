@@ -1,139 +1,124 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import * as cheerio from 'cheerio';
 import { NativeFetcher } from './fetchers/native.fetcher';
-import { JinaReaderFetcher } from './fetchers/jina-reader.fetcher';
-import { LlmService } from '../llm/llm.service';
 import { TExtractedApplication } from '../llm/types';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { ScraperStrategies } from './scraper.strategies';
+import { UtilUrlValidator } from 'src/shared/utils/url-validator.util';
+import { CacheManagerService } from '../cache/cache-manager.service';
+
+const NOT_A_JOB_RESULT = { isSuccess: false } as TExtractedApplication;
 
 @Injectable()
 export class ScraperService {
   private readonly logger = new Logger(ScraperService.name);
 
+  private MAX_TEXT_LENGTH = 15_000;
+
   constructor(
     private readonly nativeFetcher: NativeFetcher,
-    private readonly jinaReaderFetcher: JinaReaderFetcher,
-    private readonly llmService: LlmService,
+    private readonly scrapperStrategies: ScraperStrategies,
+    private readonly cacheManagerService: CacheManagerService,
   ) {}
 
-  // =============================================================================
-  //                               EXTRACT
-  // =============================================================================
+  // ═══════════════════════════════════════════════
+  //                  PUBLIC API
+  // ═══════════════════════════════════════════════
 
   async extract(
-    url: string,
     userId: number,
+    url?: string,
+    rawContent?: string,
   ): Promise<TExtractedApplication> {
-    // STEP 1: Native fetch + JSON-LD extraction -> LLM structureText
-    const nativeResult = await this.nativeFetcher.fetch(url);
-
-    if (nativeResult.success && nativeResult.data) {
-      const jsonLd = this.__extractJsonLd(nativeResult.data);
-
-      if (jsonLd) {
-        this.logger.log(`JSON-LD JobPosting found for ${url}`);
-        try {
-          return await this.llmService.structureText(
-            JSON.stringify(jsonLd),
-            userId,
-          );
-        } catch (error) {
-          this.logger.warn(
-            `LLM structureText failed for JSON-LD: ${(error as Error).message}`,
-          );
-        }
-      }
-
-      this.logger.log(`No JSON-LD JobPosting found for ${url}`);
-    }
-
-    // STEP 2: Fallback to Jina Reader -> LLM structureText
-    this.logger.log(`Falling back to Jina Reader for ${url}`);
-    const jinaResult = await this.jinaReaderFetcher.fetch(url);
-
-    if (jinaResult.success && jinaResult.data) {
-      this.logger.log(`Jina Reader fetch succeeded for ${url}`);
-      try {
-        return await this.llmService.structureText(jinaResult.data, userId);
-      } catch (error) {
-        this.logger.warn(
-          `LLM structureText failed for Jina data: ${(error as Error).message}`,
-        );
-      }
-    }
-
-    // STEP 3: Both fetchers failed -> Gemini fetchAndMap with urlContext
-    this.logger.log(
-      `All fetchers failed, attempting Gemini fetchAndMap for ${url}`,
-    );
-    try {
-      return await this.llmService.fetchAndMap(url, userId);
-    } catch {
-      this.logger.error(`All extraction methods failed for ${url}`);
+    if (!url && !rawContent)
       throw new BadRequestException(
         ErrorCodeEnum.SCRAPER_EXTRACTION_FAILED_ERROR,
       );
+
+    const cacheKey = url
+      ? this.cacheManagerService.buildCacheKey('scraper', 'extract', url)
+      : this.cacheManagerService.buildCacheKey(
+          'scraper',
+          'extract',
+          rawContent!,
+          true,
+        );
+
+    const cached =
+      await this.cacheManagerService.get<TExtractedApplication>(cacheKey);
+    if (cached) {
+      if (!cached.isSuccess)
+        throw new BadRequestException(
+          ErrorCodeEnum.SCRAPER_EXTRACTION_FAILED_ERROR,
+        );
+
+      return cached;
+    }
+
+    try {
+      const result = rawContent
+        ? await this.extractFromRaw(rawContent, userId)
+        : await this.extractFromUrl(UtilUrlValidator.validateUrl(url!), userId);
+
+      if (result.isSuccess)
+        await this.cacheManagerService.set(cacheKey, result);
+      return result;
+    } catch (error) {
+      if (error instanceof BadRequestException)
+        await this.cacheManagerService.set(cacheKey, NOT_A_JOB_RESULT);
+
+      throw error;
     }
   }
 
-  /********* PRIVATE *********/
+  // ═══════════════════════════════════════════════
+  //              EXTRACTION STRATEGIES
+  // ═══════════════════════════════════════════════
 
-  private __extractJsonLd(html: string): Record<string, unknown> | null {
-    const $ = cheerio.load(html);
-    const scripts = $('script[type="application/ld+json"]');
+  private async extractFromRaw(
+    rawContent: string,
+    userId: number,
+  ): Promise<TExtractedApplication> {
+    if (rawContent.length > this.MAX_TEXT_LENGTH)
+      throw new BadRequestException(
+        ErrorCodeEnum.SCRAPER_EXTRACTION_FAILED_ERROR,
+      );
 
-    for (let i = 0; i < scripts.length; i++) {
-      try {
-        const content = $(scripts[i]).html();
-        if (!content) continue;
+    const result = await this.scrapperStrategies.tryLlmStructure(
+      { userRawText: rawContent },
+      userId,
+      'raw content',
+    );
 
-        const parsed = JSON.parse(content);
-        const jobPosting = this.__findJobPosting(parsed);
+    if (!result)
+      throw new BadRequestException(
+        ErrorCodeEnum.SCRAPER_EXTRACTION_FAILED_ERROR,
+      );
 
-        if (jobPosting) return jobPosting;
-      } catch {
-        continue;
-      }
-    }
-
-    return null;
+    return result;
   }
 
-  private __findJobPosting(
-    parsed: unknown,
-  ): Record<string, unknown> | null {
-    // Direct JobPosting object
-    if (this.__isJobPosting(parsed))
-      return parsed as Record<string, unknown>;
+  private async extractFromUrl(
+    url: string,
+    userId: number,
+  ): Promise<TExtractedApplication> {
+    const nativeResult = await this.nativeFetcher.fetch(url);
+    const nativeHtml = nativeResult.success ? nativeResult.data : null;
 
-    // Array of objects
-    if (Array.isArray(parsed)) {
-      for (const item of parsed) {
-        if (this.__isJobPosting(item))
-          return item as Record<string, unknown>;
-      }
+    const strategies: Array<() => Promise<TExtractedApplication | null>> = [
+      () => this.scrapperStrategies.tryJsonLd(nativeHtml, url, userId),
+      () => this.scrapperStrategies.tryVisibleText(nativeHtml, url, userId),
+      () => this.scrapperStrategies.tryJinaReader(url, userId),
+      () => this.scrapperStrategies.tryGeminiFetch(url, userId),
+    ];
+
+    for (const strategy of strategies) {
+      const result = await strategy();
+      if (result) return result;
     }
 
-    // @graph pattern
-    const record = parsed as Record<string, unknown>;
-    if (record?.['@graph'] && Array.isArray(record['@graph'])) {
-      for (const item of record['@graph']) {
-        if (this.__isJobPosting(item))
-          return item as Record<string, unknown>;
-      }
-    }
-
-    return null;
-  }
-
-  private __isJobPosting(obj: unknown): boolean {
-    if (!obj || typeof obj !== 'object') return false;
-
-    const type = (obj as Record<string, unknown>)['@type'];
-
-    if (typeof type === 'string') return type === 'JobPosting';
-    if (Array.isArray(type)) return type.includes('JobPosting');
-
-    return false;
+    this.logger.error(`All extraction strategies failed for ${url}`);
+    throw new BadRequestException(
+      ErrorCodeEnum.SCRAPER_EXTRACTION_FAILED_ERROR,
+    );
   }
 }

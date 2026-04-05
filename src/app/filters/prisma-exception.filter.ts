@@ -43,7 +43,10 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     response: Response,
   ): void {
     const target = exception.meta?.target as string | string[] | undefined;
-    const isEmailConstraint = target === 'user_email_key';
+    const isEmailConstraint =
+      target === 'email' ||
+      target === 'user_email_key' ||
+      (Array.isArray(target) && target.includes('email'));
     const message = isEmailConstraint
       ? ErrorCodeEnum.EMAIL_ALREADY_EXISTS_ERROR
       : ErrorCodeEnum.DEFAULT_ALREADY_EXISTS_ERROR;

@@ -1,15 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ExternalProvider, HttpMethod } from '@prisma/client';
 import { ProviderService } from '../provider/provider.service';
 import { GeminiProvider } from './providers/gemini.provider';
 import { ILlmResponse } from './providers/types';
-import { TExtractedApplication } from './types';
+import { TExtractedApplication, TExtractStructureTextParams } from './types';
 import { APPLICATION_JSON_SCHEMA } from './constants/json-schema';
 import {
   STRUCTURE_TEXT_PROMPT,
-  FETCH_AND_MAP_PROMPT,
-} from './constants/prompts';
+  FORMAT_FROM_URL_PROMPT,
+  FETCH_AND_EXTRACT_PROMPT,
+} from './constants/extraction-prompts';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { extractedApplicationSchema } from './validation/extracted-application.schema';
+import { NotAJobPostingError } from './errors/not-a-job-posting.error';
 
 @Injectable()
 export class LlmService {
@@ -18,28 +21,36 @@ export class LlmService {
   constructor(
     private readonly geminiProvider: GeminiProvider,
     private readonly providerService: ProviderService,
-  ) {}
+  ) { }
 
   // =============================================================================
   //                               STRUCTURE TEXT
   // =============================================================================
 
   async structureText(
-    text: string,
+    params: TExtractStructureTextParams,
     userId: number,
   ): Promise<TExtractedApplication> {
-    const prompt = STRUCTURE_TEXT_PROMPT + text;
+
+    if (!params.fetchText && !params.userRawText)
+      throw new BadRequestException(
+        ErrorCodeEnum.SCRAPER_EXTRACTION_FAILED_ERROR,
+      );
+
+    const prompt = params.userRawText
+      ? this.__buildPrompt('raw', params.userRawText)
+      : this.__buildPrompt('url_content', params.fetchText!, params.sourceUrl);
     const request = {
       prompt,
-      maxTokens: 1000,
-      jsonSchema: APPLICATION_JSON_SCHEMA as unknown as Record<string, unknown>,
+      maxTokens: 4096,
+      jsonSchema: APPLICATION_JSON_SCHEMA as Record<string, unknown>,
     };
 
     this.logger.log('Attempting structureText with Gemini...');
     const geminiResponse = await this.geminiProvider.structureText(request);
 
     if (geminiResponse.success) {
-      const parsed = this.__parseResponse(geminiResponse);
+      const parsed = this.__parseAndValidate(geminiResponse);
       if (parsed) {
         await this.__logAndTrack(
           geminiResponse,
@@ -64,18 +75,18 @@ export class LlmService {
     url: string,
     userId: number,
   ): Promise<TExtractedApplication> {
-    const prompt = `${FETCH_AND_MAP_PROMPT}\n\nURL to analyze: ${url}`;
+    const prompt = this.__buildPrompt('url_fetch',url);
     const request = {
       prompt,
-      maxTokens: 2048,
+      maxTokens: 4096,
       jsonSchema: APPLICATION_JSON_SCHEMA as unknown as Record<string, unknown>,
     };
 
     this.logger.log(`Attempting fetchAndMap with Gemini for ${url}...`);
-    const geminiResponse = await this.geminiProvider.fetchAndMap!(request);
+    const geminiResponse = await this.geminiProvider.fetchAndMap(request);
 
     if (geminiResponse.success) {
-      const parsed = this.__parseResponse(geminiResponse);
+      const parsed = this.__parseAndValidate(geminiResponse);
       if (parsed) {
         await this.__logAndTrack(
           geminiResponse,
@@ -92,26 +103,43 @@ export class LlmService {
     throw new Error(ErrorCodeEnum.LLM_FETCH_AND_MAP_FAILED_ERROR);
   }
 
-  /********* PRIVATE *********/
+  // =============================================================================
+  //                               PRIVATE
+  // =============================================================================y
 
-  private __parseResponse(
+  private __parseAndValidate(
     response: ILlmResponse,
   ): TExtractedApplication | null {
+    let raw: unknown;
     try {
-      const parsed = JSON.parse(response.content) as TExtractedApplication;
+      raw = JSON.parse(response.content);
+    } catch {
+      this.logger.error('Failed to parse LLM JSON response');
+      return null;
+    }
 
-      if (!parsed.title) {
-        this.logger.warn('LLM response missing required "title" field');
-        return null;
-      }
+    const result = extractedApplicationSchema.safeParse(raw);
 
-      return parsed;
-    } catch (error) {
-      this.logger.error(
-        `Failed to parse LLM response: ${(error as Error).message}`,
+    if (!result.success) {
+      this.logger.warn(
+        `Zod validation failed: ${result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')}`,
       );
       return null;
     }
+
+    const validated = result.data;
+
+    if (!validated.isSuccess) {
+      this.logger.warn('LLM reported isSuccess=false: insufficient data');
+      throw new NotAJobPostingError();
+    }
+
+    if (!validated.title) {
+      this.logger.warn('LLM response missing required "title" field');
+      return null;
+    }
+
+    return validated as TExtractedApplication;
   }
 
   private async __logAndTrack(
@@ -144,4 +172,35 @@ export class LlmService {
       }),
     ]);
   }
+
+
+  private __buildPrompt(
+    type: 'raw' | 'url_content' | 'url_fetch',
+    content: string,
+    sourceUrl?: string,
+  ): string {
+    const templates = {
+      raw: STRUCTURE_TEXT_PROMPT,
+      url_content: FORMAT_FROM_URL_PROMPT,
+      url_fetch: FETCH_AND_EXTRACT_PROMPT,
+    };
+
+    const placeholders = {
+      raw: '{{RAW_CONTENT}}',
+      url_content: '{{PAGE_CONTENT}}',
+      url_fetch: '{{URL}}',
+    };
+
+    let prompt = templates[type].replace(placeholders[type], content);
+
+    // Inject source URL in url_content prompts (for jobboard detection, etc.)
+    if (sourceUrl) {
+      prompt = prompt.replace('{{SOURCE_URL}}', sourceUrl);
+    }
+
+    return prompt;
+  }
+
 }
+
+
