@@ -25,6 +25,7 @@ import { NoteModule } from './modules/note/note.module';
 import { TodoModule } from './modules/todo/todo.module';
 import { ApplicationHistoryModule } from './modules/application-history/application-history.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { OfferModule } from './modules/offer/offer.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     NoteModule,
     TodoModule,
     ApplicationHistoryModule,
+    OfferModule,
   ],
   controllers: [],
   providers: [

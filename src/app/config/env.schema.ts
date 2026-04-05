@@ -236,6 +236,19 @@ export const envSchema = z.object({
 
   // SCRAPER
   JINA_READER_BASE_URL: z.url().optional().default('https://r.jina.ai/'),
+
+  /* #################### OFFER PROVIDERS  ########################### */
+
+  // FRANCE TRAVAIL
+  FRANCE_TRAVAIL_ENABLED: z
+    .enum(['true', 'false', '1', '0'])
+    .catch('false')
+    .transform((val) => val === 'true' || val === '1')
+    .default(true),
+  FRANCE_TRAVAIL_TOKEN_URL: z.url(),
+  FRANCE_TRAVAIL_OFFER_DETAILS_URL: z.url(),
+  FRANCE_TRAVAIL_CLIENT_ID: z.string(),
+  FRANCE_TRAVAIL_CLIENT_SECRET: z.string(),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
