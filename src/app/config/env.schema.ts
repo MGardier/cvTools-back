@@ -245,8 +245,6 @@ export const envSchema = z.object({
     .catch('false')
     .transform((val) => val === 'true' || val === '1')
     .default(true),
-  FRANCE_TRAVAIL_TOKEN_URL: z.url(),
-  FRANCE_TRAVAIL_OFFER_DETAILS_URL: z.url(),
   FRANCE_TRAVAIL_CLIENT_ID: z.string(),
   FRANCE_TRAVAIL_CLIENT_SECRET: z.string(),
 });
