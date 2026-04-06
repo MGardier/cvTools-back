@@ -32,10 +32,6 @@ export class SearchOfferRequestDto {
 
   @IsOptional()
   @IsString()
-  region?: string;
-
-  @IsOptional()
-  @IsString()
   postalCode?: string;
 
   @IsOptional()

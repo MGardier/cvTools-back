@@ -19,6 +19,9 @@ class LocationResponseDto {
 
   @Expose()
   region?: string;
+
+  @Expose()
+  raw?: string;
 }
 
 class SalaryResponseDto {

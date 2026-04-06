@@ -32,15 +32,13 @@ export abstract class FranceTravailMapper {
   ): IFranceTravailQueryParams {
     const {
       keyword,
-      region,
       city,
       postalCode,
       contractType,
       experience,
       publishedSince,
     } = filters;
-    const regionCode =
-      region ?? (postalCode ? postalCode.slice(0, 2) : undefined);
+    const regionCode = postalCode ? postalCode.slice(0, 2) : undefined;
 
     const params: IFranceTravailQueryParams = {
       motsCles: keyword,
@@ -160,8 +158,30 @@ export abstract class FranceTravailMapper {
   private static mapLocation(
     offer: IFranceTravailRawOffer,
   ): ILocation | undefined {
-    if (!offer.lieuTravail?.libelle) return undefined;
-    return { raw: offer.lieuTravail?.libelle };
+    const lieu = offer.lieuTravail;
+    if (!lieu?.libelle && !lieu?.codePostal) return undefined;
+
+    const city = this.parseCityFromLibelle(lieu.libelle);
+    const department = lieu.codePostal?.slice(0, 2);
+
+    return {
+      ...(city && { city }),
+      ...(lieu.codePostal && { postalCode: lieu.codePostal }),
+      ...(department && { department }),
+      raw: lieu.libelle,
+    };
+  }
+
+  /**
+   * Parse city name from FT libelle format: "75 - Paris 11e Arrondissement" → "Paris 11e Arrondissement"
+   */
+  private static parseCityFromLibelle(
+    libelle?: string,
+  ): string | undefined {
+    if (!libelle) return undefined;
+    // FT format: "XX - Ville" where XX is department code
+    const match = libelle.match(/^\d+\s*-\s*(.+)$/);
+    return match?.[1]?.trim();
   }
 
   // ═══════════════════════════════════════════
@@ -171,8 +191,76 @@ export abstract class FranceTravailMapper {
   private static mapExperience(
     offer: IFranceTravailRawOffer,
   ): IExperienceInfo | undefined {
-    if (!offer.experienceLibelle) return undefined;
-    return { raw: offer.experienceLibelle };
+    const libelle = offer.experienceLibelle;
+    const exige = offer.experienceExige;
+
+    if (!libelle && !exige) return undefined;
+
+    const years = this.parseExperienceYears(libelle);
+    const level = this.resolveExperienceLevel(years, exige);
+    const raw = this.formatExperienceRaw(years, libelle, exige);
+
+    return { ...(level && { level }), raw };
+  }
+
+  /**
+   * Extract years from FT experienceLibelle: "5 An(s)" → 5, "Débutant accepté" → null
+   */
+  private static parseExperienceYears(libelle?: string): number | null {
+    if (!libelle) return null;
+    const match = libelle.match(/(\d+)\s*an/i);
+    return match ? parseInt(match[1], 10) : null;
+  }
+
+  /**
+   * Map to EExperienceLevel using years (primary) or experienceExige (fallback)
+   *   years: 0-1 → JUNIOR, 2-3 → MID, 4+ → SENIOR
+   *   exige: D (Débutant) → JUNIOR, S (Souhaitée) → MID, E (Exigée) → SENIOR
+   */
+  private static resolveExperienceLevel(
+    years: number | null,
+    exige?: string,
+  ): EExperienceLevel | undefined {
+    if (years !== null) {
+      if (years <= 1) return EExperienceLevel.JUNIOR;
+      if (years <= 3) return EExperienceLevel.MID;
+      return EExperienceLevel.SENIOR;
+    }
+
+    const exigeMap: Record<string, EExperienceLevel> = {
+      D: EExperienceLevel.JUNIOR,
+      S: EExperienceLevel.MID,
+      E: EExperienceLevel.SENIOR,
+    };
+    return exige ? exigeMap[exige] : undefined;
+  }
+
+  /**
+   * Build a readable label from FT 
+   *   "0 An(s)" → "Débutant accepté"
+   *   "3 An(s)" → "3 ans d'expérience"
+   *   exige="D" (no libelle) → "Débutant accepté"
+   */
+  private static formatExperienceRaw(
+    years: number | null,
+    libelle?: string,
+    exige?: string,
+  ): string {
+    if (libelle?.toLowerCase().includes('débutant')) return 'Débutant accepté';
+
+    if (years !== null) {
+      if (years === 0) return 'Débutant accepté';
+      return `${years} ${years === 1 ? 'an' : 'ans'} d'expérience`;
+    }
+
+    if (libelle) return libelle;
+
+    const exigeLabels: Record<string, string> = {
+      D: 'Débutant accepté',
+      S: 'Expérience souhaitée',
+      E: 'Expérience exigée',
+    };
+    return exigeLabels[exige ?? ''] ?? 'Non précisé';
   }
 
   // Mapping  : Generic filter → FT query params

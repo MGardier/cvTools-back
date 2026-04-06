@@ -92,7 +92,6 @@ export interface IOfferListItem {
 export interface IOfferSearchFilters {
   keyword: string;
   city?: string;
-  region?: string;
   postalCode?: string;
   contractType?: EContractType;
   remote?: ERemotePolicy;
