@@ -3,9 +3,11 @@ import {
   IsEnum,
   IsIn,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsPositive,
   IsString,
+  MaxLength,
   Min,
 } from 'class-validator';
 import {
@@ -14,9 +16,15 @@ import {
   EOfferJobboardOrigin,
   ERemotePolicy,
 } from '../../types';
-import { val } from 'cheerio/dist/commonjs/api/attributes';
+import { DtoErrorCodeEnum } from 'src/shared/enums/dto-error-codes.enum';
 
 export class SearchOfferRequestDto {
+
+  @IsString()
+  @IsNotEmpty({ message: DtoErrorCodeEnum.KEYWORD_REQUIRED })
+  @Transform(({ value }) => value?.trim())
+  @MaxLength(200, { message: DtoErrorCodeEnum.KEYWORD_TOO_LONG })
+  keyword: string;
 
   @IsOptional()
   @IsString()
@@ -55,11 +63,11 @@ export class SearchOfferRequestDto {
   @Transform(({ value }) => (isNaN(+value) ? 1 : +value) )
   @IsInt()
   @Min(1)
-  page?: number = 1;
+  page: number = 1;
 
   @IsOptional()
   @Transform(({ value }) =>(isNaN(+value) ? 20 : +value))
   @IsInt()
   @IsPositive()
-  limit?: number = 20;
+  limit: number = 20;
 }
