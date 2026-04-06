@@ -26,6 +26,7 @@ import { TodoModule } from './modules/todo/todo.module';
 import { ApplicationHistoryModule } from './modules/application-history/application-history.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { OfferModule } from './modules/offer/offer.module';
+import { CityModule } from './modules/city/city.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { OfferModule } from './modules/offer/offer.module';
     TodoModule,
     ApplicationHistoryModule,
     OfferModule,
+    CityModule,
   ],
   controllers: [],
   providers: [
