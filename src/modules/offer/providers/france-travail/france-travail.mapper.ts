@@ -9,8 +9,12 @@ import {
   ISalary,
   TProviderSearchFilters,
 } from '../../types';
-import { IFranceTravailRawOffer, IFranceTravailQueryParams, TFTContractType, TFTExperience }
-  from './types';
+import {
+  IFranceTravailRawOffer,
+  IFranceTravailQueryParams,
+  TFTContractType,
+  TFTExperience,
+} from './types';
 import { v5 as uuidv5 } from 'uuid';
 import { OFFER_ID_NAMESPACE } from '../../constant';
 
@@ -23,13 +27,22 @@ export abstract class FranceTravailMapper {
   /**
    *  Mapping  : Generic filter → FT query params
    */
-  static toProviderParams(filters: TProviderSearchFilters): IFranceTravailQueryParams {
-
-    const { keyword, region, city, postalCode, contractType, experience, publishedSince } = filters;
-    const regionCode = region ?? (postalCode ? postalCode.slice(0, 2) : undefined);
+  static toProviderParams(
+    filters: TProviderSearchFilters,
+  ): IFranceTravailQueryParams {
+    const {
+      keyword,
+      region,
+      city,
+      postalCode,
+      contractType,
+      experience,
+      publishedSince,
+    } = filters;
+    const regionCode =
+      region ?? (postalCode ? postalCode.slice(0, 2) : undefined);
 
     const params: IFranceTravailQueryParams = {
-
       motsCles: keyword,
       /* Address  fields */
       ...(city && { commune: city }),
@@ -40,23 +53,26 @@ export abstract class FranceTravailMapper {
 
       ...(experience && { experience: this.toExperience(experience) }),
 
-      ...(publishedSince && { minCreationDate: this.toMinCreationDate(publishedSince) }),
-
+      ...(publishedSince && {
+        minCreationDate: this.toMinCreationDate(publishedSince),
+      }),
     };
-
 
     return params;
   }
 
   // ═══════════════════════════════════════════
   //         RESPONSE MAPPING
-  //        
+  //
   // ═══════════════════════════════════════════
 
   /**
    *  FT offer  → generic offer
    */
-  static toOfferListItem(offer: IFranceTravailRawOffer, baseDetailUrl: string): IOfferListItem {
+  static toOfferListItem(
+    offer: IFranceTravailRawOffer,
+    baseDetailUrl: string,
+  ): IOfferListItem {
     return {
       id: this.generateId(offer.id),
       externalId: offer.id,
@@ -66,7 +82,9 @@ export abstract class FranceTravailMapper {
       contractType: this.mapContractType(offer),
       salary: this.mapSalary(offer),
       publishedAt: offer.dateCreation,
-      url: offer.origineOffre?.urlOrigine ?? this.buildFallbackUrl(offer.id, baseDetailUrl),
+      url:
+        offer.origineOffre?.urlOrigine ??
+        this.buildFallbackUrl(offer.id, baseDetailUrl),
       jobboard: EOfferJobboardOrigin.FRANCE_TRAVAIL,
       apiProvider: EOfferAPiProvider.FRANCE_TRAVAIL,
       experience: this.mapExperience(offer),
@@ -77,7 +95,10 @@ export abstract class FranceTravailMapper {
   /**
    * array of FT offer →  array of generic offer
    */
-  static toOfferListItems(rawOffers: IFranceTravailRawOffer[], baseDetailUrl: string): IOfferListItem[] {
+  static toOfferListItems(
+    rawOffers: IFranceTravailRawOffer[],
+    baseDetailUrl: string,
+  ): IOfferListItem[] {
     return rawOffers.map((raw) => this.toOfferListItem(raw, baseDetailUrl));
   }
 
@@ -86,8 +107,10 @@ export abstract class FranceTravailMapper {
   // ═══════════════════════════════════════════
 
   private static generateId(externalId: string): string {
-    return uuidv5(`${EOfferAPiProvider.FRANCE_TRAVAIL}:${externalId}`, OFFER_ID_NAMESPACE)
-
+    return uuidv5(
+      `${EOfferAPiProvider.FRANCE_TRAVAIL}:${externalId}`,
+      OFFER_ID_NAMESPACE,
+    );
   }
 
   // ═══════════════════════════════════════════
@@ -100,8 +123,9 @@ export abstract class FranceTravailMapper {
     LIB: EContractType.FREELANCE,
   };
 
-  private static mapContractType(offer: IFranceTravailRawOffer): EContractType | undefined {
-
+  private static mapContractType(
+    offer: IFranceTravailRawOffer,
+  ): EContractType | undefined {
     if (offer.alternance) return EContractType.ALTERNANCE;
 
     if (!offer.typeContrat) return undefined;
@@ -110,7 +134,9 @@ export abstract class FranceTravailMapper {
   }
 
   // Mapping  : Generic filter → FT query params
-  private static toContractParams(type?: EContractType): Partial<Pick<IFranceTravailQueryParams, 'typeContrat' | 'natureContrat'>> {
+  private static toContractParams(
+    type?: EContractType,
+  ): Partial<Pick<IFranceTravailQueryParams, 'typeContrat' | 'natureContrat'>> {
     if (!type) return {};
 
     if (type === EContractType.ALTERNANCE) {
@@ -131,7 +157,9 @@ export abstract class FranceTravailMapper {
   // ═══════════════════════════════════════════
   //         PRIVATE — LOCATION
   // ═══════════════════════════════════════════
-  private static mapLocation(offer: IFranceTravailRawOffer): ILocation | undefined {
+  private static mapLocation(
+    offer: IFranceTravailRawOffer,
+  ): ILocation | undefined {
     if (!offer.lieuTravail?.libelle) return undefined;
     return { raw: offer.lieuTravail?.libelle };
   }
@@ -140,7 +168,9 @@ export abstract class FranceTravailMapper {
   //         PRIVATE — EXPERIENCE
   // ═══════════════════════════════════════════
 
-  private static mapExperience(offer: IFranceTravailRawOffer): IExperienceInfo | undefined {
+  private static mapExperience(
+    offer: IFranceTravailRawOffer,
+  ): IExperienceInfo | undefined {
     if (!offer.experienceLibelle) return undefined;
     return { raw: offer.experienceLibelle };
   }
@@ -181,8 +211,9 @@ export abstract class FranceTravailMapper {
   private static parseSalaryLibelle(libelle: string): ISalary | null {
     const lower = libelle.toLowerCase();
 
-    const amounts = [...libelle.matchAll(/(\d+(?:\.\d+)?)\s*euros/gi)]
-      .map((m) => parseFloat(m[1]));
+    const amounts = [...libelle.matchAll(/(\d+(?:\.\d+)?)\s*euros/gi)].map(
+      (m) => parseFloat(m[1]),
+    );
 
     if (amounts.length === 0) return null;
 
@@ -207,8 +238,7 @@ export abstract class FranceTravailMapper {
   private static mapSkills(offer: IFranceTravailRawOffer): string[] {
     if (!offer.competences?.length) return [];
 
-    return offer.competences
-      .map((c) => c.libelle);
+    return offer.competences.map((c) => c.libelle);
   }
 
   // ═══════════════════════════════════════════

@@ -1,4 +1,5 @@
-
+import { HttpStatus } from '@nestjs/common';
+import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 
 // ═══════════════════════════════════════════
 //    QUERY PARAMS
@@ -123,4 +124,18 @@ export interface IFranceTravailTokenResponse {
   scope: string;
   token_type: string;
   expires_in: number;
+}
+
+// ═══════════════════════════════════════════
+//    ERROR HANDLING
+// ═══════════════════════════════════════════
+
+export interface IAxiosLikeError {
+  response?: { status?: number };
+  message?: string;
+}
+
+export interface IMappedApiError {
+  errorCode: ErrorCodeEnum;
+  httpStatus: HttpStatus;
 }

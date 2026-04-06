@@ -1,7 +1,3 @@
-
-
-
-
 // ═══════════════════════════════════════════
 //                  ENUMS
 // ═══════════════════════════════════════════
@@ -52,21 +48,20 @@ export interface ILocation {
   postalCode?: string;
   department?: string;
   region?: string;
-  raw? : string;
-
+  raw?: string;
 }
 
 // If mapping to salary failed it set the raw in fallback
-export interface ISalary   {
+export interface ISalary {
   min?: number;
   max?: number;
-  raw?: string; 
+  raw?: string;
 }
 
 // If mapping to exp failed it set the raw in fallback
-export interface IExperienceInfo   {
-  level?: EExperienceLevel; 
-  raw?: string; 
+export interface IExperienceInfo {
+  level?: EExperienceLevel;
+  raw?: string;
 }
 
 // ═══════════════════════════════════════════
@@ -78,7 +73,7 @@ export interface IOfferListItem {
   externalId?: string;
   title: string;
   company?: string;
-  location?: ILocation ;
+  location?: ILocation;
   contractType?: EContractType;
   salary?: ISalary;
   remote?: ERemotePolicy;
@@ -112,36 +107,42 @@ export interface IOfferSearchFilters {
 //      AGREGATE RESPONSE
 // ═══════════════════════════════════════════
 
-export interface ProviderSourceStatus {
+export interface IProviderSourceStatus {
   apiProvider: EOfferAPiProvider;
   status: EProviderStatus;
   count: number;
   message?: string;
 }
 
-export interface AggregatedSearchResult {
+export interface IAggregatedSearchResult {
   offers: IOfferListItem[];
   meta: {
     total: number;
     page: number;
     limit: number;
-    sources: ProviderSourceStatus[];
+    sources: IProviderSourceStatus[];
   };
 }
 
-
+export interface IAggregatedProviderResult {
+  offers: IOfferListItem[];
+  sources: IProviderSourceStatus[];
+}
 
 // ═══════════════════════════════════════════
 //                PROVIDER
 // ═══════════════════════════════════════════
 
 // Filtres passés aux providers (sans pagination ni sélection de jobboard — géré par l'orchestrateur)
-export type TProviderSearchFilters = Omit<IOfferSearchFilters, 'page' | 'limit' | 'jobboard'>;
+export type TProviderSearchFilters = Omit<
+  IOfferSearchFilters,
+  'page' | 'limit' | 'jobboard'
+>;
 
 export interface IOfferProvider {
   readonly name: EOfferAPiProvider;
   readonly jobboards: EOfferJobboardOrigin[];
   readonly cacheTtl: number; // in sec
-  search(filters: TProviderSearchFilters): Promise<IOfferListItem[]>;
+  search(filters: TProviderSearchFilters, maxResults: number): Promise<IOfferListItem[]>;
   isAvailable(): boolean;
 }

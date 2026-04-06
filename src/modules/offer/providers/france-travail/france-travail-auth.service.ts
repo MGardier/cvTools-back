@@ -13,6 +13,7 @@ import { AxiosError } from 'axios';
 import { CacheManagerService } from 'src/modules/cache/cache-manager.service';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { IFranceTravailTokenResponse } from './types';
+import { FRANCE_TRAVAIL_ENDPOINTS } from './endpoint';
 
 @Injectable()
 export class FranceTravailAuthService {
@@ -38,12 +39,11 @@ export class FranceTravailAuthService {
 
     if (this.pendingTokenRequest) return this.pendingTokenRequest;
 
-     this.pendingTokenRequest = this.requestNewToken().finally(() => this.pendingTokenRequest = null);
+     this.pendingTokenRequest = this.__requestNewToken().finally(() => this.pendingTokenRequest = null);
      return this.pendingTokenRequest;
   }
 
-  private async requestNewToken(): Promise<string> {
-    const tokenUrl = this.configService.getOrThrow<string>('FRANCE_TRAVAIL_TOKEN_URL');
+  private async __requestNewToken(): Promise<string> {
     const clientId = this.configService.getOrThrow<string>('FRANCE_TRAVAIL_CLIENT_ID');
     const clientSecret = this.configService.getOrThrow<string>('FRANCE_TRAVAIL_CLIENT_SECRET');
 
@@ -57,7 +57,7 @@ export class FranceTravailAuthService {
     try {
       const { data } = await firstValueFrom(
         this.httpService.post<IFranceTravailTokenResponse>(
-          tokenUrl,
+          FRANCE_TRAVAIL_ENDPOINTS.token,
           params.toString(),
           {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
