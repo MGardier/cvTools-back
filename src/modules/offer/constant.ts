@@ -1,0 +1,1 @@
+export const OFFER_ID_NAMESPACE = '5a1c3b2d-4e5f-6a7b-8c9d-0e1f2a3b4c5d';

@@ -23,6 +23,7 @@
   "dependencies": {
     "@google/genai": "^1.42.0",
     "@keyv/redis": "^4.4.1",
+    "@nestjs/axios": "^4.0.1",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.1.12",
     "@nestjs/config": "^4.0.2",
@@ -36,6 +37,7 @@
     "@prisma/client": "^6.10.1",
     "amqp-connection-manager": "^5.0.0",
     "amqplib": "^0.10.9",
+    "axios": "^1.14.0",
     "bcrypt": "^6.0.0",
     "cache-manager": "^7.1.1",
     "cacheable": "^1.10.0",
