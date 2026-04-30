@@ -28,7 +28,7 @@ export enum EOfferJobboardOrigin {
   UNKNOWN = 'UNKNOWN',
 }
 
-export enum EOfferAPiProvider {
+export enum EOfferApiProvider {
   FRANCE_TRAVAIL = 'FRANCE_TRAVAIL',
   APIFY = 'APIFY',
 }
@@ -80,7 +80,7 @@ export interface IOfferListItem {
   publishedAt: string; // ISO-8601
   url: string;
   jobboard: EOfferJobboardOrigin;
-  apiProvider: EOfferAPiProvider;
+  apiProvider: EOfferApiProvider;
   experience?: IExperienceInfo;
   skills: string[];
 }
@@ -107,7 +107,7 @@ export interface IOfferSearchFilters {
 // ═══════════════════════════════════════════
 
 export interface IProviderSourceStatus {
-  apiProvider: EOfferAPiProvider;
+  apiProvider: EOfferApiProvider;
   status: EProviderStatus;
   count: number;
   message?: string;
@@ -139,7 +139,7 @@ export type TProviderSearchFilters = Omit<
 >;
 
 export interface IOfferProvider {
-  readonly name: EOfferAPiProvider;
+  readonly name: EOfferApiProvider;
   readonly jobboards: EOfferJobboardOrigin[];
   readonly cacheTtl: number; // in sec
   search(filters: TProviderSearchFilters, maxResults: number): Promise<IOfferListItem[]>;

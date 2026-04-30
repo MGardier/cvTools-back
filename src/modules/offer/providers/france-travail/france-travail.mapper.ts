@@ -1,7 +1,7 @@
 import {
   EContractType,
   EExperienceLevel,
-  EOfferAPiProvider,
+  EOfferApiProvider,
   EOfferJobboardOrigin,
   IExperienceInfo,
   ILocation,
@@ -84,7 +84,7 @@ export abstract class FranceTravailMapper {
         offer.origineOffre?.urlOrigine ??
         this.buildFallbackUrl(offer.id, baseDetailUrl),
       jobboard: EOfferJobboardOrigin.FRANCE_TRAVAIL,
-      apiProvider: EOfferAPiProvider.FRANCE_TRAVAIL,
+      apiProvider: EOfferApiProvider.FRANCE_TRAVAIL,
       experience: this.mapExperience(offer),
       skills: this.mapSkills(offer),
     };
@@ -106,7 +106,7 @@ export abstract class FranceTravailMapper {
 
   private static generateId(externalId: string): string {
     return uuidv5(
-      `${EOfferAPiProvider.FRANCE_TRAVAIL}:${externalId}`,
+      `${EOfferApiProvider.FRANCE_TRAVAIL}:${externalId}`,
       OFFER_ID_NAMESPACE,
     );
   }

@@ -1,9 +1,8 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import {
-  EOfferAPiProvider,
+  EOfferApiProvider,
   EOfferJobboardOrigin,
   IOfferListItem,
   IOfferProvider,
@@ -20,11 +19,13 @@ import {
 } from './types';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { FRANCE_TRAVAIL_ENDPOINTS } from './endpoint';
+
+
 @Injectable()
 export class FranceTravailProvider implements IOfferProvider {
   private readonly logger = new Logger(FranceTravailProvider.name);
 
-  readonly name = EOfferAPiProvider.FRANCE_TRAVAIL;
+  readonly name = EOfferApiProvider.FRANCE_TRAVAIL;
   readonly jobboards = [EOfferJobboardOrigin.FRANCE_TRAVAIL];
   readonly cacheTtl = 1800;
 

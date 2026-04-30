@@ -1,10 +1,10 @@
 import { Expose, Type } from 'class-transformer';
-import { EOfferAPiProvider, EProviderStatus } from '../../types';
+import { EOfferApiProvider, EProviderStatus } from '../../types';
 import { OfferListItemResponseDto } from './offer-list-item.dto';
 
 class ProviderSourceStatusResponseDto {
   @Expose()
-  apiProvider: EOfferAPiProvider;
+  apiProvider: EOfferApiProvider;
 
   @Expose()
   status: EProviderStatus;
