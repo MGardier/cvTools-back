@@ -45,6 +45,11 @@ export enum EPublishedSince {
   LAST_14D = '14d',
 }
 
+export enum EProviderHealthStatus {
+  OK = 'OK',
+  DOWN = 'DOWN',
+}
+
 // ═══════════════════════════════════════════
 //                  INTERFACE
 // ═══════════════════════════════════════════
@@ -150,4 +155,20 @@ export interface IOfferProvider {
   readonly cacheTtl: number; // in sec
   search(filters: TProviderSearchFilters, maxResults: number): Promise<IOfferListItem[]>;
   isAvailable(): boolean;
+}
+
+export interface IHealthCheckEntry {
+  status: EProviderHealthStatus;
+  latencyMs?: number;
+  message?: string;
+}
+
+export interface IProviderHealthCheck {
+  provider: EOfferApiProvider;
+  status: EProviderHealthStatus;
+  message?: string;
+  checks?: {
+    auth: IHealthCheckEntry;
+    search: IHealthCheckEntry;
+  };
 }

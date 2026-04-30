@@ -9,6 +9,7 @@ import {
   IOfferListItem,
   IOfferProvider,
   IOfferSearchFilters,
+  IProviderHealthCheck,
   IProviderSourceStatus,
   TProviderSearchFilters,
 } from './types';
@@ -47,6 +48,14 @@ export class OfferService {
 
     //Return slice offers & meta data for pagination & providers
     return this.__paginate(sortedOffers, sources, page, limit);
+  }
+
+  // ═══════════════════════════════════════════
+  //                  HEALTH CHECK
+  // ═══════════════════════════════════════════
+
+  checkFranceTravailHealth(): Promise<IProviderHealthCheck> {
+    return this.franceTravailProvider.healthCheck();
   }
 
   // ═══════════════════════════════════════════
