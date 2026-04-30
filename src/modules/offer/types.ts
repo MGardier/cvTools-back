@@ -39,6 +39,12 @@ export enum EProviderStatus {
   TIMEOUT = 'TIMEOUT',
 }
 
+export enum EPublishedSince {
+  LAST_24H = '24h',
+  LAST_7D = '7d',
+  LAST_14D = '14d',
+}
+
 // ═══════════════════════════════════════════
 //                  INTERFACE
 // ═══════════════════════════════════════════
@@ -96,7 +102,7 @@ export interface IOfferSearchFilters {
   contractType?: EContractType;
   remote?: ERemotePolicy;
   experience?: EExperienceLevel;
-  publishedSince?: '24h' | '7d' | '14d';
+  publishedSince?: EPublishedSince;
   jobboard?: EOfferJobboardOrigin[];
   page: number; // default 1
   limit: number; // default 20

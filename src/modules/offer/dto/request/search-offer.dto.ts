@@ -1,7 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
   IsEnum,
-  IsIn,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -14,6 +13,7 @@ import {
   EContractType,
   EExperienceLevel,
   EOfferJobboardOrigin,
+  EPublishedSince,
   ERemotePolicy,
 } from '../../types';
 import { DtoErrorCodeEnum } from 'src/shared/enums/dto-error-codes.enum';
@@ -47,8 +47,8 @@ export class SearchOfferRequestDto {
   experience?: EExperienceLevel;
 
   @IsOptional()
-  @IsIn(['24h', '7d', '14d'])
-  publishedSince?: '24h' | '7d' | '14d';
+  @IsEnum(EPublishedSince)
+  publishedSince?: EPublishedSince;
 
   @IsOptional()
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
