@@ -49,6 +49,26 @@
 		{
 			"key": "historyId",
 			"value": ""
+		},
+		{
+			"key": "ftClientId",
+			"value": "",
+			"description": "France Travail OAuth2 client_id (FRANCE_TRAVAIL_CLIENT_ID)"
+		},
+		{
+			"key": "ftClientSecret",
+			"value": "",
+			"description": "France Travail OAuth2 client_secret (FRANCE_TRAVAIL_CLIENT_SECRET)"
+		},
+		{
+			"key": "ftAccessToken",
+			"value": "",
+			"description": "Bearer token obtained from France Travail OAuth2 token endpoint"
+		},
+		{
+			"key": "ftOfferId",
+			"value": "",
+			"description": "France Travail offer external id (used for the details URL fallback)"
 		}
 	],
 	"item": [
@@ -1236,6 +1256,244 @@
 							"path": ["scraper", "offer", "extract"]
 						},
 						"description": "Extraire les informations d'une offre depuis du texte brut copié/collé. Max 50 000 caractères. Rate limité à 10 requêtes par minute."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Offer",
+			"item": [
+				{
+					"name": "Search Offers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/offer/search?keyword=developpeur&page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["offer", "search"],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "developpeur",
+									"description": "Mot-clé requis (max 200 caractères, trimmed)"
+								},
+								{
+									"key": "city",
+									"value": "Paris",
+									"description": "Filtrer par ville",
+									"disabled": true
+								},
+								{
+									"key": "postalCode",
+									"value": "75001",
+									"description": "Code postal — les 2 premiers chiffres servent de region pour France Travail",
+									"disabled": true
+								},
+								{
+									"key": "contractType",
+									"value": "CDI",
+									"description": "Type de contrat (CDI, CDD, FREELANCE, ALTERNANCE)",
+									"disabled": true
+								},
+								{
+									"key": "remote",
+									"value": "HYBRID",
+									"description": "Politique de télétravail (FULL, HYBRID, ONSITE)",
+									"disabled": true
+								},
+								{
+									"key": "experience",
+									"value": "MID",
+									"description": "Niveau d'expérience (JUNIOR, MID, SENIOR)",
+									"disabled": true
+								},
+								{
+									"key": "publishedSince",
+									"value": "7d",
+									"description": "Période de publication (24h, 7d, 14d)",
+									"disabled": true
+								},
+								{
+									"key": "jobboard",
+									"value": "FRANCE_TRAVAIL",
+									"description": "Jobboard à interroger (FRANCE_TRAVAIL, WTTJ, HELLOWORK, UNKNOWN). Répétable.",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Numéro de page (défaut: 1, min: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Nombre d'éléments par page (défaut: 20, > 0)"
+								}
+							]
+						},
+						"description": "Recherche agrégée d'offres d'emploi auprès des providers configurés (France Travail, etc.). Authentifié par JwtAuthGuard global. Réponse: AggregatedSearchResponseDto { offers, meta { total, page, limit, sources[] } }."
+					},
+					"response": []
+				},
+				{
+					"name": "France Travail Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/offer/health/france-travail",
+							"host": ["{{baseUrl}}"],
+							"path": ["offer", "health", "france-travail"]
+						},
+						"description": "Health check du provider France Travail. Endpoint @Public() (pas d'auth). Vérifie OAuth (entreprise.francetravail.fr) et search (api.francetravail.io) séparément. Réponse: { provider, status: OK|DOWN, checks: { auth, search } }."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "France Travail (External API)",
+			"description": "Appels directs à l'API publique France Travail tels qu'effectués par le provider FranceTravailProvider et FranceTravailAuthService. Les paramètres correspondent exactement à ceux envoyés par le code.",
+			"item": [
+				{
+					"name": "Get Access Token (OAuth2 Client Credentials)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"description": "Toujours client_credentials"
+								},
+								{
+									"key": "client_id",
+									"value": "{{ftClientId}}",
+									"description": "FRANCE_TRAVAIL_CLIENT_ID"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{ftClientSecret}}",
+									"description": "FRANCE_TRAVAIL_CLIENT_SECRET"
+								},
+								{
+									"key": "scope",
+									"value": "api_offresdemploiv2 o2dsoffre",
+									"description": "Scope hardcodé dans FranceTravailAuthService.SCOPE"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=/partenaire",
+							"protocol": "https",
+							"host": ["entreprise", "francetravail", "fr"],
+							"path": ["connexion", "oauth2", "access_token"],
+							"query": [
+								{
+									"key": "realm",
+									"value": "/partenaire",
+									"description": "Hardcodé dans l'URL du token (realm partenaire)"
+								}
+							]
+						},
+						"description": "Obtient un access token via OAuth2 client_credentials. Correspond à FRANCE_TRAVAIL_ENDPOINTS.token. Réponse IFranceTravailTokenResponse: { access_token, scope, token_type, expires_in }. Le token est mis en cache (expires_in - 60s)."
+					},
+					"response": []
+				},
+				{
+					"name": "Search Offers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ftAccessToken}}"
+							}
+						],
+						"url": {
+							"raw": "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search?motsCles=developpeur&range=0-99",
+							"protocol": "https",
+							"host": ["api", "francetravail", "io"],
+							"path": ["partenaire", "offresdemploi", "v2", "offres", "search"],
+							"query": [
+								{
+									"key": "motsCles",
+									"value": "developpeur",
+									"description": "Mot-clé (requis). Mappé depuis filters.keyword."
+								},
+								{
+									"key": "commune",
+									"value": "75056",
+									"description": "Code commune INSEE. Mappé depuis filters.city.",
+									"disabled": true
+								},
+								{
+									"key": "region",
+									"value": "75",
+									"description": "Code région (2 premiers chiffres du code postal). Mappé depuis filters.postalCode.slice(0,2).",
+									"disabled": true
+								},
+								{
+									"key": "typeContrat",
+									"value": "CDI",
+									"description": "Type de contrat: CDI, CDD ou LIB (freelance). Mappé depuis filters.contractType.",
+									"disabled": true
+								},
+								{
+									"key": "natureContrat",
+									"value": "E2,FS",
+									"description": "Utilisé uniquement pour ALTERNANCE: 'E2,FS' (E2=apprentissage, FS=professionnalisation).",
+									"disabled": true
+								},
+								{
+									"key": "experience",
+									"value": "2",
+									"description": "Expérience: 1 (<1 an / JUNIOR), 2 (1-3 ans / MID), 3 (>3 ans / SENIOR).",
+									"disabled": true
+								},
+								{
+									"key": "minCreationDate",
+									"value": "2026-04-23T00:00:00.000Z",
+									"description": "Date ISO-8601 calculée depuis publishedSince (24h, 7d, 14d).",
+									"disabled": true
+								},
+								{
+									"key": "range",
+									"value": "0-99",
+									"description": "Pagination format min-max (max 0-149). Le provider envoie '0-99' (MAX_RESULTS=100), le healthcheck envoie '0-0'."
+								}
+							]
+						},
+						"description": "Recherche d'offres France Travail. Correspond à FRANCE_TRAVAIL_ENDPOINTS.offer.search. Authentification Bearer obtenue via le endpoint token. Réponse IFranceTravailSearchResponse: { resultats[], filtresPossibles[] }. 204 = pas de résultats."
+					},
+					"response": []
+				},
+				{
+					"name": "Offer Details (Fallback URL)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://candidat.francetravail.fr/offres/recherche/detail/{{ftOfferId}}",
+							"protocol": "https",
+							"host": ["candidat", "francetravail", "fr"],
+							"path": ["offres", "recherche", "detail", "{{ftOfferId}}"]
+						},
+						"description": "URL de détail d'une offre côté candidat France Travail. Correspond à FRANCE_TRAVAIL_ENDPOINTS.offer.details utilisé comme baseDetailUrl dans FranceTravailMapper.buildFallbackUrl(id, baseUrl) → `${baseUrl}/${id}`. Utilisé en fallback quand offer.origineOffre.urlOrigine n'est pas fourni. Pas d'authentification."
 					},
 					"response": []
 				}
