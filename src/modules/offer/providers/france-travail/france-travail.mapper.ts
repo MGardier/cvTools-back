@@ -1,8 +1,9 @@
 import {
   EContractType,
   EExperienceLevel,
-  EOfferAPiProvider,
+  EOfferApiProvider,
   EOfferJobboardOrigin,
+  EPublishedSince,
   IExperienceInfo,
   ILocation,
   IOfferListItem,
@@ -84,7 +85,7 @@ export abstract class FranceTravailMapper {
         offer.origineOffre?.urlOrigine ??
         this.buildFallbackUrl(offer.id, baseDetailUrl),
       jobboard: EOfferJobboardOrigin.FRANCE_TRAVAIL,
-      apiProvider: EOfferAPiProvider.FRANCE_TRAVAIL,
+      apiProvider: EOfferApiProvider.FRANCE_TRAVAIL,
       experience: this.mapExperience(offer),
       skills: this.mapSkills(offer),
     };
@@ -106,7 +107,7 @@ export abstract class FranceTravailMapper {
 
   private static generateId(externalId: string): string {
     return uuidv5(
-      `${EOfferAPiProvider.FRANCE_TRAVAIL}:${externalId}`,
+      `${EOfferApiProvider.FRANCE_TRAVAIL}:${externalId}`,
       OFFER_ID_NAMESPACE,
     );
   }
@@ -334,13 +335,13 @@ export abstract class FranceTravailMapper {
   // ═══════════════════════════════════════════
 
   // Mapping  : Generic filter → FT query params
-  private static toMinCreationDate(since: '24h' | '7d' | '14d'): string {
+  private static toMinCreationDate(since: EPublishedSince): string {
     const now = new Date();
 
-    const offsets: Record<string, number> = {
-      '24h': 24 * 60 * 60 * 1000,
-      '7d': 7 * 24 * 60 * 60 * 1000,
-      '14d': 14 * 24 * 60 * 60 * 1000,
+    const offsets: Record<EPublishedSince, number> = {
+      [EPublishedSince.LAST_24H]: 24 * 60 * 60 * 1000,
+      [EPublishedSince.LAST_7D]: 7 * 24 * 60 * 60 * 1000,
+      [EPublishedSince.LAST_14D]: 14 * 24 * 60 * 60 * 1000,
     };
 
     const date = new Date(now.getTime() - offsets[since]);

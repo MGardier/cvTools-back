@@ -2,7 +2,7 @@ import { Expose, Type } from 'class-transformer';
 import {
   EContractType,
   EExperienceLevel,
-  EOfferAPiProvider,
+  EOfferApiProvider,
   EOfferJobboardOrigin,
   ERemotePolicy,
 } from '../../types';
@@ -80,7 +80,7 @@ export class OfferListItemResponseDto {
   jobboard: EOfferJobboardOrigin;
 
   @Expose()
-  apiProvider: EOfferAPiProvider;
+  apiProvider: EOfferApiProvider;
 
   @Expose()
   @Type(() => ExperienceResponseDto)

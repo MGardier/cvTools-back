@@ -28,7 +28,7 @@ export enum EOfferJobboardOrigin {
   UNKNOWN = 'UNKNOWN',
 }
 
-export enum EOfferAPiProvider {
+export enum EOfferApiProvider {
   FRANCE_TRAVAIL = 'FRANCE_TRAVAIL',
   APIFY = 'APIFY',
 }
@@ -37,6 +37,17 @@ export enum EProviderStatus {
   SUCCESS = 'SUCCESS',
   ERROR = 'ERROR',
   TIMEOUT = 'TIMEOUT',
+}
+
+export enum EPublishedSince {
+  LAST_24H = '24h',
+  LAST_7D = '7d',
+  LAST_14D = '14d',
+}
+
+export enum EProviderHealthStatus {
+  OK = 'OK',
+  DOWN = 'DOWN',
 }
 
 // ═══════════════════════════════════════════
@@ -80,7 +91,7 @@ export interface IOfferListItem {
   publishedAt: string; // ISO-8601
   url: string;
   jobboard: EOfferJobboardOrigin;
-  apiProvider: EOfferAPiProvider;
+  apiProvider: EOfferApiProvider;
   experience?: IExperienceInfo;
   skills: string[];
 }
@@ -96,7 +107,7 @@ export interface IOfferSearchFilters {
   contractType?: EContractType;
   remote?: ERemotePolicy;
   experience?: EExperienceLevel;
-  publishedSince?: '24h' | '7d' | '14d';
+  publishedSince?: EPublishedSince;
   jobboard?: EOfferJobboardOrigin[];
   page: number; // default 1
   limit: number; // default 20
@@ -107,7 +118,7 @@ export interface IOfferSearchFilters {
 // ═══════════════════════════════════════════
 
 export interface IProviderSourceStatus {
-  apiProvider: EOfferAPiProvider;
+  apiProvider: EOfferApiProvider;
   status: EProviderStatus;
   count: number;
   message?: string;
@@ -139,9 +150,25 @@ export type TProviderSearchFilters = Omit<
 >;
 
 export interface IOfferProvider {
-  readonly name: EOfferAPiProvider;
+  readonly name: EOfferApiProvider;
   readonly jobboards: EOfferJobboardOrigin[];
   readonly cacheTtl: number; // in sec
   search(filters: TProviderSearchFilters, maxResults: number): Promise<IOfferListItem[]>;
   isAvailable(): boolean;
+}
+
+export interface IHealthCheckEntry {
+  status: EProviderHealthStatus;
+  latencyMs?: number;
+  message?: string;
+}
+
+export interface IProviderHealthCheck {
+  provider: EOfferApiProvider;
+  status: EProviderHealthStatus;
+  message?: string;
+  checks?: {
+    auth: IHealthCheckEntry;
+    search: IHealthCheckEntry;
+  };
 }

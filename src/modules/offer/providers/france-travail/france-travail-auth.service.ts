@@ -76,13 +76,14 @@ export class FranceTravailAuthService {
       this.logger.log(`Token obtained, expires in ${data.expires_in}s (cached ${ttl}s)`);
 
       return data.access_token;
-    } catch (error) {
+    } catch (error: unknown) {
 
       if (error instanceof AxiosError){
         this.__handleAxiosError(error);
       }
 
-      this.logger.error('Failed to obtain France Travail access token', error?.message);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error('Failed to obtain France Travail access token', message);
       throw new HttpException(
         ErrorCodeEnum.FRANCE_TRAVAIL_API_UNAVAILABLE,
         HttpStatus.SERVICE_UNAVAILABLE,

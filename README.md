@@ -37,6 +37,24 @@ This project uses **pnpm** as the package manager. All commands should use `pnpm
 $ pnpm install
 ```
 
+## DevOps — Docker
+
+The `docker-compose.yml` exposes two profiles:
+
+- **`dev`**: `api-postgres`, `ms-postgres`, `rabbitmq`, `redis`, `pgadmin`, `mailpit`
+- **`test`**: `test-postgres`, `redis`
+
+```bash
+# Start the dev stack in the background
+$ docker compose --profile dev up -d
+
+# Stop the dev stack (keeps volumes and data)
+$ docker compose --profile dev down
+
+# Stop the dev stack and remove named volumes (full data reset)
+$ docker compose --profile dev down -v
+```
+
 ## Compile and run the project
 
 ```bash
