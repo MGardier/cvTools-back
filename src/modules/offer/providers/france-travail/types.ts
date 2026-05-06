@@ -132,7 +132,8 @@ export interface IFranceTravailTokenResponse {
 // ═══════════════════════════════════════════
 
 export interface IAxiosLikeError {
-  response?: { status?: number };
+  response?: { status?: number; data?: unknown };
+  config?: { params?: Record<string, unknown> };
   message?: string;
 }
 

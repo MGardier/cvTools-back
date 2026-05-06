@@ -43,10 +43,10 @@ export abstract class FranceTravailMapper {
 
     const params: IFranceTravailQueryParams = {
       motsCles: keyword,
-      /* Address fields — FT API expects INSEE codes */
-      ...(cityCode && { commune: cityCode }),
-      ...(departmentCode && { departement: departmentCode }),
-      ...(regionCode && { region: regionCode }),
+      // FT expects INSEE codes. Only the most specific scope is sent —
+      // commune already implies its department/region; sending all three
+      // is redundant and FT may reject the payload.
+      ...this.toLocationParams(cityCode, departmentCode, regionCode),
 
       /* Contract fields */
       ...this.toContractParams(contractType),
@@ -59,6 +59,30 @@ export abstract class FranceTravailMapper {
     };
 
     return params;
+  }
+
+  // INSEE consolidated codes for Paris/Lyon/Marseille that FT's commune
+  // referential rejects (FT only accepts the per-arrondissement codes).
+  // Per FT doc, searching by département returns all offers of these cities.
+  private static readonly FT_COMMUNE_TO_DEPARTMENT_FALLBACK: Record<string, string> = {
+    '75056': '75', // Paris
+    '69123': '69', // Lyon
+    '13055': '13', // Marseille
+  };
+
+  private static toLocationParams(
+    cityCode?: string,
+    departmentCode?: string,
+    regionCode?: string,
+  ): Pick<IFranceTravailQueryParams, 'commune' | 'departement' | 'region'> {
+    if (cityCode) {
+      const fallbackDept = this.FT_COMMUNE_TO_DEPARTMENT_FALLBACK[cityCode];
+      if (fallbackDept) return { departement: departmentCode ?? fallbackDept };
+      return { commune: cityCode };
+    }
+    if (departmentCode) return { departement: departmentCode };
+    if (regionCode) return { region: regionCode };
+    return {};
   }
 
   // ═══════════════════════════════════════════

@@ -156,7 +156,7 @@ export class FranceTravailProvider implements IOfferProvider {
           },
         ),
       );
-
+      
       return data.resultats ?? [];
     } catch (error) {
       if (error?.response?.status === 204) return [];
@@ -169,10 +169,14 @@ export class FranceTravailProvider implements IOfferProvider {
     const axiosError = error as IAxiosLikeError;
     const status = axiosError?.response?.status;
     const message = axiosError?.message ?? 'Unknown error';
+    const responseBody = axiosError?.response?.data;
+    const sentParams = axiosError?.config?.params;
 
     const { errorCode, httpStatus } = this.__mapStatusToError(status);
 
-    this.logger.error(`FT API error (${status ?? 'unknown'}): ${message}`);
+    this.logger.error(
+      `FT API error (${status ?? 'unknown'}): ${message} | sent=${JSON.stringify(sentParams)} | body=${JSON.stringify(responseBody)}`,
+    );
 
     throw new HttpException(errorCode, httpStatus);
   }
