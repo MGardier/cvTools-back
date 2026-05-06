@@ -20,6 +20,7 @@ export interface IFranceTravailQueryParams {
 
   motsCles: string;
   commune ?: string;
+  departement ?: string;
   region ?: string;
   typeContrat ?: TFTContractType
 

@@ -33,18 +33,19 @@ export abstract class FranceTravailMapper {
   ): IFranceTravailQueryParams {
     const {
       keyword,
-      city,
-      postalCode,
+      cityCode,
+      departmentCode,
+      regionCode,
       contractType,
       experience,
       publishedSince,
     } = filters;
-    const regionCode = postalCode ? postalCode.slice(0, 2) : undefined;
 
     const params: IFranceTravailQueryParams = {
       motsCles: keyword,
-      /* Address  fields */
-      ...(city && { commune: city }),
+      /* Address fields — FT API expects INSEE codes */
+      ...(cityCode && { commune: cityCode }),
+      ...(departmentCode && { departement: departmentCode }),
       ...(regionCode && { region: regionCode }),
 
       /* Contract fields */
