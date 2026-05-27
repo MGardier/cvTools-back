@@ -16,7 +16,14 @@ import { TApplicationWithAddress, TApplicationDetail } from './types';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { AddressOwnerEnum } from '../address/constants';
 import { PrismaService } from 'prisma/prisma.service';
-import { Address, Application, Contact, Prisma, Skill } from '@prisma/client';
+import {
+  Address,
+  Application,
+  ApplicationStatus,
+  Contact,
+  Prisma,
+  Skill,
+} from '@prisma/client';
 import { PaginatedApplicationResponseDto } from './dto/response/paginated-application.dto';
 
 @Injectable()
@@ -196,6 +203,35 @@ export class ApplicationService {
       };
 
     return { ...rest, address, skills, contacts };
+  }
+
+  async findRecentByUserId(userId: number, limit: number) {
+    const items = await this.applicationRepository.findRecentByUserId(
+      userId,
+      limit,
+    );
+
+    return await Promise.all(
+      items.map(async (app) => {
+        const address = await this.addressService.findByEntity(
+          AddressOwnerEnum.APPLICATION,
+          app.id,
+        );
+        const skills = app.applicationSkills.map((as) => as.skill);
+        const { applicationSkills, ...rest } = app;
+        return { ...rest, address, skills };
+      }),
+    );
+  }
+
+  // =============================================================================
+  //                               COUNT
+  // =============================================================================
+
+  async countByStatusForUser(
+    userId: number,
+  ): Promise<Partial<Record<ApplicationStatus, number>>> {
+    return await this.applicationRepository.countByStatusForUser(userId);
   }
 
   // =============================================================================
