@@ -1,7 +1,9 @@
 import * as cheerio from 'cheerio';
-import { HARD_BLOCK_PATTERNS, SOFT_BLOCK_PATTERNS } from '../constants/url.constant';
+import {
+  HARD_BLOCK_PATTERNS,
+  SOFT_BLOCK_PATTERNS,
+} from '../constants/url.constant';
 export abstract class UtilHtmlParser {
-
   private static MAX_TEXT_LENGTH = 15_000;
 
   static extractJsonLd(html: string): Record<string, unknown> | null {
@@ -24,7 +26,6 @@ export abstract class UtilHtmlParser {
     return null;
   }
 
-
   static extractVisibleText(html: string): string | null {
     const $ = cheerio.load(html);
 
@@ -42,17 +43,12 @@ export abstract class UtilHtmlParser {
     return text.slice(0, this.MAX_TEXT_LENGTH);
   }
 
-
-
-
   static isUsableContent(text: string): boolean {
     const trimmed = text.trim();
     if (trimmed.length < 100) return false;
 
     for (const pattern of HARD_BLOCK_PATTERNS) {
-      if (pattern.test(trimmed))
-        return false;
-
+      if (pattern.test(trimmed)) return false;
     }
 
     let signals = 0;
@@ -68,7 +64,6 @@ export abstract class UtilHtmlParser {
       (length < 2000 && signals >= 2) ||
       signals >= 3;
 
-
     return !rejected;
   }
 
@@ -76,7 +71,9 @@ export abstract class UtilHtmlParser {
   //                  PRIVATE
   // ═══════════════════════════════════════════════
 
-  private static findJobPosting(parsed: unknown): Record<string, unknown> | null {
+  private static findJobPosting(
+    parsed: unknown,
+  ): Record<string, unknown> | null {
     if (this.isJobPosting(parsed)) return parsed as Record<string, unknown>;
 
     if (Array.isArray(parsed)) {
@@ -104,5 +101,4 @@ export abstract class UtilHtmlParser {
 
     return false;
   }
-
 }

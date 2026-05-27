@@ -1,6 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, ForbiddenException, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { LoginMethod, PrismaTokenType, User, UserRoles, UserStatus, UserToken } from '@prisma/client';
+import {
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import {
+  LoginMethod,
+  PrismaTokenType,
+  User,
+  UserRoles,
+  UserStatus,
+  UserToken,
+} from '@prisma/client';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { UserTokenService } from '../user-token/user-token.service';
@@ -9,8 +21,6 @@ import { ConfigService } from '@nestjs/config';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { UtilHash } from 'src/shared/utils/hash.util';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
-
-
 
 // =============================================================================
 //                            MOCK DATA
@@ -39,7 +49,6 @@ const makeUserToken = (overrides: Partial<UserToken> = {}): UserToken => ({
   ...overrides,
 });
 
-
 // =============================================================================
 //                           DESCRIBE
 // =============================================================================
@@ -51,22 +60,20 @@ describe('AuthService', () => {
   let emailService: jest.Mocked<EmailService>;
   let configService: jest.Mocked<ConfigService>;
 
-
   const mockUserService = {
     findOneByEmail: jest.fn(),
     findOneById: jest.fn(),
     findOneByOauthId: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-  }
+  };
 
   const mockUserTokenService = {
     decodeAndGet: jest.fn(),
     generate: jest.fn(),
     generateAndSave: jest.fn(),
     remove: jest.fn(),
-  }
-
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -111,7 +118,6 @@ describe('AuthService', () => {
   // =============================================================================
 
   describe('validateUser', () => {
-
     it('should return the user when credentials are valid', async () => {
       const user = makeUser();
       userService.findOneByEmail.mockResolvedValue(user);
@@ -136,18 +142,19 @@ describe('AuthService', () => {
       );
     });
 
-    it('should throw UnauthorizedException when user has no password (OAuth account)',
-      async () => {
-        userService.findOneByEmail.mockResolvedValue(makeUser({
+    it('should throw UnauthorizedException when user has no password (OAuth account)', async () => {
+      userService.findOneByEmail.mockResolvedValue(
+        makeUser({
           password: null,
-        }));
+        }),
+      );
 
-        await expect(
-          authService.validateUser('test@test.com', 'password'),
-        ).rejects.toThrow(
-          new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS),
-        );
-      });
+      await expect(
+        authService.validateUser('test@test.com', 'password'),
+      ).rejects.toThrow(
+        new UnauthorizedException(ErrorCodeEnum.INVALID_CREDENTIALS),
+      );
+    });
 
     it('should throw UnauthorizedException when password is invalid', async () => {
       userService.findOneByEmail.mockResolvedValue(makeUser());
@@ -161,29 +168,29 @@ describe('AuthService', () => {
     });
 
     it('should throw ForbiddenException when user status is PENDING', async () => {
-      userService.findOneByEmail.mockResolvedValue(makeUser({
-        status: UserStatus.PENDING,
-      }));
+      userService.findOneByEmail.mockResolvedValue(
+        makeUser({
+          status: UserStatus.PENDING,
+        }),
+      );
       jest.spyOn(UtilHash, 'compare').mockResolvedValue(true);
 
       await expect(
         authService.validateUser('test@test.com', 'password'),
-      ).rejects.toThrow(
-        new ForbiddenException(ErrorCodeEnum.ACCOUNT_PENDING),
-      );
+      ).rejects.toThrow(new ForbiddenException(ErrorCodeEnum.ACCOUNT_PENDING));
     });
 
     it('should throw ForbiddenException when user status is BANNED', async () => {
-      userService.findOneByEmail.mockResolvedValue(makeUser({
-        status: UserStatus.BANNED,
-      }));
+      userService.findOneByEmail.mockResolvedValue(
+        makeUser({
+          status: UserStatus.BANNED,
+        }),
+      );
       jest.spyOn(UtilHash, 'compare').mockResolvedValue(true);
 
       await expect(
         authService.validateUser('test@test.com', 'password'),
-      ).rejects.toThrow(
-        new ForbiddenException(ErrorCodeEnum.USER_BANNED),
-      );
+      ).rejects.toThrow(new ForbiddenException(ErrorCodeEnum.USER_BANNED));
     });
   });
 
@@ -201,12 +208,20 @@ describe('AuthService', () => {
       const user = makeUser();
       const userToken = makeUserToken();
 
-
-      userTokenService.decodeAndGet.mockResolvedValue({ userToken, payload: mockPayload });
+      userTokenService.decodeAndGet.mockResolvedValue({
+        userToken,
+        payload: mockPayload,
+      });
       userService.findOneById.mockResolvedValue(user);
-      userTokenService.generate.mockResolvedValue({ token: mockAccessToken, expiresIn: 900 });
+      userTokenService.generate.mockResolvedValue({
+        token: mockAccessToken,
+        expiresIn: 900,
+      });
       const refreshUserToken = makeUserToken({ token: 'hashed_token' });
-      userTokenService.generateAndSave.mockResolvedValue({ userToken: refreshUserToken, rawToken: mockRefreshToken });
+      userTokenService.generateAndSave.mockResolvedValue({
+        userToken: refreshUserToken,
+        rawToken: mockRefreshToken,
+      });
       userTokenService.remove.mockResolvedValue(userToken);
 
       const result = await authService.refresh(mockToken);
@@ -266,10 +281,16 @@ describe('AuthService', () => {
     const googleEmail = 'google@test.com';
 
     it('should return existing user found by oauthId without calling findOneByEmail', async () => {
-      const user = makeUser({ oauthId: googleId, loginMethod: LoginMethod.GOOGLE });
+      const user = makeUser({
+        oauthId: googleId,
+        loginMethod: LoginMethod.GOOGLE,
+      });
       userService.findOneByOauthId.mockResolvedValue(user);
 
-      const result = await authService.validateOrCreateGoogleUser(googleId, googleEmail);
+      const result = await authService.validateOrCreateGoogleUser(
+        googleId,
+        googleEmail,
+      );
 
       expect(result).toEqual(user);
       expect(userService.findOneByOauthId).toHaveBeenCalledWith({
@@ -288,7 +309,9 @@ describe('AuthService', () => {
       await expect(
         authService.validateOrCreateGoogleUser(googleId, googleEmail),
       ).rejects.toThrow(
-        new ConflictException(ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR),
+        new ConflictException(
+          ErrorCodeEnum.CLASSIC_ACCOUNT_ALREADY_EXISTS_ERROR,
+        ),
       );
     });
 
@@ -306,7 +329,10 @@ describe('AuthService', () => {
     });
 
     it('should update and return user when email exists without password and loginMethod is GOOGLE', async () => {
-      const existingUser = makeUser({ password: null, loginMethod: LoginMethod.GOOGLE });
+      const existingUser = makeUser({
+        password: null,
+        loginMethod: LoginMethod.GOOGLE,
+      });
       const updatedUser = makeUser({
         oauthId: googleId,
         loginMethod: LoginMethod.GOOGLE,
@@ -317,7 +343,10 @@ describe('AuthService', () => {
       userService.findOneByEmail.mockResolvedValue(existingUser);
       userService.update.mockResolvedValue(updatedUser);
 
-      const result = await authService.validateOrCreateGoogleUser(googleId, googleEmail);
+      const result = await authService.validateOrCreateGoogleUser(
+        googleId,
+        googleEmail,
+      );
 
       expect(result).toEqual(updatedUser);
       expect(userService.update).toHaveBeenCalledWith(existingUser.id, {
@@ -341,7 +370,10 @@ describe('AuthService', () => {
       userService.findOneByEmail.mockResolvedValue(null);
       userService.create.mockResolvedValue(newUser);
 
-      const result = await authService.validateOrCreateGoogleUser(googleId, googleEmail);
+      const result = await authService.validateOrCreateGoogleUser(
+        googleId,
+        googleEmail,
+      );
 
       expect(result).toEqual(newUser);
       expect(userService.create).toHaveBeenCalledWith({
@@ -361,7 +393,6 @@ describe('AuthService', () => {
     const githubId = 'github-oauth-id-456';
     const githubEmail = 'github@test.com';
 
-
     it('should create and return a new user when no user is found', async () => {
       const newUser = makeUser({
         oauthId: githubId,
@@ -375,7 +406,10 @@ describe('AuthService', () => {
       userService.findOneByEmail.mockResolvedValue(null);
       userService.create.mockResolvedValue(newUser);
 
-      const result = await authService.validateOrCreateGithubUser(githubId, githubEmail);
+      const result = await authService.validateOrCreateGithubUser(
+        githubId,
+        githubEmail,
+      );
 
       expect(result).toEqual(newUser);
       expect(userService.create).toHaveBeenCalledWith({
@@ -399,24 +433,32 @@ describe('AuthService', () => {
 
     it(`should hash password, create user with CLASSIC loginMethod, generate CONFIRM_ACCOUNT token 
       and build confirmation link`, async () => {
-      const createdUser = makeUser({ email: signUpDto.email, password: hashedPassword });
-      const userToken = makeUserToken({ token: 'hashed_token', type: PrismaTokenType.CONFIRM_ACCOUNT });
+      const createdUser = makeUser({
+        email: signUpDto.email,
+        password: hashedPassword,
+      });
+      const userToken = makeUserToken({
+        token: 'hashed_token',
+        type: PrismaTokenType.CONFIRM_ACCOUNT,
+      });
 
       jest.spyOn(UtilHash, 'hash').mockResolvedValue(hashedPassword);
       configService.get.mockReturnValue(frontUrl);
       userService.create.mockResolvedValue(createdUser);
-      userTokenService.generateAndSave.mockResolvedValue({ userToken, rawToken: confirmToken });
-
-     const result =  await authService.signUp(signUpDto);
-
-    expect(result).toEqual(createdUser);
-
-      expect(userService.create).toHaveBeenCalledWith({
-          email: signUpDto.email,
-          password: hashedPassword,
-          loginMethod: LoginMethod.CLASSIC
+      userTokenService.generateAndSave.mockResolvedValue({
+        userToken,
+        rawToken: confirmToken,
       });
 
+      const result = await authService.signUp(signUpDto);
+
+      expect(result).toEqual(createdUser);
+
+      expect(userService.create).toHaveBeenCalledWith({
+        email: signUpDto.email,
+        password: hashedPassword,
+        loginMethod: LoginMethod.CLASSIC,
+      });
 
       expect(userTokenService.generateAndSave).toHaveBeenCalledWith(
         { sub: createdUser.id, email: createdUser.email },
@@ -428,8 +470,6 @@ describe('AuthService', () => {
         createdUser.email,
         `${frontUrl}?token=${confirmToken}`,
       );
-
-
     });
   });
 
@@ -466,14 +506,17 @@ describe('AuthService', () => {
 
     it('should remove the token when valid', async () => {
       const userToken = makeUserToken();
-      userTokenService.decodeAndGet.mockResolvedValue({ 
-        userToken, 
-        payload: { sub: 1, email: 'test@test.com' } 
+      userTokenService.decodeAndGet.mockResolvedValue({
+        userToken,
+        payload: { sub: 1, email: 'test@test.com' },
       });
 
       await authService.logout(mockToken);
 
-      expect(userTokenService.decodeAndGet).toHaveBeenCalledWith(mockToken, TokenType.REFRESH);
+      expect(userTokenService.decodeAndGet).toHaveBeenCalledWith(
+        mockToken,
+        TokenType.REFRESH,
+      );
       expect(userTokenService.remove).toHaveBeenCalledWith(userToken.id);
     });
 
@@ -501,10 +544,16 @@ describe('AuthService', () => {
     it(`should return the user, generate CONFIRM_ACCOUNT token and
        send confirmation email when user is PENDING`, async () => {
       const user = makeUser({ status: UserStatus.PENDING });
-      const userToken = makeUserToken({ token: 'hashed_token', type: PrismaTokenType.CONFIRM_ACCOUNT });
+      const userToken = makeUserToken({
+        token: 'hashed_token',
+        type: PrismaTokenType.CONFIRM_ACCOUNT,
+      });
 
       userService.findOneByEmail.mockResolvedValue(user);
-      userTokenService.generateAndSave.mockResolvedValue({ userToken, rawToken: confirmToken });
+      userTokenService.generateAndSave.mockResolvedValue({
+        userToken,
+        rawToken: confirmToken,
+      });
       configService.get.mockReturnValue(frontUrl);
 
       const result = await authService.reSendConfirmAccount(email);
@@ -532,7 +581,9 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException when user status is not PENDING', async () => {
-      userService.findOneByEmail.mockResolvedValue(makeUser({ status: UserStatus.ALLOWED }));
+      userService.findOneByEmail.mockResolvedValue(
+        makeUser({ status: UserStatus.ALLOWED }),
+      );
 
       await expect(authService.reSendConfirmAccount(email)).rejects.toThrow(
         new UnauthorizedException(ErrorCodeEnum.ACCOUNT_ALREADY_CONFIRM),
@@ -554,7 +605,10 @@ describe('AuthService', () => {
       const userToken = makeUserToken({ token: 'hashed_token' });
 
       userService.findOneByEmail.mockResolvedValue(user);
-      userTokenService.generateAndSave.mockResolvedValue({ userToken, rawToken: resetToken });
+      userTokenService.generateAndSave.mockResolvedValue({
+        userToken,
+        rawToken: resetToken,
+      });
       configService.get.mockReturnValue(frontUrl);
 
       const result = await authService.forgotPassword(email);
@@ -594,7 +648,10 @@ describe('AuthService', () => {
     it('should decode with FORGOT_PASSWORD type, hash password, update user and remove token', async () => {
       const userToken = makeUserToken();
 
-      userTokenService.decodeAndGet.mockResolvedValue({ userToken, payload: mockPayload });
+      userTokenService.decodeAndGet.mockResolvedValue({
+        userToken,
+        payload: mockPayload,
+      });
       jest.spyOn(UtilHash, 'hash').mockResolvedValue(hashedPassword);
       userService.update.mockResolvedValue(makeUser());
       userTokenService.remove.mockResolvedValue(userToken);

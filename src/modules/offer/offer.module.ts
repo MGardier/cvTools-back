@@ -5,7 +5,6 @@ import { OfferController } from './offer.controller';
 import { FranceTravailProvider } from './providers/france-travail/france-travail.provider';
 import { FranceTravailAuthService } from './providers/france-travail/france-travail-auth.service';
 
-
 const HTTP_TIMEOUT_MS = 8_000;
 
 @Module({

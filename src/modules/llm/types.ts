@@ -6,12 +6,14 @@ export type TExtractStructureTextParams = {
   fetchText?: string;
   userRawText?: string;
   sourceUrl?: string;
-}
+};
 
 export type TExtractedAddress = Partial<
-  Pick<Address, 'city' | 'postalCode' | 'street' | 'complement' | 'streetNumber'>
+  Pick<
+    Address,
+    'city' | 'postalCode' | 'street' | 'complement' | 'streetNumber'
+  >
 >;
-
 
 export type TExtractedApplication = Pick<Application, 'title'> &
   Partial<
@@ -28,7 +30,7 @@ export type TExtractedApplication = Pick<Application, 'title'> &
     >
   > & {
     isSuccess: boolean;
-    publishedAt?: string; 
+    publishedAt?: string;
     skills?: string[];
     address?: TExtractedAddress;
   };

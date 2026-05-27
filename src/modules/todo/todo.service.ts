@@ -81,7 +81,11 @@ export class TodoService {
   ): Promise<Todo[]> {
     await this.applicationService.findOne(applicationId, userId);
 
-    return this.todoRepository.findAllByApplicationId(applicationId, sort, status);
+    return this.todoRepository.findAllByApplicationId(
+      applicationId,
+      sort,
+      status,
+    );
   }
 
   async findRecentByUserId(userId: number, limit: number): Promise<Todo[]> {

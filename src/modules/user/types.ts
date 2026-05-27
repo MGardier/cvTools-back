@@ -21,4 +21,8 @@ export interface IFindOneByOauthId {
   loginMethod: LoginMethod;
 }
 
-export type THomeCountCategory = 'inProgress' | 'toApply' | 'interview' | 'finished';
+export type THomeCountCategory =
+  | 'inProgress'
+  | 'toApply'
+  | 'interview'
+  | 'finished';

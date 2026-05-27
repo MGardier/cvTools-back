@@ -2,7 +2,10 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { OfferService } from './offer.service';
 import { SearchOfferRequestDto } from './dto/request/search-offer.dto';
 import { AggregatedSearchResponseDto } from './dto/response/aggregated-search.dto';
-import { SerializeWith, SkipSerialize } from 'src/shared/decorators/serialize.decorator';
+import {
+  SerializeWith,
+  SkipSerialize,
+} from 'src/shared/decorators/serialize.decorator';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { IProviderHealthCheck } from './types';
 

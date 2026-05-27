@@ -29,8 +29,6 @@ export class ExtractOfferDto {
   /** Hidden field that always validates to enforce the XOR constraint. */
   @Validate(ExactlyOneFieldConstraint)
   @Allow()
-
-
   @ValidateIf((o) => !o.rawContent)
   @IsNotEmpty({ message: "L'URL ne peut pas être vide." })
   @IsUrl({}, { message: "L'URL doit être une URL valide." })

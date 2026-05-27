@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ApplicationStatus, User } from '@prisma/client';
 import { UserRepository } from './user.repository';
-import { IUpdateUser, IFindOneByOauthId, ICreateUser, THomeCountCategory } from './types';
+import {
+  IUpdateUser,
+  IFindOneByOauthId,
+  ICreateUser,
+  THomeCountCategory,
+} from './types';
 import { ApplicationService } from '../application/application.service';
 import { TodoService } from '../todo/todo.service';
 import { UserHomeResponseDto } from './dto/response/user-home-response.dto';
-
 
 @Injectable()
 export class UserService {
@@ -76,9 +80,7 @@ export class UserService {
   //                               PRIVATE
   // =============================================================================
 
-  private __mapStatusToCategory(
-    status: ApplicationStatus,
-  ): THomeCountCategory {
+  private __mapStatusToCategory(status: ApplicationStatus): THomeCountCategory {
     switch (status) {
       case ApplicationStatus.APPLIED:
       case ApplicationStatus.FIRST_CONTACT:

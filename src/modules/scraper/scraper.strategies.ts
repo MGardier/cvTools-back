@@ -1,10 +1,10 @@
-import { BadRequestException, Injectable, Logger } from "@nestjs/common";
-import { JinaReaderFetcher } from "./fetchers/jina-reader.fetcher";
-import { LlmService } from "../llm/llm.service";
-import { TExtractedApplication } from "../llm/types";
-import { NotAJobPostingError } from "../llm/errors/not-a-job-posting.error";
-import { ErrorCodeEnum } from "src/shared/enums/error-codes.enum";
-import { UtilHtmlParser } from "src/shared/utils/html-parser.util";
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { JinaReaderFetcher } from './fetchers/jina-reader.fetcher';
+import { LlmService } from '../llm/llm.service';
+import { TExtractedApplication } from '../llm/types';
+import { NotAJobPostingError } from '../llm/errors/not-a-job-posting.error';
+import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { UtilHtmlParser } from 'src/shared/utils/html-parser.util';
 
 @Injectable()
 export class ScraperStrategies {
@@ -12,7 +12,7 @@ export class ScraperStrategies {
   constructor(
     private readonly jinaReaderFetcher: JinaReaderFetcher,
     private readonly llmService: LlmService,
-  ) { }
+  ) {}
 
   async tryJsonLd(
     html: string | null,
@@ -31,7 +31,6 @@ export class ScraperStrategies {
     );
   }
 
-
   async tryVisibleText(
     html: string | null,
     url: string,
@@ -40,7 +39,8 @@ export class ScraperStrategies {
     if (!html) return null;
 
     const visibleText = UtilHtmlParser.extractVisibleText(html);
-    if (!visibleText || !UtilHtmlParser.isUsableContent(visibleText)) return null;
+    if (!visibleText || !UtilHtmlParser.isUsableContent(visibleText))
+      return null;
 
     return this.tryLlmStructure(
       { fetchText: visibleText, sourceUrl: url },
@@ -49,13 +49,17 @@ export class ScraperStrategies {
     );
   }
 
-   async tryJinaReader(
+  async tryJinaReader(
     url: string,
     userId: number,
   ): Promise<TExtractedApplication | null> {
     const jinaResult = await this.jinaReaderFetcher.fetch(url);
 
-    if (!jinaResult.success || !jinaResult.data || !UtilHtmlParser.isUsableContent(jinaResult.data)) {
+    if (
+      !jinaResult.success ||
+      !jinaResult.data ||
+      !UtilHtmlParser.isUsableContent(jinaResult.data)
+    ) {
       return null;
     }
 
@@ -65,7 +69,7 @@ export class ScraperStrategies {
       'Jina Reader',
     );
   }
-   async tryGeminiFetch(
+  async tryGeminiFetch(
     url: string,
     userId: number,
   ): Promise<TExtractedApplication | null> {
@@ -82,13 +86,16 @@ export class ScraperStrategies {
   ): Promise<TExtractedApplication | null> {
     try {
       return await this.llmService.structureText(input, userId);
-    }
-    catch (error) {
+    } catch (error) {
       if (error instanceof NotAJobPostingError) {
         this.logger.warn(`${source}: content is not a job posting`);
-        throw new BadRequestException(ErrorCodeEnum.SCRAPER_EXTRACTION_FAILED_ERROR);
+        throw new BadRequestException(
+          ErrorCodeEnum.SCRAPER_EXTRACTION_FAILED_ERROR,
+        );
       }
-      this.logger.warn(`LLM extraction failed for ${source}: ${(error as Error).message}`);
+      this.logger.warn(
+        `LLM extraction failed for ${source}: ${(error as Error).message}`,
+      );
       return null;
     }
   }

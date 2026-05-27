@@ -110,7 +110,8 @@ export class AuthService {
       token,
       TokenType.REFRESH,
     );
-    if (!userToken.id) throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
+    if (!userToken.id)
+      throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
     await this.userTokenService.remove(userToken.id);
   }
 
@@ -120,10 +121,12 @@ export class AuthService {
       TokenType.REFRESH,
     );
 
-    if (!userToken.id || !userToken.token) throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
+    if (!userToken.id || !userToken.token)
+      throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
 
     const user = await this.userService.findOneById(+payload.sub);
-    if (!user) throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
+    if (!user)
+      throw new UnauthorizedException(ErrorCodeEnum.USER_NOT_FOUND_ERROR);
 
     const accessToken = await this.userTokenService.generate(
       { sub: user.id, email: user.email },

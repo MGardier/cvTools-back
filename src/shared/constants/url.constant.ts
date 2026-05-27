@@ -53,8 +53,6 @@ export const BLOCKED_IP_PATTERNS: RegExp[] = [
   /^fe80:/i,
 ];
 
-
-
 // Patterns that ONLY appear on blocked/error pages — instant reject
 export const HARD_BLOCK_PATTERNS: RegExp[] = [
   /checking your browser/i,
@@ -63,7 +61,6 @@ export const HARD_BLOCK_PATTERNS: RegExp[] = [
   /verify you are (a )?human/i,
   /^unknown\.?$/i, // Jina Reader failure response
 ];
-
 
 // Patterns that are suspicious but can appear legitimately in long pages
 export const SOFT_BLOCK_PATTERNS: RegExp[] = [

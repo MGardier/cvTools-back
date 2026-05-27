@@ -9,7 +9,12 @@ import { ScraperStrategies } from './scraper.strategies';
 @Module({
   imports: [LlmModule],
   controllers: [ScraperController],
-  providers: [ScraperService, NativeFetcher, JinaReaderFetcher, ScraperStrategies],
+  providers: [
+    ScraperService,
+    NativeFetcher,
+    JinaReaderFetcher,
+    ScraperStrategies,
+  ],
   exports: [ScraperService],
 })
 export class ScraperModule {}

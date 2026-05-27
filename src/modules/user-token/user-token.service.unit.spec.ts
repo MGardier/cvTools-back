@@ -12,8 +12,6 @@ import { UtilDate } from 'src/shared/utils/date.util';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { IPayloadJwt } from 'src/modules/jwt-manager/types';
 
-
-
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid-123'),
 }));
@@ -21,7 +19,6 @@ jest.mock('uuid', () => ({
 // =============================================================================
 //                            MOCK DATA
 // =============================================================================
-
 
 const makeUserToken = (overrides: Partial<UserToken> = {}): UserToken => ({
   id: 1,
@@ -35,7 +32,6 @@ const makeUserToken = (overrides: Partial<UserToken> = {}): UserToken => ({
 });
 
 const mockPayload: IPayloadJwt = { sub: 1, email: 'test@test.com' };
-
 
 // =============================================================================
 //                           DESCRIBE
@@ -79,7 +75,6 @@ describe('UserTokenService', () => {
     userTokenRepository = module.get(UserTokenRepository);
     configService = module.get(ConfigService);
 
-    
     jest.clearAllMocks();
   });
 
@@ -93,31 +88,42 @@ describe('UserTokenService', () => {
       const hashedToken = 'hashed_jwt_token';
       const expiresIn = 3600;
       const mockExpiresAt = new Date('2026-04-02T12:00:00Z');
-      const mockUuid =  'mocked-uuid-123';
-      const createdUserToken = makeUserToken({ token: hashedToken, type: PrismaTokenType.CONFIRM_ACCOUNT });
+      const mockUuid = 'mocked-uuid-123';
+      const createdUserToken = makeUserToken({
+        token: hashedToken,
+        type: PrismaTokenType.CONFIRM_ACCOUNT,
+      });
 
-      jwtManagerService.generate.mockResolvedValue({ token: rawToken, expiresIn });
+      jwtManagerService.generate.mockResolvedValue({
+        token: rawToken,
+        expiresIn,
+      });
       configService.get.mockReturnValue(12);
       jest.spyOn(UtilHash, 'hash').mockResolvedValue(hashedToken);
-      jest.spyOn(UtilDate, '__convertExpiresToDate').mockReturnValue(mockExpiresAt);
-      jest.spyOn(UtilRepository, 'toPrismaTokenType').mockReturnValue(PrismaTokenType.CONFIRM_ACCOUNT);
- 
+      jest
+        .spyOn(UtilDate, '__convertExpiresToDate')
+        .mockReturnValue(mockExpiresAt);
+      jest
+        .spyOn(UtilRepository, 'toPrismaTokenType')
+        .mockReturnValue(PrismaTokenType.CONFIRM_ACCOUNT);
 
       userTokenRepository.create.mockResolvedValue(createdUserToken);
 
-      const result = await userTokenService.generateAndSave(mockPayload, TokenType.CONFIRM_ACCOUNT);
+      const result = await userTokenService.generateAndSave(
+        mockPayload,
+        TokenType.CONFIRM_ACCOUNT,
+      );
 
       expect(jwtManagerService.generate).toHaveBeenCalledWith(
         {
           ...mockPayload,
-          uuid: mockUuid
+          uuid: mockUuid,
         },
         TokenType.CONFIRM_ACCOUNT,
       );
 
       expect(UtilHash.hash).toHaveBeenCalledWith(rawToken, 12);
 
-     
       expect(userTokenRepository.create).toHaveBeenCalledWith(
         {
           token: hashedToken,
@@ -128,7 +134,10 @@ describe('UserTokenService', () => {
         mockPayload.sub,
       );
 
-      expect(result).toEqual({ userToken: createdUserToken, rawToken: rawToken });
+      expect(result).toEqual({
+        userToken: createdUserToken,
+        rawToken: rawToken,
+      });
     });
   });
 
@@ -147,10 +156,16 @@ describe('UserTokenService', () => {
       userTokenRepository.findByUuid.mockResolvedValue(userToken);
       jest.spyOn(UtilHash, 'compare').mockResolvedValue(true);
 
-      const result = await userTokenService.decodeAndGet(rawToken, TokenType.REFRESH);
+      const result = await userTokenService.decodeAndGet(
+        rawToken,
+        TokenType.REFRESH,
+      );
 
-      expect(jwtManagerService.verify).toHaveBeenCalledWith(rawToken, TokenType.REFRESH);
-    
+      expect(jwtManagerService.verify).toHaveBeenCalledWith(
+        rawToken,
+        TokenType.REFRESH,
+      );
+
       expect(userTokenRepository.findByUuid).toHaveBeenCalledWith('uuid-123');
 
       expect(UtilHash.compare).toHaveBeenCalledWith(rawToken, userToken.token);
@@ -159,20 +174,26 @@ describe('UserTokenService', () => {
     });
 
     it('should throw UnauthorizedException when payload has no uuid', async () => {
-      jwtManagerService.verify.mockResolvedValue({ ...mockPayload, uuid: undefined });
+      jwtManagerService.verify.mockResolvedValue({
+        ...mockPayload,
+        uuid: undefined,
+      });
 
-      await expect(userTokenService.decodeAndGet(rawToken, TokenType.REFRESH)).rejects.toThrow(
-        new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID),
-      );
+      await expect(
+        userTokenService.decodeAndGet(rawToken, TokenType.REFRESH),
+      ).rejects.toThrow(new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID));
     });
 
     it('should throw UnauthorizedException when token is not found by uuid', async () => {
-      jwtManagerService.verify.mockResolvedValue({ ...mockPayload, uuid: 'unknown-uuid' });
+      jwtManagerService.verify.mockResolvedValue({
+        ...mockPayload,
+        uuid: 'unknown-uuid',
+      });
       userTokenRepository.findByUuid.mockResolvedValue(null);
 
-      await expect(userTokenService.decodeAndGet(rawToken, TokenType.REFRESH)).rejects.toThrow(
-        new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID),
-      );
+      await expect(
+        userTokenService.decodeAndGet(rawToken, TokenType.REFRESH),
+      ).rejects.toThrow(new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID));
     });
 
     it('should throw UnauthorizedException when hash does not match', async () => {
@@ -183,9 +204,9 @@ describe('UserTokenService', () => {
       userTokenRepository.findByUuid.mockResolvedValue(userToken);
       jest.spyOn(UtilHash, 'compare').mockResolvedValue(false);
 
-      await expect(userTokenService.decodeAndGet(rawToken, TokenType.REFRESH)).rejects.toThrow(
-        new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID),
-      );
+      await expect(
+        userTokenService.decodeAndGet(rawToken, TokenType.REFRESH),
+      ).rejects.toThrow(new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID));
     });
   });
 });

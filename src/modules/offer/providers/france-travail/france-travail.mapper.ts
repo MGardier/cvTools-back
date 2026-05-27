@@ -64,7 +64,10 @@ export abstract class FranceTravailMapper {
   // INSEE consolidated codes for Paris/Lyon/Marseille that FT's commune
   // referential rejects (FT only accepts the per-arrondissement codes).
   // Per FT doc, searching by département returns all offers of these cities.
-  private static readonly FT_COMMUNE_TO_DEPARTMENT_FALLBACK: Record<string, string> = {
+  private static readonly FT_COMMUNE_TO_DEPARTMENT_FALLBACK: Record<
+    string,
+    string
+  > = {
     '75056': '75', // Paris
     '69123': '69', // Lyon
     '13055': '13', // Marseille
@@ -201,9 +204,7 @@ export abstract class FranceTravailMapper {
   /**
    * Parse city name from FT libelle format: "75 - Paris 11e Arrondissement" → "Paris 11e Arrondissement"
    */
-  private static parseCityFromLibelle(
-    libelle?: string,
-  ): string | undefined {
+  private static parseCityFromLibelle(libelle?: string): string | undefined {
     if (!libelle) return undefined;
     // FT format: "XX - Ville" where XX is department code
     const match = libelle.match(/^\d+\s*-\s*(.+)$/);
@@ -262,7 +263,7 @@ export abstract class FranceTravailMapper {
   }
 
   /**
-   * Build a readable label from FT 
+   * Build a readable label from FT
    *   "0 An(s)" → "Débutant accepté"
    *   "3 An(s)" → "3 ans d'expérience"
    *   exige="D" (no libelle) → "Débutant accepté"

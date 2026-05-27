@@ -38,10 +38,16 @@ export class OfferService {
     const activeProviders = this.__getAvailableProviders(jobboard);
 
     //Get offers from active providers with searchFilters
-    const results = await this.__fetchAllProviders(activeProviders, searchFilters);
+    const results = await this.__fetchAllProviders(
+      activeProviders,
+      searchFilters,
+    );
 
-    //Format & regroup results adn create sources with result for each Providers  
-    const { offers, sources } = this.__aggregateResults(activeProviders, results);
+    //Format & regroup results adn create sources with result for each Providers
+    const { offers, sources } = this.__aggregateResults(
+      activeProviders,
+      results,
+    );
 
     //Sort offers by the most recent publications
     const sortedOffers = this.__sortByDate(offers);
@@ -81,7 +87,6 @@ export class OfferService {
     providers: IOfferProvider[],
     filters: TProviderSearchFilters,
   ): Promise<PromiseSettledResult<IOfferListItem[]>[]> {
-
     return Promise.allSettled(
       providers.map((provider) =>
         this.__fetchFromProviderWithCache(provider, filters),
@@ -97,7 +102,6 @@ export class OfferService {
     provider: IOfferProvider,
     filters: TProviderSearchFilters,
   ): Promise<IOfferListItem[]> {
-
     const cacheKey = this.cacheManagerService.buildCacheKey(
       'offer',
       provider.name,
@@ -105,16 +109,21 @@ export class OfferService {
       true,
     );
 
-    const cached = await this.cacheManagerService.get<IOfferListItem[]>(cacheKey);
+    const cached =
+      await this.cacheManagerService.get<IOfferListItem[]>(cacheKey);
     if (cached) {
       this.logger.debug(`Cache hit for provider ${provider.name}`);
       return cached;
     }
 
-    // Provider call 
-    const offers = await provider.search(filters,this.BATCH_SIZE);
+    // Provider call
+    const offers = await provider.search(filters, this.BATCH_SIZE);
 
-    await this.cacheManagerService.set(cacheKey, offers, provider.cacheTtl * 1000);
+    await this.cacheManagerService.set(
+      cacheKey,
+      offers,
+      provider.cacheTtl * 1000,
+    );
 
     this.logger.debug(
       `Fetched ${offers.length} offers from ${provider.name}, cached for ${provider.cacheTtl}s`,
@@ -164,7 +173,8 @@ export class OfferService {
 
   private __sortByDate(offers: IOfferListItem[]): IOfferListItem[] {
     return [...offers].sort(
-      (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+      (a, b) =>
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
     );
   }
 
@@ -174,7 +184,6 @@ export class OfferService {
     page: number,
     limit: number,
   ): IAggregatedSearchResult {
-
     const start = (page - 1) * limit;
 
     return {

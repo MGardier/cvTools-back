@@ -155,7 +155,10 @@ export interface IOfferProvider {
   readonly name: EOfferApiProvider;
   readonly jobboards: EOfferJobboardOrigin[];
   readonly cacheTtl: number; // in sec
-  search(filters: TProviderSearchFilters, maxResults: number): Promise<IOfferListItem[]>;
+  search(
+    filters: TProviderSearchFilters,
+    maxResults: number,
+  ): Promise<IOfferListItem[]>;
   isAvailable(): boolean;
 }
 

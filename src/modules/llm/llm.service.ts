@@ -21,7 +21,7 @@ export class LlmService {
   constructor(
     private readonly geminiProvider: GeminiProvider,
     private readonly providerService: ProviderService,
-  ) { }
+  ) {}
 
   // =============================================================================
   //                               STRUCTURE TEXT
@@ -31,7 +31,6 @@ export class LlmService {
     params: TExtractStructureTextParams,
     userId: number,
   ): Promise<TExtractedApplication> {
-
     if (!params.fetchText && !params.userRawText)
       throw new BadRequestException(
         ErrorCodeEnum.SCRAPER_EXTRACTION_FAILED_ERROR,
@@ -75,7 +74,7 @@ export class LlmService {
     url: string,
     userId: number,
   ): Promise<TExtractedApplication> {
-    const prompt = this.__buildPrompt('url_fetch',url);
+    const prompt = this.__buildPrompt('url_fetch', url);
     const request = {
       prompt,
       maxTokens: 4096,
@@ -173,7 +172,6 @@ export class LlmService {
     ]);
   }
 
-
   private __buildPrompt(
     type: 'raw' | 'url_content' | 'url_fetch',
     content: string,
@@ -200,7 +198,4 @@ export class LlmService {
 
     return prompt;
   }
-
 }
-
-

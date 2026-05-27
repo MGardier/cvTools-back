@@ -16,7 +16,9 @@ export class CityService {
 
   constructor(private readonly httpService: HttpService) {}
 
-  async search(dto: SearchCityRequestDto): Promise<CitySearchItemResponseDto[]> {
+  async search(
+    dto: SearchCityRequestDto,
+  ): Promise<CitySearchItemResponseDto[]> {
     const params: Record<string, string | number> = {
       boost: 'population',
       limit: dto.limit,
@@ -32,7 +34,10 @@ export class CityService {
     const result = cityApiResponseSchema.safeParse(data);
 
     if (!result.success) {
-      this.logger.warn('Geo API response validation failed', result.error.issues);
+      this.logger.warn(
+        'Geo API response validation failed',
+        result.error.issues,
+      );
       return [];
     }
 

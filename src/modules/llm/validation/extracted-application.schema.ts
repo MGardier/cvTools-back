@@ -33,7 +33,7 @@ const extractedSkillSchema = z
   .catch(undefined)
   .transform((skills) => {
     if (!skills) return undefined;
-    
+
     //Remove dupplication
     const seen = new Set<string>();
     return skills.filter((s) => {
@@ -50,7 +50,7 @@ export const extractedApplicationSchema = z
     title: z.string().min(1).max(150),
     company: z.string().max(150).optional(),
     description: z.string().max(20_000).optional(),
-    
+
     //Number
     salaryMin: z.number().positive().max(500_000).optional().catch(undefined),
     salaryMax: z.number().positive().max(500_000).optional().catch(undefined),
@@ -61,7 +61,7 @@ export const extractedApplicationSchema = z
     //Date
     publishedAt: z.iso.date().optional().catch(undefined),
 
-    //Enum  
+    //Enum
     contractType: contractTypeEnum.optional().catch(undefined),
     experience: experienceEnum.optional().catch(undefined),
     remotePolicy: remotePolicyEnum.optional().catch(undefined),
@@ -70,7 +70,6 @@ export const extractedApplicationSchema = z
     //Object
     skills: extractedSkillSchema.catch(undefined),
     address: extractedAddressSchema.catch(undefined),
-
   })
   // Removes any unknown fields
   .strip()

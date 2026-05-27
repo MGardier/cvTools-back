@@ -1,5 +1,5 @@
 // ────────────────────────────────────────────────
-//  EXTRACTION RULES 
+//  EXTRACTION RULES
 // ────────────────────────────────────────────────
 
 const BASE_EXTRACTION_RULES = `
@@ -46,9 +46,8 @@ ${BASE_EXTRACTION_RULES}
 
 Extract the structured data as JSON:`;
 
-
 // ────────────────────────────────────────────────────
-// Prompt 2 : Only Formatting data extract from Website 
+// Prompt 2 : Only Formatting data extract from Website
 // ────────────────────────────────────────────────────
 
 export const FORMAT_FROM_URL_PROMPT = `You are an expert job offer data extractor.
@@ -74,7 +73,6 @@ ${BASE_EXTRACTION_RULES}
 </job_offer_data>
 
 Extract the structured data as JSON:`;
-
 
 // ────────────────────────────────────────────────
 // Prompt 3 : Fetch URL + extract
