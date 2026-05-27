@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Application, Prisma } from '@prisma/client';
+import { Application, ApplicationStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
 import { IApplicationFindAllOptions } from 'src/shared/types/repository.types';
 
@@ -121,5 +121,38 @@ export class ApplicationRepository {
         applicationContacts: { include: { contact: true } },
       },
     });
+  }
+
+  async findRecentByUserId(userId: number, limit: number) {
+    return await this.prismaService.application.findMany({
+      where: { userId },
+      orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
+      take: limit,
+      include: {
+        applicationSkills: { include: { skill: true } },
+      },
+    });
+  }
+
+  // =============================================================================
+  //                               COUNT
+  // =============================================================================
+
+  async countByStatusForUser(
+    userId: number,
+  ): Promise<Partial<Record<ApplicationStatus, number>>> {
+    const grouped = await this.prismaService.application.groupBy({
+      by: ['currentStatus'],
+      where: { userId },
+      _count: { _all: true },
+    });
+
+    return grouped.reduce<Partial<Record<ApplicationStatus, number>>>(
+      (acc, row) => {
+        acc[row.currentStatus] = row._count._all;
+        return acc;
+      },
+      {},
+    );
   }
 }
