@@ -84,6 +84,10 @@ export class TodoService {
     return this.todoRepository.findAllByApplicationId(applicationId, sort, status);
   }
 
+  async findRecentByUserId(userId: number, limit: number): Promise<Todo[]> {
+    return this.todoRepository.findRecentByUserId(userId, limit);
+  }
+
   // =============================================================================
   //                               PRIVATE
   // =============================================================================
