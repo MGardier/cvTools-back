@@ -1,4 +1,4 @@
-import { PrismaService } from "prisma/prisma.service";
+import { PrismaService } from 'prisma/prisma.service';
 
 export async function resetDatabase(prisma: PrismaService): Promise<void> {
   await prisma.userToken.deleteMany();

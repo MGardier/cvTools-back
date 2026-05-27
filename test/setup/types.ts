@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User } from '@prisma/client';
 
 export interface ITestCredentials {
   email: string;
@@ -10,7 +10,6 @@ export interface IAuthCookies {
   refreshToken: string;
   raw: string[];
 }
-
 
 export interface IMockUserRef {
   current: Partial<User>;

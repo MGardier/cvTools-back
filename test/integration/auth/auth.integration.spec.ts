@@ -36,14 +36,11 @@ describe('Auth Integration', () => {
     await app.close();
   });
 
-
   // =============================================================================
   //                            SIGN UP
   // =============================================================================
 
-
   describe('POST /auth/signUp', () => {
-
     /********* VALID SIGN UP *********/
 
     it('should return 201 and create user with PENDING status', async () => {
@@ -134,14 +131,11 @@ describe('Auth Integration', () => {
     });
   });
 
-
   // =============================================================================
   //                            SIGN IN
   // =============================================================================
 
-
   describe('POST /auth/signIn', () => {
-
     /********* HAPPY PATH *********/
 
     it('should return 201 with user data and set auth cookies', async () => {
@@ -237,14 +231,11 @@ describe('Auth Integration', () => {
     });
   });
 
-
   // =============================================================================
   //                              ME
   // =============================================================================
 
-
   describe('GET /auth/me', () => {
-
     /********* HAPPY PATH *********/
 
     it('should return 200 with user data when token is valid', async () => {
@@ -277,14 +268,11 @@ describe('Auth Integration', () => {
     });
   });
 
-
   // =============================================================================
   //                            LOGOUT
   // =============================================================================
 
-
   describe('DELETE /auth/logout', () => {
-
     /********* HAPPY PATH *********/
 
     it('should return 204 and clear cookies', async () => {
@@ -296,7 +284,9 @@ describe('Auth Integration', () => {
 
       expect(response.status).toBe(204);
 
-      const setCookieHeaders = response.headers['set-cookie'] as unknown as string[];
+      const setCookieHeaders = response.headers[
+        'set-cookie'
+      ] as unknown as string[];
       const accessCookie = setCookieHeaders?.find((c: string) =>
         c.startsWith('access_token='),
       );
@@ -330,14 +320,11 @@ describe('Auth Integration', () => {
     });
   });
 
-
   // =============================================================================
   //                            REFRESH
   // =============================================================================
 
-
   describe('POST /auth/refresh', () => {
-
     /********* HAPPY PATH *********/
 
     it('should return 201 with new cookies', async () => {
@@ -374,14 +361,11 @@ describe('Auth Integration', () => {
     });
   });
 
-
   // =============================================================================
   //                       RESEND CONFIRM ACCOUNT
   // =============================================================================
 
-
   describe('POST /auth/resendConfirmAccount', () => {
-
     /********* HAPPY PATH *********/
 
     it('should return 201 with user data when user is PENDING', async () => {
@@ -405,7 +389,6 @@ describe('Auth Integration', () => {
 
       const emailMock = getEmailMock(app);
       expect(emailMock.reSendAccountConfirmationLink).toHaveBeenCalledTimes(1);
-
     });
 
     /********* EMAIL NOT FOUND *********/
@@ -441,14 +424,11 @@ describe('Auth Integration', () => {
     });
   });
 
-
   // =============================================================================
   //                        CONFIRM ACCOUNT
   // =============================================================================
 
-
   describe('PATCH /auth/confirmAccount', () => {
-
     /********* HAPPY PATH *********/
 
     it('should return 200 and set user status to ALLOWED', async () => {
@@ -481,14 +461,11 @@ describe('Auth Integration', () => {
     });
   });
 
-
   // =============================================================================
   //                        FORGOT PASSWORD
   // =============================================================================
 
-
   describe('POST /auth/forgotPassword', () => {
-
     /********* HAPPY PATH *********/
 
     it('should return 201 with user data', async () => {
@@ -528,14 +505,11 @@ describe('Auth Integration', () => {
     });
   });
 
-
   // =============================================================================
   //                        RESET PASSWORD
   // =============================================================================
 
-
   describe('PATCH /auth/resetPassword', () => {
-
     /********* HAPPY PATH *********/
 
     it('should return 200 and change password (old fails, new works)', async () => {
@@ -560,7 +534,10 @@ describe('Auth Integration', () => {
 
       const signInOld = await request(app.getHttpServer())
         .post('/auth/signIn')
-        .send({ email: DEFAULT_CREDENTIALS.email, password: DEFAULT_CREDENTIALS.password });
+        .send({
+          email: DEFAULT_CREDENTIALS.email,
+          password: DEFAULT_CREDENTIALS.password,
+        });
       expect(signInOld.status).toBe(401);
 
       const signInNew = await request(app.getHttpServer())

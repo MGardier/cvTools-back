@@ -6,7 +6,6 @@ import { PrismaService } from 'prisma/prisma.service';
 import { EmailService } from 'src/modules/email/email.service';
 import { IAuthCookies, ITestCredentials } from './types';
 
-
 // =============================================================================
 //                               DEFAULT DATA
 // =============================================================================
@@ -15,7 +14,6 @@ export const DEFAULT_CREDENTIALS: ITestCredentials = {
   email: 'email@example.com',
   password: 'StrongPassword1!',
 };
-
 
 // =============================================================================
 //                             COOKIES HELPER
@@ -62,9 +60,7 @@ export async function signUpUser(
   overrides: Partial<ITestCredentials> = {},
 ): Promise<request.Response> {
   const credentials = { ...DEFAULT_CREDENTIALS, ...overrides };
-  return request(app.getHttpServer())
-    .post('/auth/signUp')
-    .send(credentials);
+  return request(app.getHttpServer()).post('/auth/signUp').send(credentials);
 }
 
 export async function createConfirmedUser(
@@ -112,7 +108,7 @@ export async function authenticateUser(
 // =============================================================================
 
 export function getEmailMock(app: INestApplication): jest.Mocked<EmailService> {
-  return app.get(EmailService) as jest.Mocked<EmailService>;
+  return app.get(EmailService);
 }
 
 export function extractTokenFromMockUrl(
@@ -129,7 +125,6 @@ export function extractTokenFromMockUrl(
   return tokenMatch[1];
 }
 
-
 // =============================================================================
 //                            OAUTH HELPERS
 // =============================================================================
@@ -141,7 +136,8 @@ export async function createOAuthUser(
 ): Promise<User> {
   return prisma.user.create({
     data: {
-      email: overrides.email ?? `oauth-${loginMethod.toLowerCase()}@example.com`,
+      email:
+        overrides.email ?? `oauth-${loginMethod.toLowerCase()}@example.com`,
       oauthId: overrides.oauthId ?? `${loginMethod.toLowerCase()}-oauth-id-123`,
       loginMethod,
       status: overrides.status ?? UserStatus.ALLOWED,
