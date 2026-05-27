@@ -75,4 +75,15 @@ export class TodoRepository {
       where: { id, applicationId },
     });
   }
+
+  async findRecentByUserId(userId: number, limit: number): Promise<Todo[]> {
+    return await this.prismaService.todo.findMany({
+      where: {
+        application: { userId },
+        status: { notIn: [StatusTodo.DONE, StatusTodo.ARCHIVED] },
+      },
+      orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
+      take: limit,
+    });
+  }
 }
