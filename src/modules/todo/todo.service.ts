@@ -11,6 +11,7 @@ import { CreateTodoRequestDto } from './dto/request/create-todo.dto';
 import { UpdateTodoRequestDto } from './dto/request/update-todo.dto';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { Todo, StatusTodo } from '@prisma/client';
+import { TTodoStatusCounts, TTodoWithCompany } from './types';
 
 @Injectable()
 export class TodoService {
@@ -88,8 +89,29 @@ export class TodoService {
     );
   }
 
-  async findRecentByUserId(userId: number, limit: number): Promise<Todo[]> {
+  async findRecentByUserId(
+    userId: number,
+    limit: number,
+  ): Promise<TTodoWithCompany[]> {
     return this.todoRepository.findRecentByUserId(userId, limit);
+  }
+
+  // =============================================================================
+  //                               COUNT
+  // =============================================================================
+
+  async countByStatusForUser(userId: number): Promise<TTodoStatusCounts> {
+    return this.todoRepository.countByStatusForUser(userId);
+  }
+
+  async countByStatusForApplicationIds(
+    userId: number,
+    applicationIds: number[],
+  ): Promise<Map<number, TTodoStatusCounts>> {
+    return this.todoRepository.countByStatusForApplicationIds(
+      userId,
+      applicationIds,
+    );
   }
 
   // =============================================================================

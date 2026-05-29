@@ -26,3 +26,5 @@ export type THomeCountCategory =
   | 'toApply'
   | 'interview'
   | 'finished';
+
+export type THomeTodoCategory = 'toMake' | 'inProgress';
