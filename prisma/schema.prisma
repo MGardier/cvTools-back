@@ -107,6 +107,30 @@ model UserToken {
 
 
 // ================================================
+//                  ADMIN INVITATION
+// ================================================
+
+model AdminInvitation {
+  @@map("admin_invitation")
+
+  // Int
+  id        Int       @id @default(autoincrement())
+
+  // String
+  email     String    @db.VarChar(100)
+  uuid      String    @unique @db.VarChar(150)
+  tokenHash String    @map("token_hash") @db.Text
+
+  // DateTime
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([email])
+}
+
+
+// ================================================
 //                  PROVIDER LOGGER
 // ================================================
 

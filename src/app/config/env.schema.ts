@@ -189,6 +189,15 @@ export const envSchema = z.object({
         ? 'You must provide FRONT_URL_OAUTH_CALLBACK_ERROR.'
         : 'FRONT_URL_OAUTH_CALLBACK_ERROR must be a valid URL.',
   }),
+  FRONT_URL_ADMIN_REGISTER: z.url({
+    error: (iss) =>
+      iss.input === undefined
+        ? 'You must provide FRONT_URL_ADMIN_REGISTER.'
+        : 'FRONT_URL_ADMIN_REGISTER must be a valid URL.',
+  }),
+
+  // ADMIN INVITATION
+  ADMIN_INVITATION_EXPIRES_MINUTES: z.coerce.number().default(15),
 
   /* #################### EXTERNAL SERVICES  ########################### */
 

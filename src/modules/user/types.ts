@@ -1,4 +1,4 @@
-import { LoginMethod, UserStatus } from '@prisma/client';
+import { LoginMethod, UserRoles, UserStatus } from '@prisma/client';
 
 export interface ICreateUser {
   email: string;
@@ -6,6 +6,7 @@ export interface ICreateUser {
   loginMethod: LoginMethod;
   oauthId?: string;
   status?: UserStatus;
+  roles?: UserRoles;
 }
 
 export interface IUpdateUser {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ApplicationStatus, StatusTodo, User } from '@prisma/client';
+import { ApplicationStatus, Prisma, StatusTodo, User } from '@prisma/client';
 import { UserRepository } from './user.repository';
 import {
   IUpdateUser,
@@ -28,8 +28,11 @@ export class UserService {
     private readonly todoService: TodoService,
   ) {}
 
-  async create(data: ICreateUser): Promise<User> {
-    return await this.userRepository.create(data);
+  async create(
+    data: ICreateUser,
+    tx?: Prisma.TransactionClient,
+  ): Promise<User> {
+    return await this.userRepository.create(data, tx);
   }
 
   async update(id: number, data: IUpdateUser): Promise<User> {
@@ -54,6 +57,10 @@ export class UserService {
 
   async findOneByOauthId(data: IFindOneByOauthId): Promise<User | null> {
     return await this.userRepository.findOneByOauthId(data);
+  }
+
+  async findActiveAdmin(): Promise<User | null> {
+    return await this.userRepository.findActiveAdmin();
   }
 
   // =============================================================================
