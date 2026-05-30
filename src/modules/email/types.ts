@@ -4,9 +4,10 @@ export interface IEmailPayload {
   cc?: string[];
   bcc?: string[];
   html?: string;
-  templateVersionId?: number;
+  templateSlug?: string;
+  versionNumber?: number;
   variables?: Record<string, unknown>;
-  userId: number;
+  userId?: number;
   origin: string;
   isApproved?: boolean;
   metadata?: Record<string, unknown>;

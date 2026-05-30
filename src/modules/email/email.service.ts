@@ -13,7 +13,7 @@ export class EmailService {
     this.rabbitMqQService.sendEmailAsync({
       recipients: [email],
       subject: 'Confirmation of your account',
-      templateVersionId: 1,
+      templateSlug: 'auth-account-confirmation.hbs',
       variables: {
         userName: email,
         confirmationLink,
@@ -31,7 +31,7 @@ export class EmailService {
     return this.rabbitMqQService.sendEmail({
       recipients: [email],
       subject: 'Confirmation of your account',
-      templateVersionId: 1,
+      templateSlug: 'auth-account-confirmation.hbs',
       variables: {
         userName: email,
         confirmationLink,
@@ -49,13 +49,29 @@ export class EmailService {
     return this.rabbitMqQService.sendEmail({
       recipients: [email],
       subject: 'Reset your password',
-      templateVersionId: 2,
+      templateSlug: 'auth-forgot-password.hbs',
       variables: {
         userName: email,
         resetPasswordLink,
       },
       userId,
       origin: 'send-reset-password-link',
+    });
+  }
+
+  async sendAdminInvitation(
+    email: string,
+    invitationLink: string,
+  ): Promise<unknown> {
+    return this.rabbitMqQService.sendEmail({
+      recipients: [email],
+      subject: 'Invitation à créer votre compte administrateur',
+      templateSlug: 'auth-admin-invitation.hbs',
+      variables: {
+        userName: email,
+        invitationLink,
+      },
+      origin: 'send-admin-invitation-link',
     });
   }
 }
