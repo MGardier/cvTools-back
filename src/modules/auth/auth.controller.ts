@@ -30,6 +30,7 @@ import { GithubOauthGuard } from 'src/shared/guards/github-oauth.guard';
 import { CredentialsAuthGuard } from 'src/shared/guards/credentials-auth.guard';
 import { JwtRefreshGuard } from 'src/shared/guards/jwt-refresh.guard';
 import { ConfigService } from '@nestjs/config';
+import { UtilOAuth } from 'src/shared/utils/oauth.util';
 import { Response } from 'express';
 import {
   IAuthenticatedRequest,
@@ -183,13 +184,13 @@ export class AuthController {
       this.authService.setAuthCookies(res, authSession.tokens);
 
       res.redirect(
-        this.__buildOAuthRedirectUrl('success', {
+        UtilOAuth.buildRedirectUrl(this.configService, 'success', {
           loginMethod: LoginMethod.GOOGLE,
         }),
       );
     } catch (error: unknown) {
       res.redirect(
-        this.__buildOAuthRedirectUrl('error', {
+        UtilOAuth.buildRedirectUrl(this.configService, 'error', {
           errorCode: this.__getErrorCodeFromException(error),
         }),
       );
@@ -230,13 +231,13 @@ export class AuthController {
       this.authService.setAuthCookies(res, authSession.tokens);
 
       res.redirect(
-        this.__buildOAuthRedirectUrl('success', {
+        UtilOAuth.buildRedirectUrl(this.configService, 'success', {
           loginMethod: LoginMethod.GITHUB,
         }),
       );
     } catch (error: unknown) {
       res.redirect(
-        this.__buildOAuthRedirectUrl('error', {
+        UtilOAuth.buildRedirectUrl(this.configService, 'error', {
           errorCode: this.__getErrorCodeFromException(error),
         }),
       );
@@ -246,26 +247,6 @@ export class AuthController {
   // =============================================================================
   //                               PRIVATE
   // =============================================================================
-
-  private __buildOAuthRedirectUrl(
-    type: 'success' | 'error',
-    params: { loginMethod?: LoginMethod; errorCode?: string },
-  ): string {
-    const baseUrl =
-      type === 'success'
-        ? this.configService.get('FRONT_URL_OAUTH_CALLBACK_SUCCESS')
-        : this.configService.get('FRONT_URL_OAUTH_CALLBACK_ERROR');
-
-    const searchParams = new URLSearchParams();
-
-    if (type === 'success' && params.loginMethod) {
-      searchParams.set('loginMethod', params.loginMethod);
-    } else if (type === 'error' && params.errorCode) {
-      searchParams.set('errorCode', params.errorCode);
-    }
-
-    return `${baseUrl}?${searchParams.toString()}`;
-  }
 
   private __getErrorCodeFromException(error: unknown): string {
     const errorMessage = error instanceof Error ? error.message : '';

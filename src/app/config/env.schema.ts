@@ -118,6 +118,32 @@ export const envSchema = z.object({
         : 'GITHUB_CALLBACK_URL must be a valid URL.',
   }),
 
+  // ADMIN OAUTH
+  GOOGLE_ADMIN_CALLBACK_URL: z.url({
+    error: (iss) =>
+      iss.input === undefined
+        ? 'You must provide GOOGLE_ADMIN_CALLBACK_URL.'
+        : 'GOOGLE_ADMIN_CALLBACK_URL must be a valid URL.',
+  }),
+  GITHUB_ADMIN_CLIENT_ID: z.string({
+    error: (iss) =>
+      iss.input === undefined
+        ? 'You must provide GITHUB_ADMIN_CLIENT_ID.'
+        : 'GITHUB_ADMIN_CLIENT_ID must be a string.',
+  }),
+  GITHUB_ADMIN_CLIENT_SECRET: z.string({
+    error: (iss) =>
+      iss.input === undefined
+        ? 'You must provide GITHUB_ADMIN_CLIENT_SECRET.'
+        : 'GITHUB_ADMIN_CLIENT_SECRET must be a string.',
+  }),
+  GITHUB_ADMIN_CALLBACK_URL: z.url({
+    error: (iss) =>
+      iss.input === undefined
+        ? 'You must provide GITHUB_ADMIN_CALLBACK_URL.'
+        : 'GITHUB_ADMIN_CALLBACK_URL must be a valid URL.',
+  }),
+
   // JWT SECRET
   JWT_DEFAULT_SECRET: z.string({
     error: (iss) =>

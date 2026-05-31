@@ -42,6 +42,21 @@ export type THomeCountCategory = 'inProgress' | 'toApply' | ...;
 import { THomeCountCategory } from './types';
 ```
 
+## Durations & millisecond values
+
+Any numeric value expressed in **milliseconds** (durations, timeouts, TTLs,
+cookie `maxAge`, expirations, etc.) must carry an inline comment giving its
+human-readable equivalent, so the raw number is immediately understandable:
+
+- **< 1 hour** → express in **minutes**
+- **≥ 1 hour** → express in **hours**
+
+```ts
+maxAge: 600000, // 10 minutes
+ttl: 60_000,    // 1 minute
+JWT_REFRESH_EXPIRATION: 604800000, // 168 hours (7 days)
+```
+
 ## Constants
 
 - If a constant is used by **a single method**, declare it **inside that method**.
