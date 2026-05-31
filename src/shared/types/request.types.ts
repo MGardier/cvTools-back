@@ -27,3 +27,9 @@ export interface IOAuthRequest extends Request {
 export interface IOAuthCallbackRequest extends Request {
   user: User;
 }
+
+export type TAdminOAuthIdentity = Required<IOAuthUser>;
+
+export interface IAdminOAuthCallbackRequest extends Request {
+  user: TAdminOAuthIdentity;
+}

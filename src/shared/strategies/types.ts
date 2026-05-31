@@ -9,5 +9,5 @@ export interface IGithubProfile {
   id: string;
   username?: string;
   displayName?: string;
-  emails?: Array<{ value: string }>;
+  emails?: Array<{ value: string; primary?: boolean; verified?: boolean }>;
 }

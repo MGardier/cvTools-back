@@ -4,8 +4,3 @@ export interface ICreateAdminInvitation {
   tokenHash: string;
   expiresAt: Date;
 }
-
-export interface IAdminRegisterCredentials {
-  password?: string;
-  oauthId?: string;
-}

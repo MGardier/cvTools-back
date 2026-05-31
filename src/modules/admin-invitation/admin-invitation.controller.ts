@@ -28,7 +28,7 @@ export class AdminInvitationController {
 
   @Public()
   @UseGuards(CustomThrottlerGuard)
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: 5, ttl: 60_000 } }) // ttl: 1 minute
   @Get('invitation/validate')
   @SerializeWith(ValidateInvitationResponseDto)
   async validateInvitation(
@@ -44,10 +44,9 @@ export class AdminInvitationController {
     @Body() dto: RegisterAdminRequestDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<UserResponseDto> {
-    const session = await this.adminInvitationService.register(
+    const session = await this.adminInvitationService.registerWithPassword(
       dto.token,
-      dto.loginMethod,
-      dto.password ? { password: dto.password } : { oauthId: dto.oauthId },
+      dto.password,
     );
 
     this.authService.setAuthCookies(res, session.tokens);
