@@ -27,6 +27,7 @@ import { ApplicationHistoryModule } from './modules/application-history/applicat
 import { ThrottlerModule } from '@nestjs/throttler';
 import { OfferModule } from './modules/offer/offer.module';
 import { CityModule } from './modules/city/city.module';
+import { AdminInvitationModule } from './modules/admin-invitation/admin-invitation.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { CityModule } from './modules/city/city.module';
     ApplicationHistoryModule,
     OfferModule,
     CityModule,
+    AdminInvitationModule,
   ],
   controllers: [],
   providers: [

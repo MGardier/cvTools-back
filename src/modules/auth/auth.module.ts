@@ -21,5 +21,6 @@ import { JwtRefreshStrategy } from 'src/shared/strategies/jwt-refresh.strategy';
     JwtAccessStrategy,
     JwtRefreshStrategy,
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}
