@@ -1,10 +1,8 @@
 import { ConfigService } from '@nestjs/config';
-import { LoginMethod } from '@prisma/client';
 import { IOAuthRedirectParams, TOAuthRedirectType } from '../types/auth.types';
-
+import { ErrorCodeEnum } from '../enums/error-codes.enum';
 
 export abstract class UtilOAuth {
-
   static buildRedirectUrl(
     configService: ConfigService,
     type: TOAuthRedirectType,
@@ -24,5 +22,14 @@ export abstract class UtilOAuth {
     }
 
     return `${baseUrl}?${searchParams.toString()}`;
+  }
+
+  // Maps  error => ErrorCodeEnum  or => INTERNAL_SERVER_ERROR
+  static resolveErrorCode(error: unknown): string {
+    const message = error instanceof Error ? error.message : '';
+
+    return Object.values(ErrorCodeEnum).includes(message as ErrorCodeEnum)
+      ? message
+      : ErrorCodeEnum.INTERNAL_SERVER_ERROR;
   }
 }

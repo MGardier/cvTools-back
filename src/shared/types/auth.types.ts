@@ -1,4 +1,4 @@
-import { LoginMethod } from "@prisma/client";
+import { LoginMethod } from '@prisma/client';
 
 export type TOAuthRedirectType = 'success' | 'error';
 

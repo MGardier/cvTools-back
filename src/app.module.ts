@@ -28,6 +28,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { OfferModule } from './modules/offer/offer.module';
 import { CityModule } from './modules/city/city.module';
 import { AdminInvitationModule } from './modules/admin-invitation/admin-invitation.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { AdminInvitationModule } from './modules/admin-invitation/admin-invitati
     OfferModule,
     CityModule,
     AdminInvitationModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [

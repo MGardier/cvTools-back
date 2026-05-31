@@ -191,7 +191,7 @@ export class AuthController {
     } catch (error: unknown) {
       res.redirect(
         UtilOAuth.buildRedirectUrl(this.configService, 'error', {
-          errorCode: this.__getErrorCodeFromException(error),
+          errorCode: UtilOAuth.resolveErrorCode(error),
         }),
       );
     }
@@ -238,20 +238,9 @@ export class AuthController {
     } catch (error: unknown) {
       res.redirect(
         UtilOAuth.buildRedirectUrl(this.configService, 'error', {
-          errorCode: this.__getErrorCodeFromException(error),
+          errorCode: UtilOAuth.resolveErrorCode(error),
         }),
       );
     }
-  }
-
-  // =============================================================================
-  //                               PRIVATE
-  // =============================================================================
-
-  private __getErrorCodeFromException(error: unknown): string {
-    const errorMessage = error instanceof Error ? error.message : '';
-    return Object.values(ErrorCodeEnum).includes(errorMessage as ErrorCodeEnum)
-      ? errorMessage
-      : ErrorCodeEnum.INTERNAL_SERVER_ERROR;
   }
 }
