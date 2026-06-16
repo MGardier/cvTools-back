@@ -45,7 +45,7 @@ export class GoogleAdminStrategy extends PassportStrategy(
           ErrorCodeEnum.GOOGLE_COMPLETED_OAUTH_FAILED,
         );
 
-      if (!primaryEmail.verified)
+      if (!profile._json?.email_verified)
         throw new BadRequestException(ErrorCodeEnum.OAUTH_EMAIL_NOT_VERIFIED);
 
       const identity: TAdminOAuthIdentity = {

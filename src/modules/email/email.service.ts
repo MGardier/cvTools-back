@@ -62,6 +62,7 @@ export class EmailService {
   async sendAdminInvitation(
     email: string,
     invitationLink: string,
+    expiresInMinutes: number,
   ): Promise<unknown> {
     return this.rabbitMqQService.sendEmail({
       recipients: [email],
@@ -70,6 +71,7 @@ export class EmailService {
       variables: {
         userName: email,
         invitationLink,
+        expiresIn: `${expiresInMinutes} minutes`,
       },
       origin: 'send-admin-invitation-link',
     });

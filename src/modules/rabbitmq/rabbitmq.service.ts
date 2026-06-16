@@ -1,6 +1,6 @@
 import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 import { IEmailPayload } from '../email/types';
 
 @Injectable()
@@ -18,8 +18,13 @@ export class RabbitmqService implements OnModuleInit {
     }
   }
 
-  async sendEmail(data: IEmailPayload) {
-    return await firstValueFrom(this.emailClient.send('send_email', data));
+  async sendEmail(data: IEmailPayload): Promise<unknown> {
+    const RPC_TIMEOUT_MS = 10_000; // 10 seconds
+    return firstValueFrom(
+      this.emailClient
+        .send<unknown>('send_email', data)
+        .pipe(timeout(RPC_TIMEOUT_MS)),
+    );
   }
 
   sendEmailAsync(data: IEmailPayload): void {

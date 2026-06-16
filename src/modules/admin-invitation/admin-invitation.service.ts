@@ -27,8 +27,7 @@ export class AdminInvitationService {
   // =============================================================================
 
   async createInvitation(email: string): Promise<{ rawToken: string }> {
-    // Normalize so invitation.email, User.email and the OAuth email comparison
-    // all stay consistent (providers return their own casing).
+  
     const normalizedEmail = email.trim().toLowerCase();
 
     const activeAdmin = await this.userService.findActiveAdmin();
