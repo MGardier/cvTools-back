@@ -56,7 +56,8 @@ export class AdminService {
     const invitation =
       await this.adminInvitationService.getValidInvitation(rawToken);
 
-    if (invitation.email !== oauthEmail) {
+    // invitation.email is stored normalized; normalize the provider email too.
+    if (invitation.email !== oauthEmail.trim().toLowerCase()) {
       throw new UnauthorizedException(ErrorCodeEnum.OAUTH_EMAIL_MISMATCH);
     }
 

@@ -50,10 +50,18 @@ export class CreateAdminCommand extends CommandRunner {
       );
       const link = `${baseUrl}?token=${rawToken}`;
 
-      await this.emailService.sendAdminInvitation(options.email, link);
+      const expiresInMinutes = Number(
+        this.configService.get('ADMIN_INVITATION_EXPIRES_MINUTES') ?? 15,
+      );
+
+      await this.emailService.sendAdminInvitation(
+        options.email,
+        link,
+        expiresInMinutes,
+      );
 
       console.log(
-        `✅ Invitation admin envoyée à ${options.email} (expire dans 15min)`,
+        `✅ Invitation admin envoyée à ${options.email} (expire dans ${expiresInMinutes}min)`,
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

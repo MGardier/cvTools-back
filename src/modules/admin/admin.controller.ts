@@ -25,6 +25,7 @@ import {
   SkipSerialize,
 } from 'src/shared/decorators/serialize.decorator';
 import { CustomThrottlerGuard } from 'src/shared/guards/custom-throttler.guard';
+import { ADMIN_THROTTLE } from './constants';
 import { GoogleAdminOauthGuard } from 'src/shared/guards/google-admin-oauth.guard';
 import { GithubAdminOauthGuard } from 'src/shared/guards/github-admin-oauth.guard';
 import { IAdminOAuthCallbackRequest } from 'src/shared/types/request.types';
@@ -46,7 +47,7 @@ export class AdminController {
 
   @Public()
   @UseGuards(CustomThrottlerGuard)
-  @Throttle({ default: { limit: 5, ttl: 60_000 } }) // ttl: 1 minute
+  @Throttle(ADMIN_THROTTLE)
   @Get('invitation/validate')
   @SerializeWith(ValidateInvitationResponseDto)
   async validateInvitation(
@@ -60,6 +61,8 @@ export class AdminController {
   // =============================================================================
 
   @Public()
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle(ADMIN_THROTTLE)
   @Post('register')
   @SerializeWith(UserResponseDto)
   async register(
@@ -81,8 +84,9 @@ export class AdminController {
   // =============================================================================
 
   @Public()
+  @UseGuards(CustomThrottlerGuard, GoogleAdminOauthGuard)
+  @Throttle(ADMIN_THROTTLE)
   @Get('oauth/google')
-  @UseGuards(GoogleAdminOauthGuard)
   @SkipSerialize()
   googleAuth() {
     // Redirection to Google is handled by Passport (guard).
@@ -104,8 +108,9 @@ export class AdminController {
   // =============================================================================
 
   @Public()
+  @UseGuards(CustomThrottlerGuard, GithubAdminOauthGuard)
+  @Throttle(ADMIN_THROTTLE)
   @Get('oauth/github')
-  @UseGuards(GithubAdminOauthGuard)
   @SkipSerialize()
   githubAuth() {
     // Redirection to GitHub is handled by Passport (guard).

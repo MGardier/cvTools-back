@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { AdminInvitation, Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
+import { PrismaService } from 'prisma/prisma.service';
 import { AdminInvitationRepository } from './admin-invitation.repository';
 import { UserService } from '../user/user.service';
 import { UtilHash } from 'src/shared/utils/hash.util';
@@ -18,6 +19,7 @@ export class AdminInvitationService {
     private readonly adminInvitationRepository: AdminInvitationRepository,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
+    private readonly prismaService: PrismaService,
   ) {}
 
   // =============================================================================
@@ -25,25 +27,40 @@ export class AdminInvitationService {
   // =============================================================================
 
   async createInvitation(email: string): Promise<{ rawToken: string }> {
+    // Normalize so invitation.email, User.email and the OAuth email comparison
+    // all stay consistent (providers return their own casing).
+    const normalizedEmail = email.trim().toLowerCase();
+
     const activeAdmin = await this.userService.findActiveAdmin();
     if (activeAdmin) {
       throw new ConflictException(ErrorCodeEnum.DEFAULT_ALREADY_EXISTS_ERROR);
     }
 
     const existingInvitation =
-      await this.adminInvitationRepository.findActiveByEmail(email);
-    if (existingInvitation) {
-      await this.adminInvitationRepository.markAsUsed(existingInvitation.id);
-    }
+      await this.adminInvitationRepository.findActiveByEmail(normalizedEmail);
 
     const rawToken = uuidv4();
     const tokenHash = await UtilHash.hash(rawToken, this.__getSaltRound());
 
-    await this.adminInvitationRepository.create({
-      email,
-      uuid: rawToken,
-      tokenHash,
-      expiresAt: this.__buildExpiresAt(),
+    // Atomic: revoking the previous invitation and creating the new one must
+    // not leave the email without a valid invitation on partial failure.
+    await this.prismaService.$transaction(async (tx) => {
+      if (existingInvitation) {
+        await this.adminInvitationRepository.markAsUsed(
+          existingInvitation.id,
+          tx,
+        );
+      }
+
+      await this.adminInvitationRepository.create(
+        {
+          email: normalizedEmail,
+          uuid: rawToken,
+          tokenHash,
+          expiresAt: this.__buildExpiresAt(),
+        },
+        tx,
+      );
     });
 
     return { rawToken };
@@ -62,6 +79,10 @@ export class AdminInvitationService {
   // Validates the token (existence, single-use, expiry, hash) and returns the
   // invitation entity. Consumed by the admin module to register the admin.
   async getValidInvitation(rawToken: string): Promise<AdminInvitation> {
+    if (!rawToken) {
+      throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
+    }
+
     const invitation =
       await this.adminInvitationRepository.findByUuid(rawToken);
 
