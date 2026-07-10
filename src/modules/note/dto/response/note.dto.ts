@@ -1,5 +1,10 @@
 import { Expose } from 'class-transformer';
 
+// ============================================================================
+//                                    LEGACY
+//         Module outside Lot 1 scope (future module) - entirely legacy
+// ============================================================================
+
 export class NoteResponseDto {
   @Expose()
   id: number;

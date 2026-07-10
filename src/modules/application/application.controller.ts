@@ -28,9 +28,17 @@ import { IAuthenticatedRequest } from 'src/shared/types/request.types';
 export class ApplicationController {
   constructor(private readonly applicationService: ApplicationService) {}
 
-  // =============================================================================
-  //                               CREATE
-  // =============================================================================
+  // ==========================================================================
+  //                                 REFACTORED
+  //    New code compliant with the Candidature refactor (Lot 1 - CAND-xxx)
+  // ==========================================================================
+
+  // ==========================================================================
+  //                                   LEGACY
+  //    Old code - move above to REFACTORED when reused/adapted, else delete
+  // ==========================================================================
+
+  // --------------------------------- CREATE ---------------------------------
 
   @Post()
   @SerializeWith(ApplicationResponseDto)
@@ -41,9 +49,7 @@ export class ApplicationController {
     return await this.applicationService.create(req.user.sub, dto);
   }
 
-  // =============================================================================
-  //                               UPDATE
-  // =============================================================================
+  // --------------------------------- UPDATE ---------------------------------
 
   @Patch(':id')
   @SerializeWith(ApplicationResponseDto)
@@ -55,9 +61,7 @@ export class ApplicationController {
     return await this.applicationService.update(id, req.user.sub, dto);
   }
 
-  // =============================================================================
-  //                               DELETE
-  // =============================================================================
+  // --------------------------------- DELETE ---------------------------------
 
   @Delete(':id')
   @HttpCode(204)
@@ -69,9 +73,7 @@ export class ApplicationController {
     await this.applicationService.delete(id, req.user.sub);
   }
 
-  // =============================================================================
-  //                               FIND
-  // =============================================================================
+  // ---------------------------------- FIND ----------------------------------
 
   @Get()
   @SerializeWith(PaginatedApplicationResponseDto)

@@ -6,9 +6,12 @@ import { PrismaService } from 'prisma/prisma.service';
 export class ApplicationHistoryRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  // =============================================================================
-  //                               CREATE
-  // =============================================================================
+  // ==========================================================================
+  //                                   LEGACY
+  //        Module outside Lot 1 scope (future module) - entirely legacy
+  // ==========================================================================
+
+  // --------------------------------- CREATE ---------------------------------
 
   async create(
     data: Prisma.ApplicationHistoryUncheckedCreateInput,
@@ -19,9 +22,7 @@ export class ApplicationHistoryRepository {
     return await client.applicationHistory.create({ data });
   }
 
-  // =============================================================================
-  //                               UPDATE
-  // =============================================================================
+  // --------------------------------- UPDATE ---------------------------------
 
   async update(
     id: number,
@@ -36,9 +37,7 @@ export class ApplicationHistoryRepository {
     });
   }
 
-  // =============================================================================
-  //                               DELETE
-  // =============================================================================
+  // --------------------------------- DELETE ---------------------------------
 
   async delete(id: number): Promise<ApplicationHistory> {
     return await this.prismaService.applicationHistory.delete({
@@ -46,9 +45,7 @@ export class ApplicationHistoryRepository {
     });
   }
 
-  // =============================================================================
-  //                               FIND
-  // =============================================================================
+  // ---------------------------------- FIND ----------------------------------
 
   async findAllByApplicationId(
     applicationId: number,

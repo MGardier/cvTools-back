@@ -7,9 +7,17 @@ import { IApplicationFindAllOptions } from 'src/shared/types/repository.types';
 export class ApplicationRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  // =============================================================================
-  //                               CREATE
-  // =============================================================================
+  // ==========================================================================
+  //                                 REFACTORED
+  //    New code compliant with the Candidature refactor (Lot 1 - CAND-xxx)
+  // ==========================================================================
+
+  // ==========================================================================
+  //                                   LEGACY
+  //    Old code - move above to REFACTORED when reused/adapted, else delete
+  // ==========================================================================
+
+  // --------------------------------- CREATE ---------------------------------
 
   async create(
     data: Prisma.ApplicationUncheckedCreateInput,
@@ -20,9 +28,7 @@ export class ApplicationRepository {
     return await client.application.create({ data });
   }
 
-  // =============================================================================
-  //                               UPDATE
-  // =============================================================================
+  // --------------------------------- UPDATE ---------------------------------
 
   async update(
     id: number,
@@ -37,9 +43,7 @@ export class ApplicationRepository {
     });
   }
 
-  // =============================================================================
-  //                               DELETE
-  // =============================================================================
+  // --------------------------------- DELETE ---------------------------------
 
   async delete(id: number): Promise<Application> {
     return await this.prismaService.application.delete({
@@ -47,9 +51,7 @@ export class ApplicationRepository {
     });
   }
 
-  // =============================================================================
-  //                               FIND
-  // =============================================================================
+  // ---------------------------------- FIND ----------------------------------
 
   async findAllByUserId(
     userId: number,
@@ -134,9 +136,7 @@ export class ApplicationRepository {
     });
   }
 
-  // =============================================================================
-  //                               COUNT
-  // =============================================================================
+  // --------------------------------- COUNT ----------------------------------
 
   async countByStatusForUser(
     userId: number,

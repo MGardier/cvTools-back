@@ -26,9 +26,12 @@ import { IAuthenticatedRequest } from 'src/shared/types/request.types';
 export class NoteController {
   constructor(private readonly noteService: NoteService) {}
 
-  // =============================================================================
-  //                               CREATE
-  // =============================================================================
+  // ==========================================================================
+  //                                   LEGACY
+  //        Module outside Lot 1 scope (future module) - entirely legacy
+  // ==========================================================================
+
+  // --------------------------------- CREATE ---------------------------------
 
   @Post()
   @SerializeWith(NoteResponseDto)
@@ -40,9 +43,7 @@ export class NoteController {
     return await this.noteService.create(applicationId, req.user.sub, dto);
   }
 
-  // =============================================================================
-  //                               UPDATE
-  // =============================================================================
+  // --------------------------------- UPDATE ---------------------------------
 
   @Patch(':id')
   @SerializeWith(NoteResponseDto)
@@ -55,9 +56,7 @@ export class NoteController {
     return await this.noteService.update(id, applicationId, req.user.sub, dto);
   }
 
-  // =============================================================================
-  //                               DELETE
-  // =============================================================================
+  // --------------------------------- DELETE ---------------------------------
 
   @Delete(':id')
   @HttpCode(204)
@@ -70,9 +69,7 @@ export class NoteController {
     await this.noteService.delete(id, applicationId, req.user.sub);
   }
 
-  // =============================================================================
-  //                               FIND
-  // =============================================================================
+  // ---------------------------------- FIND ----------------------------------
 
   @Get()
   @SerializeWith(NoteResponseDto)

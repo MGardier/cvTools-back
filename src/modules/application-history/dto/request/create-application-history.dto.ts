@@ -9,6 +9,11 @@ import {
 import { Type } from 'class-transformer';
 import { ApplicationStatus } from '@prisma/client';
 
+// ============================================================================
+//                                    LEGACY
+//         Module outside Lot 1 scope (future module) - entirely legacy
+// ============================================================================
+
 export class CreateApplicationHistoryRequestDto {
   @IsNotEmpty({ message: 'La description est requise' })
   @IsString({ message: 'La description doit être une chaîne de caractères' })

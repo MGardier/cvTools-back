@@ -3,6 +3,11 @@ import { CreateApplicationRequestDto } from './create-application.dto';
 import { IsBoolean, IsDate, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
+// ============================================================================
+//                                    LEGACY
+//     Old code - move above to REFACTORED when reused/adapted, else delete
+// ============================================================================
+
 export class UpdateApplicationRequestDto extends PartialType(
   OmitType(CreateApplicationRequestDto, [
     'contactIds',
@@ -18,9 +23,7 @@ export class UpdateApplicationRequestDto extends PartialType(
   @IsBoolean({ message: 'isFavorite doit être un booléen.' })
   isFavorite?: boolean;
 
-  // =============================================================================
-  //                        OPTIONAL NESTED OBJECT
-  // =============================================================================
+  // ------------------------- OPTIONAL NESTED OBJECT -------------------------
 
   @IsOptional()
   @IsBoolean({ message: 'disconnectAddress doit être un booléen.' })

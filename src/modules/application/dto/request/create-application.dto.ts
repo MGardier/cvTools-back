@@ -23,10 +23,13 @@ import {
 } from '@prisma/client';
 import { AddressInputDto } from 'src/modules/address/dto/request/create-address.dto';
 
+// ============================================================================
+//                                    LEGACY
+//     Old code - move above to REFACTORED when reused/adapted, else delete
+// ============================================================================
+
 export class CreateApplicationRequestDto {
-  // =============================================================================
-  //                            STRING FIELDS
-  // =============================================================================
+  // ----------------------------- STRING FIELDS ------------------------------
 
   @IsNotEmpty({ message: 'Le titre ne peut pas être vide.' })
   @IsString({ message: 'Le titre doit être une chaîne de caractères.' })
@@ -58,9 +61,7 @@ export class CreateApplicationRequestDto {
   @IsString({ message: 'La description doit être une chaîne de caractères.' })
   description?: string;
 
-  // =============================================================================
-  //                            INTEGER FIELDS
-  // =============================================================================
+  // ----------------------------- INTEGER FIELDS -----------------------------
 
   @IsOptional()
   @IsInt({ message: 'Le salaire minimum doit être un nombre entier.' })
@@ -72,18 +73,14 @@ export class CreateApplicationRequestDto {
   @IsPositive({ message: 'Le salaire maximum doit être positif.' })
   salaryMax?: number;
 
-  // =============================================================================
-  //                             DATE FIELDS
-  // =============================================================================
+  // ------------------------------ DATE FIELDS -------------------------------
 
   @IsOptional()
   @IsDate({ message: 'La date de publication doit être une date valide.' })
   @Type(() => Date)
   publishedAt?: Date;
 
-  // =============================================================================
-  //                             ENUM FIELDS
-  // =============================================================================
+  // ------------------------------ ENUM FIELDS -------------------------------
 
   @IsNotEmpty({ message: 'Le jobboard ne peut pas être vide.' })
   @IsEnum(Jobboard, {
@@ -127,9 +124,7 @@ export class CreateApplicationRequestDto {
   })
   compatibility?: CompatibilityJob;
 
-  // =============================================================================
-  //                        OPTIONAL NESTED OBJECT
-  // =============================================================================
+  // ------------------------- OPTIONAL NESTED OBJECT -------------------------
 
   @IsOptional()
   @ValidateNested()

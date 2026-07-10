@@ -11,6 +11,11 @@ import { ApplicationStatus, Jobboard } from '@prisma/client';
 import { PaginationDto } from 'src/shared/dto/pagination.dto';
 import { EApplicationSortField } from '../../types';
 
+// ============================================================================
+//                                    LEGACY
+//     Old code - move above to REFACTORED when reused/adapted, else delete
+// ============================================================================
+
 export class FindAllApplicationRequestDto extends PaginationDto {
   @IsOptional()
   @IsEnum(Jobboard)

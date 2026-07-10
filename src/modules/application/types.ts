@@ -1,5 +1,15 @@
 import { Application, Address, Skill, Contact } from '@prisma/client';
 
+// ============================================================================
+//                                  REFACTORED
+//     New code compliant with the Candidature refactor (Lot 1 - CAND-xxx)
+// ============================================================================
+
+// ============================================================================
+//                                    LEGACY
+//     Old code - move above to REFACTORED when reused/adapted, else delete
+// ============================================================================
+
 export type TApplicationWithAddress = Application & { address: Address | null };
 
 export type TApplicationWithAddressAndSkills = TApplicationWithAddress & {
