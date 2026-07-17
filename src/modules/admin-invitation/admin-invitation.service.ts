@@ -27,7 +27,6 @@ export class AdminInvitationService {
   // =============================================================================
 
   async createInvitation(email: string): Promise<{ rawToken: string }> {
-  
     const normalizedEmail = email.trim().toLowerCase();
 
     const activeAdmin = await this.userService.findActiveAdmin();

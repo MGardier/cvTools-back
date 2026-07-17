@@ -26,5 +26,4 @@ export enum EApplicationSortField {
   APPLIED_AT = 'appliedAt',
   CURRENT_STATUS = 'currentStatus',
   TITLE = 'title',
-  JOBBOARD = 'jobboard',
 }

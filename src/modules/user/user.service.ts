@@ -167,19 +167,19 @@ export class UserService {
   }
 
   private __mapStatusToCategory(status: ApplicationStatus): THomeCountCategory {
+    // Minimal mapping to the 8 refactored statuses (Lot 1 - CAND-007): the
+    // 'interview' category is no longer produced (interviews will move to a
+    // dedicated module) and the home rework is outside the refactor scope.
     switch (status) {
       case ApplicationStatus.APPLIED:
-      case ApplicationStatus.FIRST_CONTACT:
+      case ApplicationStatus.IN_PROGRESS:
         return 'inProgress';
+      case ApplicationStatus.TO_PROCESS:
       case ApplicationStatus.TO_APPLY:
       case ApplicationStatus.OFFER_RECEIVED:
         return 'toApply';
-      case ApplicationStatus.FIRST_INTERVIEW:
-      case ApplicationStatus.FOLLOW_UP_INTERVIEW:
-        return 'interview';
       case ApplicationStatus.REJECTED:
-      case ApplicationStatus.GHOSTED:
-      case ApplicationStatus.WITHDRAWN:
+      case ApplicationStatus.ABANDONED:
       case ApplicationStatus.ACCEPTED:
         return 'finished';
     }

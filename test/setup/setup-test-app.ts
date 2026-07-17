@@ -12,9 +12,9 @@ import { GoogleOauthGuard } from 'src/shared/guards/google-oauth.guard';
 import { GithubOauthGuard } from 'src/shared/guards/github-oauth.guard';
 import { IMockUserRef } from './types';
 
-import * as session from 'express-session';
-import * as cookieParser from 'cookie-parser';
-import * as passport from 'passport';
+import session from 'express-session';
+import cookieParser from 'cookie-parser';
+import passport from 'passport';
 
 export const oauthMockUserRef: IMockUserRef = { current: {} };
 

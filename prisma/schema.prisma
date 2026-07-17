@@ -283,22 +283,38 @@ enum ExperienceLevel {
 }
 
 enum RemotePolicy {
-  FULL
-  HYBRID
+  NOT_SPECIFIED
   ONSITE
+  HYBRID
+  FULL
 }
 
 enum ApplicationStatus {
+  TO_PROCESS
   TO_APPLY
   APPLIED
-  FIRST_CONTACT
-  FIRST_INTERVIEW
-  FOLLOW_UP_INTERVIEW
+  IN_PROGRESS
   OFFER_RECEIVED
   ACCEPTED
   REJECTED
-  GHOSTED
-  WITHDRAWN
+  ABANDONED
+}
+
+enum ApplicationType {
+  CLASSIC_OFFER
+  SPONTANEOUS
+  NETWORKING
+}
+
+enum CreationMode {
+  MANUAL
+}
+
+enum Completeness {
+  DRAFT
+  MINIMAL
+  USABLE
+  COMPLETE
 }
 
 enum CompatibilityJob {
@@ -315,34 +331,42 @@ model Application {
   // Int
   id           Int       @id @default(autoincrement())
 
-  // String
-  apiOfferId   String?   @map("api_offer_id") @db.VarChar(150)
-  title        String    @db.VarChar(100)
+  // String — identification (all optional: "at least one of" rule lives in the DTO)
+  title        String?   @db.VarChar(100)
   company      String?   @db.VarChar(100)
-  url          String    @db.Text
-  description  String?   @db.Text
+  subject      String?   @db.VarChar(150)
+  url          String?   @db.Text
+  source       String?   @db.VarChar(100)
+
+  // String — structured description (CAND-005)
+  descriptionSummary     String?  @map("description_summary") @db.Text
+  descriptionRole        String?  @map("description_role") @db.Text
+  descriptionMissions    String?  @map("description_missions") @db.Text
+  descriptionProfile     String?  @map("description_profile") @db.Text
+  descriptionStackEnv    String?  @map("description_stack_env") @db.Text
+  descriptionAdditional  String?  @map("description_additional") @db.Text
+
+  // String — conditions (CAND-006, free text in Lot 1)
+  contractType String?   @map("contract_type") @db.VarChar(100)
+  city         String?   @db.VarChar(100)
+  postalCode   String?   @map("postal_code") @db.VarChar(5)
+  salary       String?   @db.VarChar(150)
+  experience   String?   @db.VarChar(150)
 
   // DateTime
-  publishedAt  DateTime?  @map("published_at")
   appliedAt    DateTime?  @map("applied_at")
   createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime?  @updatedAt @map("updated_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
 
   // Boolean
-  isFavorite   Boolean    @default(false) @map("is_favorite")
+  isArchived   Boolean    @default(false) @map("is_archived")
 
   // Enum
-  jobboard       Jobboard
-  apiProvider    ApiProvider?       @map("api_provider")
-  contractType   ContractType       @map("contract_type")
-  experience     ExperienceLevel?
-  remotePolicy   RemotePolicy?      @map("remote_policy")
-  compatibility  CompatibilityJob?
-  currentStatus  ApplicationStatus  @default(TO_APPLY) @map("current_status")
-
-  // Decimal
-  salaryMin    Int?   @map("salary_min")
-  salaryMax    Int?   @map("salary_max")
+  applicationType ApplicationType?   @map("application_type")
+  creationMode    CreationMode       @default(MANUAL) @map("creation_mode")
+  completeness    Completeness       @default(DRAFT)
+  currentStatus   ApplicationStatus  @default(TO_PROCESS) @map("current_status")
+  remotePolicy    RemotePolicy       @default(NOT_SPECIFIED) @map("remote_policy")
 
   // Foreign keys
   userId       Int        @map("user_id")
@@ -357,6 +381,7 @@ model Application {
 
   @@index([userId])
   @@index([currentStatus])
+  @@index([userId, isArchived])
 }
 
 // ================================================

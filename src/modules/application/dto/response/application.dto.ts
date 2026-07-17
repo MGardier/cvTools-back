@@ -1,93 +1,98 @@
-import { Expose, Type } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import {
   ApplicationStatus,
-  ApiProvider,
-  ContractType,
-  ExperienceLevel,
-  Jobboard,
+  ApplicationType,
+  Completeness,
+  CreationMode,
   RemotePolicy,
-  CompatibilityJob,
 } from '@prisma/client';
 
-import { AddressResponseDto } from 'src/modules/address/dto/response/address.dto';
-import { ContactResponseDto } from 'src/modules/contact/dto/response/contact.dto';
-import { SkillResponseDto } from 'src/modules/skill/dto/response/skill.dto';
-
 // ============================================================================
-//                                    LEGACY
-//     Old code - move above to REFACTORED when reused/adapted, else delete
+//                                 REFACTORED
+//     New code compliant with the Candidature refactor (Lot 1 - CAND-001)
 // ============================================================================
 
 export class ApplicationResponseDto {
   @Expose()
-  id: number;
+  id!: number;
+
+  // Identification
+  @Expose()
+  title!: string | null;
 
   @Expose()
-  title: string;
+  company!: string | null;
 
   @Expose()
-  url: string;
+  subject!: string | null;
 
   @Expose()
-  company: string | null;
+  url!: string | null;
 
   @Expose()
-  currentStatus: ApplicationStatus;
+  source!: string | null;
+
+  // Structured description (CAND-005)
+  @Expose()
+  descriptionSummary!: string | null;
 
   @Expose()
-  contractType: ContractType;
+  descriptionRole!: string | null;
 
   @Expose()
-  jobboard: Jobboard;
+  descriptionMissions!: string | null;
 
   @Expose()
-  isFavorite: boolean;
+  descriptionProfile!: string | null;
 
   @Expose()
-  publishedAt: Date | null;
+  descriptionStackEnv!: string | null;
 
   @Expose()
-  appliedAt: Date | null;
+  descriptionAdditional!: string | null;
+
+  // Conditions (CAND-006)
+  @Expose()
+  contractType!: string | null;
 
   @Expose()
-  createdAt: Date;
+  city!: string | null;
 
   @Expose()
-  updatedAt: Date | null;
+  postalCode!: string | null;
 
   @Expose()
-  salaryMin: number | null;
+  salary!: string | null;
 
   @Expose()
-  salaryMax: number | null;
+  experience!: string | null;
 
   @Expose()
-  apiOfferId: string | null;
+  remotePolicy!: RemotePolicy;
+
+  // Lifecycle
+  @Expose()
+  applicationType!: ApplicationType | null;
 
   @Expose()
-  description: string | null;
+  creationMode!: CreationMode;
 
   @Expose()
-  apiProvider: ApiProvider | null;
+  completeness!: Completeness;
 
   @Expose()
-  experience: ExperienceLevel | null;
+  currentStatus!: ApplicationStatus;
 
   @Expose()
-  remotePolicy: RemotePolicy | null;
+  isArchived!: boolean;
+
+  // Dates
+  @Expose()
+  appliedAt!: Date | null;
 
   @Expose()
-  compatibility: CompatibilityJob | null;
+  createdAt!: Date;
 
   @Expose()
-  @Type(() => AddressResponseDto)
-  address: AddressResponseDto | null;
-
-  @Expose()
-  @Type(() => SkillResponseDto)
-  skills?: SkillResponseDto[];
-
-  @Expose()
-  @Type(() => ContactResponseDto)
-  contacts?: ContactResponseDto[];
+  updatedAt!: Date;
 }

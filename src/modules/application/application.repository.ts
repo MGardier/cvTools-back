@@ -12,11 +12,6 @@ export class ApplicationRepository {
   //    New code compliant with the Candidature refactor (Lot 1 - CAND-xxx)
   // ==========================================================================
 
-  // ==========================================================================
-  //                                   LEGACY
-  //    Old code - move above to REFACTORED when reused/adapted, else delete
-  // ==========================================================================
-
   // --------------------------------- CREATE ---------------------------------
 
   async create(
@@ -27,6 +22,11 @@ export class ApplicationRepository {
 
     return await client.application.create({ data });
   }
+
+  // ==========================================================================
+  //                                   LEGACY
+  //    Old code - move above to REFACTORED when reused/adapted, else delete
+  // ==========================================================================
 
   // --------------------------------- UPDATE ---------------------------------
 
@@ -59,10 +59,8 @@ export class ApplicationRepository {
   ) {
     const where: Prisma.ApplicationWhereInput = { userId };
 
-    if (options.jobboard !== undefined) where.jobboard = options.jobboard;
     if (options.currentStatus !== undefined)
       where.currentStatus = options.currentStatus;
-    if (options.isFavorite !== undefined) where.isFavorite = options.isFavorite;
     if (options.company)
       where.company = { contains: options.company, mode: 'insensitive' };
     if (options.createdAt) where.createdAt = { gte: options.createdAt };

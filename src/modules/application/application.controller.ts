@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
   Delete,
   Body,
   Param,
@@ -15,7 +14,6 @@ import {
 import { ApplicationService } from './application.service';
 import { CreateApplicationRequestDto } from './dto/request/create-application.dto';
 import { FindAllApplicationRequestDto } from './dto/request/find-all-application.dto';
-import { UpdateApplicationRequestDto } from './dto/request/update-application.dto';
 import { ApplicationResponseDto } from './dto/response/application.dto';
 import { PaginatedApplicationResponseDto } from './dto/response/paginated-application.dto';
 import {
@@ -33,11 +31,6 @@ export class ApplicationController {
   //    New code compliant with the Candidature refactor (Lot 1 - CAND-xxx)
   // ==========================================================================
 
-  // ==========================================================================
-  //                                   LEGACY
-  //    Old code - move above to REFACTORED when reused/adapted, else delete
-  // ==========================================================================
-
   // --------------------------------- CREATE ---------------------------------
 
   @Post()
@@ -49,17 +42,10 @@ export class ApplicationController {
     return await this.applicationService.create(req.user.sub, dto);
   }
 
-  // --------------------------------- UPDATE ---------------------------------
-
-  @Patch(':id')
-  @SerializeWith(ApplicationResponseDto)
-  async update(
-    @Req() req: IAuthenticatedRequest,
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateApplicationRequestDto,
-  ): Promise<ApplicationResponseDto> {
-    return await this.applicationService.update(id, req.user.sub, dto);
-  }
+  // ==========================================================================
+  //                                   LEGACY
+  //    Old code - move above to REFACTORED when reused/adapted, else delete
+  // ==========================================================================
 
   // --------------------------------- DELETE ---------------------------------
 
