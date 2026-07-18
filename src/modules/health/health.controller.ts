@@ -7,6 +7,7 @@ import {
 } from '@nestjs/terminus';
 import { PrismaService } from 'prisma/prisma.service';
 import { Public } from 'src/shared/decorators/public.decorator';
+import { SkipSerialize } from 'src/shared/decorators/serialize.decorator';
 
 @Controller('health')
 export class HealthController {
@@ -17,6 +18,7 @@ export class HealthController {
   ) {}
 
   @Public()
+  @SkipSerialize()
   @Get()
   @HealthCheck()
   check(): Promise<HealthCheckResult> {
