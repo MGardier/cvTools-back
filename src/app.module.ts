@@ -15,20 +15,15 @@ import { ResponseInterceptor } from './app/interceptors/response.interceptor';
 import { SerializeInterceptor } from './app/interceptors/serialize.interceptor';
 import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
 import { CacheManagerModule } from './modules/cache/cache-manager.module';
-import { AddressModule } from './modules/address/address.module';
 import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
 import { ApplicationModule } from './modules/application/application.module';
-import { ContactModule } from './modules/contact/contact.module';
-import { SkillModule } from './modules/skill/skill.module';
 import { ScraperModule } from './modules/scraper/scraper.module';
-import { NoteModule } from './modules/note/note.module';
-import { TodoModule } from './modules/todo/todo.module';
-import { ApplicationHistoryModule } from './modules/application-history/application-history.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { OfferModule } from './modules/offer/offer.module';
 import { CityModule } from './modules/city/city.module';
 import { AdminInvitationModule } from './modules/admin-invitation/admin-invitation.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -45,18 +40,13 @@ import { AdminModule } from './modules/admin/admin.module';
     EmailModule,
     UserTokenModule,
     JwtManagerModule,
-    AddressModule,
     ApplicationModule,
-    ContactModule,
-    SkillModule,
     ScraperModule,
-    NoteModule,
-    TodoModule,
-    ApplicationHistoryModule,
     OfferModule,
     CityModule,
     AdminInvitationModule,
     AdminModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [

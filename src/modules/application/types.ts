@@ -1,29 +1,94 @@
-import { Application, Address, Skill, Contact } from '@prisma/client';
+// RPC envelope returned by ms-applications handlers.
+export interface IRpcSuccessResponse<TData> {
+  success: true;
+  data: TData;
+}
 
-// ============================================================================
-//                                  REFACTORED
-//     New code compliant with the Candidature refactor (Lot 1 - CAND-xxx)
-// ============================================================================
+export interface IRpcErrorResponse {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    context?: Record<string, unknown>;
+    timestamp: string;
+  };
+}
 
-// ============================================================================
-//                                    LEGACY
-//     Old code - move above to REFACTORED when reused/adapted, else delete
-// ============================================================================
+export type TRpcResponse<TData> =
+  | IRpcSuccessResponse<TData>
+  | IRpcErrorResponse;
 
-export type TApplicationWithAddress = Application & { address: Address | null };
+// Mirrors of the ms-applications enums (the domain source of truth lives there).
+export type TApplicationType = 'CLASSIC_OFFER' | 'SPONTANEOUS' | 'NETWORKING';
 
-export type TApplicationWithAddressAndSkills = TApplicationWithAddress & {
-  skills: Skill[];
-};
+export type TApplicationStatus =
+  | 'TO_REVIEW'
+  | 'TO_APPLY'
+  | 'APPLIED'
+  | 'IN_PROGRESS'
+  | 'OFFER_RECEIVED'
+  | 'ACCEPTED'
+  | 'REJECTED'
+  | 'ABANDONED';
 
-export type TApplicationDetail = TApplicationWithAddress & {
-  skills: Skill[];
-  contacts: Contact[];
-};
+export type TApplicationCompleteness =
+  | 'DRAFT'
+  | 'MINIMAL'
+  | 'USABLE'
+  | 'COMPLETE';
 
-export enum EApplicationSortField {
-  CREATED_AT = 'createdAt',
-  APPLIED_AT = 'appliedAt',
-  CURRENT_STATUS = 'currentStatus',
-  TITLE = 'title',
+export type TCreationMode = 'MANUAL';
+
+export type TRemoteType =
+  | 'NOT_SPECIFIED'
+  | 'ON_SITE'
+  | 'HYBRID'
+  | 'FULLY_REMOTE';
+
+export type TStackCategory =
+  | 'LANGUAGES'
+  | 'FRAMEWORKS'
+  | 'DATABASES'
+  | 'DEVOPS'
+  | 'LIBRARIES'
+  | 'METHODS_PRACTICES'
+  | 'OTHER';
+
+// Mirror of the ms-applications IApplicationResponse contract.
+export interface IApplicationResponse {
+  publicId: string;
+  companyName: string | null;
+  jobTitle: string | null;
+  subject: string | null;
+  url: string | null;
+  source: string | null;
+  type: TApplicationType | null;
+  status: TApplicationStatus;
+  completeness: TApplicationCompleteness;
+  creationMode: TCreationMode;
+  isArchived: boolean;
+  isStackToComplete: boolean;
+  appliedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  conditions: {
+    contractType: string | null;
+    city: string | null;
+    postalCode: string | null;
+    remoteType: TRemoteType;
+    salary: string | null;
+    requiredExperience: string | null;
+  };
+  description: {
+    quickOverview: string | null;
+    role: string | null;
+    missions: string | null;
+    desiredProfile: string | null;
+    techEnvironment: string | null;
+    additionalInfo: string | null;
+  };
+  stack: {
+    primary: { name: string; position: number }[];
+    detailed: { name: string; category: TStackCategory }[];
+  };
 }

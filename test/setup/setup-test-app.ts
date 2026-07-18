@@ -36,6 +36,12 @@ export async function setupTestApp(): Promise<INestApplication> {
       reSendAccountConfirmationLink: jest.fn(),
       sendResetPasswordLink: jest.fn(),
     })
+    .overrideProvider('APPLICATIONS_SERVICE')
+    .useValue({
+      connect: jest.fn(),
+      send: jest.fn(),
+      emit: jest.fn(),
+    })
     .overrideGuard(GoogleOauthGuard)
     .useValue(mockOAuthGuard)
     .overrideGuard(GithubOauthGuard)

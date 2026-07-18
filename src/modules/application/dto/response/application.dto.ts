@@ -1,57 +1,15 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+
 import {
-  ApplicationStatus,
-  ApplicationType,
-  Completeness,
-  CreationMode,
-  RemotePolicy,
-} from '@prisma/client';
+  TApplicationCompleteness,
+  TApplicationStatus,
+  TApplicationType,
+  TCreationMode,
+  TRemoteType,
+  TStackCategory,
+} from '../../types';
 
-// ============================================================================
-//                                 REFACTORED
-//     New code compliant with the Candidature refactor (Lot 1 - CAND-001)
-// ============================================================================
-
-export class ApplicationResponseDto {
-  @Expose()
-  id!: number;
-
-  // Identification
-  @Expose()
-  title!: string | null;
-
-  @Expose()
-  company!: string | null;
-
-  @Expose()
-  subject!: string | null;
-
-  @Expose()
-  url!: string | null;
-
-  @Expose()
-  source!: string | null;
-
-  // Structured description (CAND-005)
-  @Expose()
-  descriptionSummary!: string | null;
-
-  @Expose()
-  descriptionRole!: string | null;
-
-  @Expose()
-  descriptionMissions!: string | null;
-
-  @Expose()
-  descriptionProfile!: string | null;
-
-  @Expose()
-  descriptionStackEnv!: string | null;
-
-  @Expose()
-  descriptionAdditional!: string | null;
-
-  // Conditions (CAND-006)
+export class ApplicationConditionsResponseDto {
   @Expose()
   contractType!: string | null;
 
@@ -62,37 +20,116 @@ export class ApplicationResponseDto {
   postalCode!: string | null;
 
   @Expose()
+  remoteType!: TRemoteType;
+
+  @Expose()
   salary!: string | null;
 
   @Expose()
-  experience!: string | null;
+  requiredExperience!: string | null;
+}
+
+export class ApplicationDescriptionResponseDto {
+  @Expose()
+  quickOverview!: string | null;
 
   @Expose()
-  remotePolicy!: RemotePolicy;
-
-  // Lifecycle
-  @Expose()
-  applicationType!: ApplicationType | null;
+  role!: string | null;
 
   @Expose()
-  creationMode!: CreationMode;
+  missions!: string | null;
 
   @Expose()
-  completeness!: Completeness;
+  desiredProfile!: string | null;
 
   @Expose()
-  currentStatus!: ApplicationStatus;
+  techEnvironment!: string | null;
+
+  @Expose()
+  additionalInfo!: string | null;
+}
+
+export class ApplicationStackPrimaryItemResponseDto {
+  @Expose()
+  name!: string;
+
+  @Expose()
+  position!: number;
+}
+
+export class ApplicationStackDetailedItemResponseDto {
+  @Expose()
+  name!: string;
+
+  @Expose()
+  category!: TStackCategory;
+}
+
+export class ApplicationStackResponseDto {
+  @Expose()
+  @Type(() => ApplicationStackPrimaryItemResponseDto)
+  primary!: ApplicationStackPrimaryItemResponseDto[];
+
+  @Expose()
+  @Type(() => ApplicationStackDetailedItemResponseDto)
+  detailed!: ApplicationStackDetailedItemResponseDto[];
+}
+
+export class ApplicationResponseDto {
+  @Expose()
+  publicId!: string;
+
+  @Expose()
+  companyName!: string | null;
+
+  @Expose()
+  jobTitle!: string | null;
+
+  @Expose()
+  subject!: string | null;
+
+  @Expose()
+  url!: string | null;
+
+  @Expose()
+  source!: string | null;
+
+  @Expose()
+  type!: TApplicationType | null;
+
+  @Expose()
+  status!: TApplicationStatus;
+
+  @Expose()
+  completeness!: TApplicationCompleteness;
+
+  @Expose()
+  creationMode!: TCreationMode;
 
   @Expose()
   isArchived!: boolean;
 
-  // Dates
   @Expose()
-  appliedAt!: Date | null;
+  isStackToComplete!: boolean;
 
   @Expose()
-  createdAt!: Date;
+  appliedAt!: string | null;
 
   @Expose()
-  updatedAt!: Date;
+  createdAt!: string;
+
+  @Expose()
+  updatedAt!: string;
+
+  @Expose()
+  @Type(() => ApplicationConditionsResponseDto)
+  conditions!: ApplicationConditionsResponseDto;
+
+  @Expose()
+  @Type(() => ApplicationDescriptionResponseDto)
+  description!: ApplicationDescriptionResponseDto;
+
+  @Expose()
+  @Type(() => ApplicationStackResponseDto)
+  stack!: ApplicationStackResponseDto;
 }

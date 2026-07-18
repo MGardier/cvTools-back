@@ -1,11 +1,23 @@
-import type {
-  ContractType,
-  ExperienceLevel,
-  Jobboard,
-  RemotePolicy,
-} from '@prisma/client';
-
 /********* TYPES *********/
+
+// Standalone unions (the Prisma enums moved out with the application domain):
+// values mirror APPLICATION_JSON_SCHEMA and extractedApplicationSchema.
+export type TContractType = 'CDI' | 'CDD' | 'FREELANCE' | 'ALTERNANCE';
+
+export type TExperienceLevel = 'JUNIOR' | 'MID' | 'SENIOR';
+
+export type TRemotePolicy = 'FULL' | 'HYBRID' | 'ONSITE';
+
+export type TJobboard =
+  | 'LINKEDIN'
+  | 'INDEED'
+  | 'WTTJ'
+  | 'FRANCE_TRAVAIL'
+  | 'GLASSDOOR'
+  | 'APEC'
+  | 'HELLO_WORK'
+  | 'METEO_JOB'
+  | 'UNKNOW';
 
 export type TExtractStructureTextParams = {
   fetchText?: string;
@@ -28,12 +40,12 @@ export type TExtractedApplication = {
   title: string;
   company?: string | null;
   description?: string | null;
-  contractType?: ContractType;
+  contractType?: TContractType;
   salaryMin?: number | null;
   salaryMax?: number | null;
-  experience?: ExperienceLevel | null;
-  remotePolicy?: RemotePolicy | null;
-  jobboard?: Jobboard;
+  experience?: TExperienceLevel | null;
+  remotePolicy?: TRemotePolicy | null;
+  jobboard?: TJobboard;
   isSuccess: boolean;
   publishedAt?: string;
   skills?: string[];
