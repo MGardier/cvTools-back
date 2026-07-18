@@ -17,9 +17,20 @@ import { RabbitmqService } from './rabbitmq.service';
           },
         },
       },
+      {
+        name: 'APPLICATIONS_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBITMQ_URL || 'amqp://root:root@localhost:5672'],
+          queue: 'applications_queue',
+          queueOptions: {
+            durable: true,
+          },
+        },
+      },
     ]),
   ],
   providers: [RabbitmqService],
-  exports: [RabbitmqService],
+  exports: [RabbitmqService, ClientsModule],
 })
 export class RabbitmqModule {}

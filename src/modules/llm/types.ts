@@ -1,5 +1,4 @@
 import type {
-  Address,
   ContractType,
   ExperienceLevel,
   Jobboard,
@@ -14,12 +13,14 @@ export type TExtractStructureTextParams = {
   sourceUrl?: string;
 };
 
-export type TExtractedAddress = Partial<
-  Pick<
-    Address,
-    'city' | 'postalCode' | 'street' | 'complement' | 'streetNumber'
-  >
->;
+// Standalone shape (the Address model moved out with the application domain).
+export type TExtractedAddress = {
+  city?: string | null;
+  postalCode?: string | null;
+  street?: string | null;
+  complement?: string | null;
+  streetNumber?: string | null;
+};
 
 // Standalone shape (LLM extraction is outside the Candidature refactor Lot 1):
 // mirrors the pre-refactor Application columns, no longer present on the model.

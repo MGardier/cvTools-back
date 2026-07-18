@@ -1,8 +1,5 @@
 import { Expose, Type } from 'class-transformer';
 
-import { ApplicationResponseDto } from 'src/modules/application/dto/response/application.dto';
-import { TodoResponseDto } from 'src/modules/todo/dto/response/todo.dto';
-
 export class ApplicationCountsDto {
   @Expose()
   inProgress!: number;
@@ -25,27 +22,13 @@ export class TodoCountsDto {
   inProgress!: number;
 }
 
-export class RecentApplicationTodoCountsDto {
-  @Expose()
-  toMake!: number;
+// TODO: reshape from ms-applications data once the recent-todos pattern exists
+// (application domain delegated, list is always empty for now).
+export class HomeRecentTodoDto {}
 
-  @Expose()
-  inProgress!: number;
-
-  @Expose()
-  total!: number;
-}
-
-export class HomeRecentTodoDto extends TodoResponseDto {
-  @Expose()
-  company!: string | null;
-}
-
-export class HomeRecentApplicationDto extends ApplicationResponseDto {
-  @Expose()
-  @Type(() => RecentApplicationTodoCountsDto)
-  todoCounts!: RecentApplicationTodoCountsDto;
-}
+// TODO: reshape from ms-applications data once the recent-applications pattern
+// exists (application domain delegated, list is always empty for now).
+export class HomeRecentApplicationDto {}
 
 export class UserHomeResponseDto {
   @Expose()
