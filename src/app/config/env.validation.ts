@@ -1,9 +1,9 @@
 import { Logger } from '@nestjs/common';
 import { envSchema, EnvConfig } from './env.schema';
 
-export function validateEnv(): EnvConfig {
+export function validateEnv(config: Record<string, unknown>): EnvConfig {
   const logger = new Logger('EnvValidation');
-  const result = envSchema.safeParse(process.env);
+  const result = envSchema.safeParse(config);
 
   if (!result.success) {
     const errorMessages = result.error.issues.map(

@@ -1,6 +1,6 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AuthGuard, IAuthModuleOptions } from '@nestjs/passport';
+import { AuthGuard, AuthGuardAuthenticateOptions } from '@nestjs/passport';
 import { Request, Response } from 'express';
 
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
@@ -40,7 +40,7 @@ export class GithubAdminOauthGuard extends AuthGuard('github-admin') {
     return (await super.canActivate(context)) as boolean;
   }
 
-  override getAuthenticateOptions(): IAuthModuleOptions {
+  override getAuthenticateOptions(): AuthGuardAuthenticateOptions {
     return { session: false };
   }
 
@@ -63,6 +63,6 @@ export class GithubAdminOauthGuard extends AuthGuard('github-admin') {
       throw new OAuthRedirectException();
     }
 
-    return user as TUser;
+    return user;
   }
 }

@@ -1,4 +1,4 @@
-import { User } from '@prisma/client';
+import { User } from 'prisma/generated/client';
 
 export interface IAuthTokens {
   accessToken: string;

@@ -1,3 +1,4 @@
+import type { Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -27,8 +28,8 @@ const mockConfigValues: Record<string, string | number> = {
 
 describe('JwtManagerService', () => {
   let jwtManagerService: JwtManagerService;
-  let jwtService: jest.Mocked<JwtService>;
-  let configService: jest.Mocked<ConfigService>;
+  let jwtService: Mocked<JwtService>;
+  let configService: Mocked<ConfigService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -37,14 +38,14 @@ describe('JwtManagerService', () => {
         {
           provide: JwtService,
           useValue: {
-            signAsync: jest.fn().mockResolvedValue('signed_token'),
-            verifyAsync: jest.fn().mockResolvedValue(mockPayload),
+            signAsync: vi.fn().mockResolvedValue('signed_token'),
+            verifyAsync: vi.fn().mockResolvedValue(mockPayload),
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => mockConfigValues[key]),
+            get: vi.fn((key: string) => mockConfigValues[key]),
           },
         },
       ],
@@ -54,9 +55,9 @@ describe('JwtManagerService', () => {
     jwtService = module.get(JwtService);
     configService = module.get(ConfigService);
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     configService.get.mockImplementation(
-      (key: string) => mockConfigValues[key] as any,
+      (key: string) => mockConfigValues[key] as never,
     );
   });
 

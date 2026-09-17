@@ -57,7 +57,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     request: Request,
     statusCode: number,
   ): IHttpLogContext {
-    const user = request.user as { id?: string; email?: string } | undefined;
+    const user: { id?: string; email?: string } | undefined = request.user;
 
     return {
       method: request.method,
@@ -68,10 +68,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message: exception.message,
       userId: user?.id,
       body: this.sanitizeBody(request.body),
-      query:
-        Object.keys(request.query).length > 0
-          ? (request.query as Record<string, unknown>)
-          : undefined,
+      query: Object.keys(request.query).length > 0 ? request.query : undefined,
       stack: exception.stack,
     };
   }

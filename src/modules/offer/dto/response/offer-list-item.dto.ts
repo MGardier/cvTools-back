@@ -45,13 +45,13 @@ class ExperienceResponseDto {
 
 export class OfferListItemResponseDto {
   @Expose()
-  id: string;
+  id!: string;
 
   @Expose()
   externalId?: string;
 
   @Expose()
-  title: string;
+  title!: string;
 
   @Expose()
   company?: string;
@@ -71,21 +71,21 @@ export class OfferListItemResponseDto {
   remote?: ERemotePolicy;
 
   @Expose()
-  publishedAt: string;
+  publishedAt!: string;
 
   @Expose()
-  url: string;
+  url!: string;
 
   @Expose()
-  jobboard: EOfferJobboardOrigin;
+  jobboard!: EOfferJobboardOrigin;
 
   @Expose()
-  apiProvider: EOfferApiProvider;
+  apiProvider!: EOfferApiProvider;
 
   @Expose()
   @Type(() => ExperienceResponseDto)
   experience?: ExperienceResponseDto;
 
   @Expose()
-  skills: string[];
+  skills!: string[];
 }

@@ -13,7 +13,7 @@ import { SignUpRequestDto } from './dto/request/sign-up.dto';
 import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto';
 import { ResetPasswordRequestDto } from './dto/request/reset-password.dto';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
-import { LoginMethod, User, UserStatus } from '@prisma/client';
+import { LoginMethod, User, UserStatus } from 'prisma/generated/client';
 import { IAuthSession, IAuthTokens } from './types';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { UtilHash } from 'src/shared/utils/hash.util';

@@ -44,7 +44,7 @@ export class GithubAdminStrategy extends PassportStrategy(
 
       done(null, identity);
     } catch (error: unknown) {
-      done(error as Error, undefined);
+      done(error, undefined);
     }
   }
 

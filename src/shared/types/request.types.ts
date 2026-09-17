@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { User } from '@prisma/client';
+import { User } from 'prisma/generated/client';
 import { IPayloadJwt } from 'src/modules/jwt-manager/types';
 import { IRefreshTokenPayload } from 'src/shared/strategies/jwt-refresh.strategy';
 

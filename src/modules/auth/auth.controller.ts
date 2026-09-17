@@ -23,7 +23,7 @@ import {
   SerializeWith,
   SkipSerialize,
 } from 'src/shared/decorators/serialize.decorator';
-import { LoginMethod } from '@prisma/client';
+import { LoginMethod } from 'prisma/generated/client';
 import { GoogleOauthGuard } from 'src/shared/guards/google-oauth.guard';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { GithubOauthGuard } from 'src/shared/guards/github-oauth.guard';

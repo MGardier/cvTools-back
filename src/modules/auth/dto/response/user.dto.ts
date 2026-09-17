@@ -1,16 +1,16 @@
 import { Expose } from 'class-transformer';
-import { UserRoles, UserStatus } from '@prisma/client';
+import { UserRoles, UserStatus } from 'prisma/generated/client';
 
 export class UserResponseDto {
   @Expose()
-  id: number;
+  id!: number;
 
   @Expose()
-  email: string;
+  email!: string;
 
   @Expose()
-  status: UserStatus;
+  status!: UserStatus;
 
   @Expose()
-  roles: UserRoles;
+  roles!: UserRoles;
 }

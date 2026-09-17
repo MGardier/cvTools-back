@@ -5,9 +5,9 @@ import { TokenResponseDto } from './token.dto';
 export class SignInResponseDto {
   @Expose()
   @Type(() => TokenResponseDto)
-  tokens: TokenResponseDto;
+  tokens!: TokenResponseDto;
 
   @Expose()
   @Type(() => UserResponseDto)
-  user: UserResponseDto;
+  user!: UserResponseDto;
 }

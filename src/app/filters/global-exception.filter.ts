@@ -7,8 +7,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Request, Response } from 'express';
+import { Prisma } from 'prisma/generated/client';
 
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { OAuthRedirectException } from 'src/shared/exceptions/oauth-redirect.exception';
@@ -38,7 +38,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (response.headersSent) return;
 
-    if (exception instanceof PrismaClientKnownRequestError) {
+    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       return this.prismaFilter.catch(exception, host);
     }
 
@@ -70,7 +70,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   }
 
   private buildLogContext(error: Error, request: Request): IHttpLogContext {
-    const user = request.user as { id?: string } | undefined;
+    const user: { id?: string } | undefined = request.user;
 
     return {
       method: request.method,

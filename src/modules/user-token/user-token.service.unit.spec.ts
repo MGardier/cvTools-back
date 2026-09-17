@@ -1,6 +1,7 @@
+import type { Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
-import { PrismaTokenType, UserToken } from '@prisma/client';
+import { PrismaTokenType, UserToken } from 'prisma/generated/client';
 import { UserTokenService } from './user-token.service';
 import { JwtManagerService } from '../jwt-manager/jwt-manager.service';
 import { UserTokenRepository } from './user-token.repository';
@@ -12,8 +13,8 @@ import { UtilDate } from 'src/shared/utils/date.util';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { IPayloadJwt } from 'src/modules/jwt-manager/types';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('mocked-uuid-123'),
+vi.mock('uuid', () => ({
+  v4: vi.fn().mockReturnValue('mocked-uuid-123'),
 }));
 
 // =============================================================================
@@ -39,9 +40,9 @@ const mockPayload: IPayloadJwt = { sub: 1, email: 'test@test.com' };
 
 describe('UserTokenService', () => {
   let userTokenService: UserTokenService;
-  let jwtManagerService: jest.Mocked<JwtManagerService>;
-  let userTokenRepository: jest.Mocked<UserTokenRepository>;
-  let configService: jest.Mocked<ConfigService>;
+  let jwtManagerService: Mocked<JwtManagerService>;
+  let userTokenRepository: Mocked<UserTokenRepository>;
+  let configService: Mocked<ConfigService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -50,21 +51,21 @@ describe('UserTokenService', () => {
         {
           provide: JwtManagerService,
           useValue: {
-            generate: jest.fn(),
-            verify: jest.fn(),
+            generate: vi.fn(),
+            verify: vi.fn(),
           },
         },
         {
           provide: UserTokenRepository,
           useValue: {
-            create: jest.fn(),
-            findByUuid: jest.fn(),
+            create: vi.fn(),
+            findByUuid: vi.fn(),
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
         },
       ],
@@ -75,7 +76,7 @@ describe('UserTokenService', () => {
     userTokenRepository = module.get(UserTokenRepository);
     configService = module.get(ConfigService);
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // =============================================================================
@@ -99,13 +100,13 @@ describe('UserTokenService', () => {
         expiresIn,
       });
       configService.get.mockReturnValue(12);
-      jest.spyOn(UtilHash, 'hash').mockResolvedValue(hashedToken);
-      jest
-        .spyOn(UtilDate, '__convertExpiresToDate')
-        .mockReturnValue(mockExpiresAt);
-      jest
-        .spyOn(UtilRepository, 'toPrismaTokenType')
-        .mockReturnValue(PrismaTokenType.CONFIRM_ACCOUNT);
+      vi.spyOn(UtilHash, 'hash').mockResolvedValue(hashedToken);
+      vi.spyOn(UtilDate, '__convertExpiresToDate').mockReturnValue(
+        mockExpiresAt,
+      );
+      vi.spyOn(UtilRepository, 'toPrismaTokenType').mockReturnValue(
+        PrismaTokenType.CONFIRM_ACCOUNT,
+      );
 
       userTokenRepository.create.mockResolvedValue(createdUserToken);
 
@@ -154,7 +155,7 @@ describe('UserTokenService', () => {
 
       jwtManagerService.verify.mockResolvedValue(payloadWithUuid);
       userTokenRepository.findByUuid.mockResolvedValue(userToken);
-      jest.spyOn(UtilHash, 'compare').mockResolvedValue(true);
+      vi.spyOn(UtilHash, 'compare').mockResolvedValue(true);
 
       const result = await userTokenService.decodeAndGet(
         rawToken,
@@ -202,7 +203,7 @@ describe('UserTokenService', () => {
 
       jwtManagerService.verify.mockResolvedValue(payloadWithUuid);
       userTokenRepository.findByUuid.mockResolvedValue(userToken);
-      jest.spyOn(UtilHash, 'compare').mockResolvedValue(false);
+      vi.spyOn(UtilHash, 'compare').mockResolvedValue(false);
 
       await expect(
         userTokenService.decodeAndGet(rawToken, TokenType.REFRESH),

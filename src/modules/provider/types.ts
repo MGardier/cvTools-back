@@ -1,4 +1,4 @@
-import { ExternalProvider, HttpMethod, Prisma } from '@prisma/client';
+import { ExternalProvider, HttpMethod, Prisma } from 'prisma/generated/client';
 
 /********* INTERFACES *********/
 

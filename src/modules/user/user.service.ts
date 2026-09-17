@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, User } from 'prisma/generated/client';
 import { UserRepository } from './user.repository';
 import { IUpdateUser, IFindOneByOauthId, ICreateUser } from './types';
 

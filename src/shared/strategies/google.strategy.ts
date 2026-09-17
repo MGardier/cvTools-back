@@ -7,7 +7,7 @@ import {
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { User } from '@prisma/client';
+import { User } from 'prisma/generated/client';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { IGoogleProfile } from './types';
@@ -51,7 +51,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
       done(null, user);
     } catch (error: unknown) {
-      done(error as Error, undefined);
+      done(error, undefined);
     }
   }
 }

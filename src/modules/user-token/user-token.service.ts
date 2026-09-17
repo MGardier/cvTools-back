@@ -8,7 +8,7 @@ import { UserTokenRepository } from './user-token.repository';
 import { IGeneratedJwt, IPayloadJwt } from 'src/modules/jwt-manager/types';
 import { UtilRepository } from 'src/shared/utils/repository.util';
 import { UtilHash } from 'src/shared/utils/hash.util';
-import { UserToken } from '@prisma/client';
+import { UserToken } from 'prisma/generated/client';
 import { ISavedToken, IValidatedToken } from './types';
 import { UtilDate } from 'src/shared/utils/date.util';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { ExternalProvider, HttpMethod } from '@prisma/client';
+import { ExternalProvider, HttpMethod } from 'prisma/generated/client';
 import { ProviderService } from '../provider/provider.service';
 import { GeminiProvider } from './providers/gemini.provider';
 import { ILlmResponse } from './providers/types';
@@ -138,7 +138,7 @@ export class LlmService {
       return null;
     }
 
-    return validated as TExtractedApplication;
+    return validated;
   }
 
   private async __logAndTrack(

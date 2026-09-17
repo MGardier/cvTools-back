@@ -7,5 +7,5 @@ export class ResetPasswordRequestDto extends PickType(SignUpRequestDto, [
 ]) {
   @IsNotEmpty()
   @IsString()
-  token: string;
+  token!: string;
 }

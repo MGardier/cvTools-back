@@ -1,8 +1,12 @@
 import { Global, Module } from '@nestjs/common';
 
-import KeyvRedis, { Keyv } from '@keyv/redis';
+import KeyvRedis from '@keyv/redis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Keyv } from 'keyv';
+import type { Keyv as KeyvEsm } from 'keyv' with {
+  'resolution-mode': 'import',
+};
 import { CacheManagerService } from './cache-manager.service';
 
 // Le cache est une optimisation, pas une dépendance dure : si Redis est HS,
@@ -28,7 +32,7 @@ const REDIS_RECONNECT_MAX_ATTEMPTS = 5;
               url: redisUrl,
               socket: {
                 connectTimeout: REDIS_CONNECT_TIMEOUT_MS,
-                reconnectStrategy: (attempts) => {
+                reconnectStrategy: (attempts: number) => {
                   if (attempts > REDIS_RECONNECT_MAX_ATTEMPTS) {
                     return new Error('Redis: max reconnect attempts reached');
                   }
@@ -44,7 +48,7 @@ const REDIS_RECONNECT_MAX_ATTEMPTS = 5;
               namespace: 'app',
               connectionTimeout: KEYV_CONNECT_TIMEOUT_MS,
               throwOnConnectError: true,
-              throwErrors: true,
+              throwOnErrors: true,
             },
           ),
           namespace: 'app',
@@ -55,7 +59,9 @@ const REDIS_RECONNECT_MAX_ATTEMPTS = 5;
         });
 
         return {
-          stores: [redisStore],
+          // Same keyv package, but typed through its ESM declarations by the
+          // ESM-only @nestjs/cache-manager; runtime detection is duck-typed.
+          stores: [redisStore as unknown as KeyvEsm],
           ttl: configService.get<number>('CACHE_TTL', 300000),
           isGlobal: true,
         };

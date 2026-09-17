@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ProviderLogger, ProviderUsageRecord } from '@prisma/client';
+import { ProviderLogger, ProviderUsageRecord } from 'prisma/generated/client';
 import { PrismaService } from 'prisma/prisma.service';
 import { ICreateProviderLog, IUpdateProviderUsage } from './types';
 

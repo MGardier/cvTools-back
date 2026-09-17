@@ -1,6 +1,6 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AuthGuard, IAuthModuleOptions } from '@nestjs/passport';
+import { AuthGuard, AuthGuardAuthenticateOptions } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { OAuthRedirectException } from 'src/shared/exceptions/oauth-redirect.exception';
@@ -12,7 +12,7 @@ export class GoogleOauthGuard extends AuthGuard('google') {
     super();
   }
 
-  override getAuthenticateOptions(): IAuthModuleOptions {
+  override getAuthenticateOptions(): AuthGuardAuthenticateOptions {
     return { session: false };
   }
 
@@ -51,6 +51,6 @@ export class GoogleOauthGuard extends AuthGuard('google') {
       throw new OAuthRedirectException();
     }
 
-    return user as TUser;
+    return user;
   }
 }

@@ -10,7 +10,7 @@ import {
   User,
   UserRoles,
   UserStatus,
-} from '@prisma/client';
+} from 'prisma/generated/client';
 
 import { PrismaService } from 'prisma/prisma.service';
 import { UserService } from '../user/user.service';

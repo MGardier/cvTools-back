@@ -164,7 +164,7 @@ export class FranceTravailProvider implements IOfferProvider {
 
       return data.resultats ?? [];
     } catch (error) {
-      if (error?.response?.status === 204) return [];
+      if ((error as IAxiosLikeError)?.response?.status === 204) return [];
 
       this.__handleApiError(error);
     }

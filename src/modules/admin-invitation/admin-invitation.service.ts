@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AdminInvitation, Prisma } from '@prisma/client';
+import { AdminInvitation, Prisma } from 'prisma/generated/client';
 import { v4 as uuidv4 } from 'uuid';
 
 import { PrismaService } from 'prisma/prisma.service';

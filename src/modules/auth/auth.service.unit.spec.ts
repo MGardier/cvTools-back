@@ -1,3 +1,4 @@
+import type { Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   ConflictException,
@@ -12,7 +13,7 @@ import {
   UserRoles,
   UserStatus,
   UserToken,
-} from '@prisma/client';
+} from 'prisma/generated/client';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { UserTokenService } from '../user-token/user-token.service';
@@ -55,24 +56,24 @@ const makeUserToken = (overrides: Partial<UserToken> = {}): UserToken => ({
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let userService: jest.Mocked<UserService>;
-  let userTokenService: jest.Mocked<UserTokenService>;
-  let emailService: jest.Mocked<EmailService>;
-  let configService: jest.Mocked<ConfigService>;
+  let userService: Mocked<UserService>;
+  let userTokenService: Mocked<UserTokenService>;
+  let emailService: Mocked<EmailService>;
+  let configService: Mocked<ConfigService>;
 
   const mockUserService = {
-    findOneByEmail: jest.fn(),
-    findOneById: jest.fn(),
-    findOneByOauthId: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
+    findOneByEmail: vi.fn(),
+    findOneById: vi.fn(),
+    findOneByOauthId: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
   };
 
   const mockUserTokenService = {
-    decodeAndGet: jest.fn(),
-    generate: jest.fn(),
-    generateAndSave: jest.fn(),
-    remove: jest.fn(),
+    decodeAndGet: vi.fn(),
+    generate: vi.fn(),
+    generateAndSave: vi.fn(),
+    remove: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -90,15 +91,15 @@ describe('AuthService', () => {
         {
           provide: EmailService,
           useValue: {
-            sendAccountConfirmationLink: jest.fn(),
-            reSendAccountConfirmationLink: jest.fn(),
-            sendResetPasswordLink: jest.fn(),
+            sendAccountConfirmationLink: vi.fn(),
+            reSendAccountConfirmationLink: vi.fn(),
+            sendResetPasswordLink: vi.fn(),
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
         },
       ],
@@ -110,7 +111,7 @@ describe('AuthService', () => {
     emailService = module.get(EmailService);
     configService = module.get(ConfigService);
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // =============================================================================
@@ -121,7 +122,7 @@ describe('AuthService', () => {
     it('should return the user when credentials are valid', async () => {
       const user = makeUser();
       userService.findOneByEmail.mockResolvedValue(user);
-      jest.spyOn(UtilHash, 'compare').mockResolvedValue(true);
+      vi.spyOn(UtilHash, 'compare').mockResolvedValue(true);
 
       const result = await authService.validateUser(
         'test@test.com',
@@ -158,7 +159,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException when password is invalid', async () => {
       userService.findOneByEmail.mockResolvedValue(makeUser());
-      jest.spyOn(UtilHash, 'compare').mockResolvedValue(false);
+      vi.spyOn(UtilHash, 'compare').mockResolvedValue(false);
 
       await expect(
         authService.validateUser('test@test.com', 'wrong_password'),
@@ -173,7 +174,7 @@ describe('AuthService', () => {
           status: UserStatus.PENDING,
         }),
       );
-      jest.spyOn(UtilHash, 'compare').mockResolvedValue(true);
+      vi.spyOn(UtilHash, 'compare').mockResolvedValue(true);
 
       await expect(
         authService.validateUser('test@test.com', 'password'),
@@ -186,7 +187,7 @@ describe('AuthService', () => {
           status: UserStatus.BANNED,
         }),
       );
-      jest.spyOn(UtilHash, 'compare').mockResolvedValue(true);
+      vi.spyOn(UtilHash, 'compare').mockResolvedValue(true);
 
       await expect(
         authService.validateUser('test@test.com', 'password'),
@@ -442,7 +443,7 @@ describe('AuthService', () => {
         type: PrismaTokenType.CONFIRM_ACCOUNT,
       });
 
-      jest.spyOn(UtilHash, 'hash').mockResolvedValue(hashedPassword);
+      vi.spyOn(UtilHash, 'hash').mockResolvedValue(hashedPassword);
       configService.get.mockReturnValue(frontUrl);
       userService.create.mockResolvedValue(createdUser);
       userTokenService.generateAndSave.mockResolvedValue({
@@ -652,7 +653,7 @@ describe('AuthService', () => {
         userToken,
         payload: mockPayload,
       });
-      jest.spyOn(UtilHash, 'hash').mockResolvedValue(hashedPassword);
+      vi.spyOn(UtilHash, 'hash').mockResolvedValue(hashedPassword);
       userService.update.mockResolvedValue(makeUser());
       userTokenService.remove.mockResolvedValue(userToken);
 

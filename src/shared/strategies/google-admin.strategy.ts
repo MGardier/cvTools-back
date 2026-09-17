@@ -55,7 +55,7 @@ export class GoogleAdminStrategy extends PassportStrategy(
 
       done(null, identity);
     } catch (error: unknown) {
-      done(error as Error, undefined);
+      done(error, undefined);
     }
   }
 }

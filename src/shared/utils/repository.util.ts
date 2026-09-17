@@ -1,4 +1,4 @@
-import { Prisma, PrismaTokenType } from '@prisma/client';
+import { Prisma, PrismaTokenType } from 'prisma/generated/client';
 import { TSortItem } from 'src/shared/types/repository.types';
 import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
 

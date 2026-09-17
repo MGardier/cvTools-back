@@ -59,3 +59,5 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 /prisma/migrations/*
 
 /.claude
+# Prisma generated client
+/prisma/generated

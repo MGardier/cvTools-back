@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, HttpStatus, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BaseExceptionFilter } from '@nestjs/core';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'prisma/generated/client';
 import { Request, Response } from 'express';
 
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
@@ -115,7 +115,7 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     statusCode: number,
     message: string,
   ): IPrismaLogContext {
-    const user = request.user as { id?: string } | undefined;
+    const user: { id?: string } | undefined = request.user;
     const meta = exception.meta;
 
     return {

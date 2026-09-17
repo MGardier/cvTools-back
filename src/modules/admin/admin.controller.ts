@@ -11,7 +11,7 @@ import {
 import { Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
-import { LoginMethod } from '@prisma/client';
+import { LoginMethod } from 'prisma/generated/client';
 
 import { AdminService } from './admin.service';
 import { AdminInvitationService } from '../admin-invitation/admin-invitation.service';
