@@ -6,6 +6,7 @@
     "dist",
     "**/*spec.ts",
     "prisma.config.ts",
-    "vitest.config.mts"
+    "vitest.config.mts",
+    "vitest.integration.config.mts"
   ]
 }
