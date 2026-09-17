@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 
-import { AdminInvitationService } from './admin-invitation.service';
-import { AdminInvitationRepository } from './admin-invitation.repository';
-import { UserModule } from '../user/user.module';
-import { EmailModule } from '../email/email.module';
-import { CreateAdminCommand } from 'src/app/cli/create-admin.command';
+import { AdminInvitationService } from './admin-invitation.service.js';
+import { AdminInvitationRepository } from './admin-invitation.repository.js';
+import { UserModule } from '../user/user.module.js';
+import { EmailModule } from '../email/email.module.js';
+import { CreateAdminCommand } from '#src/app/cli/create-admin.command.js';
 
 @Module({
   imports: [UserModule, EmailModule],

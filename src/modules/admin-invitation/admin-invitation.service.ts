@@ -4,14 +4,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AdminInvitation, Prisma } from 'prisma/generated/client';
+import { AdminInvitation, Prisma } from '#prisma/generated/client.js';
 import { v4 as uuidv4 } from 'uuid';
 
-import { PrismaService } from 'prisma/prisma.service';
-import { AdminInvitationRepository } from './admin-invitation.repository';
-import { UserService } from '../user/user.service';
-import { UtilHash } from 'src/shared/utils/hash.util';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { PrismaService } from '#prisma/prisma.service.js';
+import { AdminInvitationRepository } from './admin-invitation.repository.js';
+import { UserService } from '../user/user.service.js';
+import { UtilHash } from '#src/shared/utils/hash.util.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
 
 @Injectable()
 export class AdminInvitationService {

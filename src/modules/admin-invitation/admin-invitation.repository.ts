@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
-import { AdminInvitation, Prisma } from 'prisma/generated/client';
-import { ICreateAdminInvitation } from './types';
+import { PrismaService } from '#prisma/prisma.service.js';
+import { AdminInvitation, Prisma } from '#prisma/generated/client.js';
+import { ICreateAdminInvitation } from './types.js';
 
 @Injectable()
 export class AdminInvitationRepository {
