@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsUUID, Matches, MinLength } from 'class-validator';
-import { DtoErrorCodeEnum } from 'src/shared/enums/dto-error-codes.enum';
+import { DtoErrorCodeEnum } from '#src/shared/enums/dto-error-codes.enum.js';
 
 // Classic (password) admin registration only.
 // OAuth registration goes through the dedicated /auth/admin/oauth routes.

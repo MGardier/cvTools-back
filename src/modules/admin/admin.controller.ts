@@ -8,29 +8,29 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
-import { LoginMethod } from 'prisma/generated/client';
+import { LoginMethod } from '#prisma/generated/client.js';
 
-import { AdminService } from './admin.service';
-import { AdminInvitationService } from '../admin-invitation/admin-invitation.service';
-import { AuthService } from '../auth/auth.service';
-import { RegisterAdminRequestDto } from './dto/request/register-admin.dto';
-import { ValidateInvitationResponseDto } from '../admin-invitation/dto/response/validate-invitation.dto';
-import { UserResponseDto } from '../auth/dto/response/user.dto';
-import { Public } from 'src/shared/decorators/public.decorator';
+import { AdminService } from './admin.service.js';
+import { AdminInvitationService } from '../admin-invitation/admin-invitation.service.js';
+import { AuthService } from '../auth/auth.service.js';
+import { RegisterAdminRequestDto } from './dto/request/register-admin.dto.js';
+import { ValidateInvitationResponseDto } from '../admin-invitation/dto/response/validate-invitation.dto.js';
+import { UserResponseDto } from '../auth/dto/response/user.dto.js';
+import { Public } from '#src/shared/decorators/public.decorator.js';
 import {
   SerializeWith,
   SkipSerialize,
-} from 'src/shared/decorators/serialize.decorator';
-import { CustomThrottlerGuard } from 'src/shared/guards/custom-throttler.guard';
-import { ADMIN_THROTTLE } from './constants';
-import { GoogleAdminOauthGuard } from 'src/shared/guards/google-admin-oauth.guard';
-import { GithubAdminOauthGuard } from 'src/shared/guards/github-admin-oauth.guard';
-import { IAdminOAuthCallbackRequest } from 'src/shared/types/request.types';
-import { UtilOAuth } from 'src/shared/utils/oauth.util';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+} from '#src/shared/decorators/serialize.decorator.js';
+import { CustomThrottlerGuard } from '#src/shared/guards/custom-throttler.guard.js';
+import { ADMIN_THROTTLE } from './constants.js';
+import { GoogleAdminOauthGuard } from '#src/shared/guards/google-admin-oauth.guard.js';
+import { GithubAdminOauthGuard } from '#src/shared/guards/github-admin-oauth.guard.js';
+import { IAdminOAuthCallbackRequest } from '#src/shared/types/request.types.js';
+import { UtilOAuth } from '#src/shared/utils/oauth.util.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
 
 @Controller('auth/admin')
 export class AdminController {

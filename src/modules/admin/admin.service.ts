@@ -10,16 +10,16 @@ import {
   User,
   UserRoles,
   UserStatus,
-} from 'prisma/generated/client';
+} from '#prisma/generated/client.js';
 
-import { PrismaService } from 'prisma/prisma.service';
-import { UserService } from '../user/user.service';
-import { ICreateUser } from '../user/types';
-import { AuthService } from '../auth/auth.service';
-import { IAuthSession } from '../auth/types';
-import { AdminInvitationService } from '../admin-invitation/admin-invitation.service';
-import { UtilHash } from 'src/shared/utils/hash.util';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { PrismaService } from '#prisma/prisma.service.js';
+import { UserService } from '../user/user.service.js';
+import { ICreateUser } from '../user/types.js';
+import { AuthService } from '../auth/auth.service.js';
+import { IAuthSession } from '../auth/types.js';
+import { AdminInvitationService } from '../admin-invitation/admin-invitation.service.js';
+import { UtilHash } from '#src/shared/utils/hash.util.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
 
 @Injectable()
 export class AdminService {
