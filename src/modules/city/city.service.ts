@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
-import { GEO_API_ENDPOINTS } from './endpoint';
+import { GEO_API_ENDPOINTS } from './endpoint.js';
 import {
   cityApiResponseSchema,
   TRawCityApiItem,
-} from './validation/city-api-response.schema';
-import { SearchCityRequestDto } from './dto/request/search-city.dto';
-import { CitySearchItemResponseDto } from './dto/response/city-search-item.dto';
+} from './validation/city-api-response.schema.js';
+import { SearchCityRequestDto } from './dto/request/search-city.dto.js';
+import { CitySearchItemResponseDto } from './dto/response/city-search-item.dto.js';
 
 @Injectable()
 export class CityService {

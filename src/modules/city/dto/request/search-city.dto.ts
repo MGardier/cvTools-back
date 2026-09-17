@@ -7,7 +7,7 @@ import {
   MaxLength,
   ValidateIf,
 } from 'class-validator';
-import { DtoErrorCodeEnum } from 'src/shared/enums/dto-error-codes.enum';
+import { DtoErrorCodeEnum } from '#src/shared/enums/dto-error-codes.enum.js';
 
 export class SearchCityRequestDto {
   @ValidateIf((o) => !o.postalCode)
