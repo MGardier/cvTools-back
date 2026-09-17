@@ -1,10 +1,11 @@
 import type { MockInstance } from 'vitest';
-import { ArgumentsHost, HttpStatus, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Prisma } from 'prisma/generated/client';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { PrismaErrorEnum } from 'src/shared/enums/prisma-error-codes.enum';
-import { PrismaClientExceptionFilter } from './prisma-exception.filter';
+import type { ArgumentsHost } from '@nestjs/common';
+import { HttpStatus, Logger } from '@nestjs/common';
+import type { ConfigService } from '@nestjs/config';
+import { Prisma } from '#prisma/generated/client.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { PrismaErrorEnum } from '#src/shared/enums/prisma-error-codes.enum.js';
+import { PrismaClientExceptionFilter } from './prisma-exception.filter.js';
 
 // =============================================================================
 //                            MOCK DATA

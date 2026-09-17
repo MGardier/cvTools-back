@@ -2,8 +2,8 @@ import { Command, CommandRunner, Option } from 'nest-commander';
 import { ConfigService } from '@nestjs/config';
 import { isEmail } from 'class-validator';
 
-import { AdminInvitationService } from '../../modules/admin-invitation/admin-invitation.service';
-import { EmailService } from '../../modules/email/email.service';
+import { AdminInvitationService } from '../../modules/admin-invitation/admin-invitation.service.js';
+import { EmailService } from '../../modules/email/email.service.js';
 
 interface ICreateAdminOptions {
   email: string;

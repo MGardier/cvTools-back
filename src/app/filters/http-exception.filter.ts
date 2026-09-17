@@ -7,10 +7,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { IHttpLogContext, IStructuredLog } from 'src/shared/types/api.types';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import {
+  IHttpLogContext,
+  IStructuredLog,
+} from '#src/shared/types/api.types.js';
 
 type LogFormat = 'json' | 'visual' | 'both';
 

@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
-import { envSchema, EnvConfig } from './env.schema';
+import type { EnvConfig } from './env.schema.js';
+import { envSchema } from './env.schema.js';
 
 export function validateEnv(config: Record<string, unknown>): EnvConfig {
   const logger = new Logger('EnvValidation');

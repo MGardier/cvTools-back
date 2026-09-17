@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Response, Request } from 'express';
-import { IApiResponse } from 'src/shared/types/api.types';
+import type { Response, Request } from 'express';
+import { IApiResponse } from '#src/shared/types/api.types.js';
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<

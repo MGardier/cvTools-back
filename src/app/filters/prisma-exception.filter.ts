@@ -1,16 +1,16 @@
 import { ArgumentsHost, Catch, HttpStatus, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BaseExceptionFilter } from '@nestjs/core';
-import { Prisma } from 'prisma/generated/client';
-import { Request, Response } from 'express';
+import { Prisma } from '#prisma/generated/client.js';
+import type { Request, Response } from 'express';
 
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { PrismaErrorEnum } from 'src/shared/enums/prisma-error-codes.enum';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { PrismaErrorEnum } from '#src/shared/enums/prisma-error-codes.enum.js';
 import {
   IPrismaDriverAdapterErrorMeta,
   IPrismaLogContext,
   IStructuredLog,
-} from 'src/shared/types/api.types';
+} from '#src/shared/types/api.types.js';
 
 type LogFormat = 'json' | 'visual' | 'both';
 
