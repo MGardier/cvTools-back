@@ -1,10 +1,11 @@
 import type { Mocked } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { JwtManagerService } from './jwt-manager.service';
-import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
-import { IPayloadJwt } from './types';
+import { JwtManagerService } from './jwt-manager.service.js';
+import { TokenType } from '#src/modules/user-token/enums/token-type.enum.js';
+import type { IPayloadJwt } from './types.js';
 
 // =============================================================================
 //                            MOCK DATA

@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ConfigService } from '@nestjs/config';
-import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
-import { IGeneratedJwt, IPayloadJwt } from './types';
+import { TokenType } from '#src/modules/user-token/enums/token-type.enum.js';
+import { IGeneratedJwt, IPayloadJwt } from './types.js';
 
 @Injectable()
 export class JwtManagerService {
