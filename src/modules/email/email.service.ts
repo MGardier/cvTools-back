@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RabbitmqService } from '../rabbitmq/rabbitmq.service';
+import { RabbitmqService } from '../rabbitmq/rabbitmq.service.js';
 
 @Injectable()
 export class EmailService {
