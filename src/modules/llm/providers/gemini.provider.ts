@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI } from '@google/genai';
-import { ILlmProvider, ILlmRequest, ILlmResponse } from './types';
+import { ILlmProvider, ILlmRequest, ILlmResponse } from './types.js';
 
 @Injectable()
 export class GeminiProvider implements ILlmProvider {
