@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { UserRoles, UserStatus } from 'prisma/generated/client';
+import { UserRoles, UserStatus } from '#prisma/generated/client.js';
 
 export class UserResponseDto {
   @Expose()

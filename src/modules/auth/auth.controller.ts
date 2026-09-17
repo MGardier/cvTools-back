@@ -11,33 +11,33 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { SignUpRequestDto } from './dto/request/sign-up.dto';
-import { ForgotPasswordRequestDto } from './dto/request/forgot-password.dto';
-import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto';
-import { ResetPasswordRequestDto } from './dto/request/reset-password.dto';
-import { UserResponseDto } from './dto/response/user.dto';
+import { AuthService } from './auth.service.js';
+import { SignUpRequestDto } from './dto/request/sign-up.dto.js';
+import { ForgotPasswordRequestDto } from './dto/request/forgot-password.dto.js';
+import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto.js';
+import { ResetPasswordRequestDto } from './dto/request/reset-password.dto.js';
+import { UserResponseDto } from './dto/response/user.dto.js';
 
-import { Public } from 'src/shared/decorators/public.decorator';
+import { Public } from '#src/shared/decorators/public.decorator.js';
 import {
   SerializeWith,
   SkipSerialize,
-} from 'src/shared/decorators/serialize.decorator';
-import { LoginMethod } from 'prisma/generated/client';
-import { GoogleOauthGuard } from 'src/shared/guards/google-oauth.guard';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { GithubOauthGuard } from 'src/shared/guards/github-oauth.guard';
-import { CredentialsAuthGuard } from 'src/shared/guards/credentials-auth.guard';
-import { JwtRefreshGuard } from 'src/shared/guards/jwt-refresh.guard';
+} from '#src/shared/decorators/serialize.decorator.js';
+import { LoginMethod } from '#prisma/generated/client.js';
+import { GoogleOauthGuard } from '#src/shared/guards/google-oauth.guard.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { GithubOauthGuard } from '#src/shared/guards/github-oauth.guard.js';
+import { CredentialsAuthGuard } from '#src/shared/guards/credentials-auth.guard.js';
+import { JwtRefreshGuard } from '#src/shared/guards/jwt-refresh.guard.js';
 import { ConfigService } from '@nestjs/config';
-import { UtilOAuth } from 'src/shared/utils/oauth.util';
-import { Response } from 'express';
+import { UtilOAuth } from '#src/shared/utils/oauth.util.js';
+import type { Response } from 'express';
 import {
   IAuthenticatedRequest,
   IRefreshTokenRequest,
   IOAuthCallbackRequest,
   ISignInRequest,
-} from 'src/shared/types/request.types';
+} from '#src/shared/types/request.types.js';
 
 @Controller('auth')
 export class AuthController {

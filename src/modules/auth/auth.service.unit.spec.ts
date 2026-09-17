@@ -1,27 +1,27 @@
 import type { Mocked } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import {
   ConflictException,
   ForbiddenException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { User, UserToken } from '#prisma/generated/client.js';
 import {
   LoginMethod,
   PrismaTokenType,
-  User,
   UserRoles,
   UserStatus,
-  UserToken,
-} from 'prisma/generated/client';
-import { AuthService } from './auth.service';
-import { UserService } from '../user/user.service';
-import { UserTokenService } from '../user-token/user-token.service';
-import { EmailService } from '../email/email.service';
+} from '#prisma/generated/client.js';
+import { AuthService } from './auth.service.js';
+import { UserService } from '../user/user.service.js';
+import { UserTokenService } from '../user-token/user-token.service.js';
+import { EmailService } from '../email/email.service.js';
 import { ConfigService } from '@nestjs/config';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { UtilHash } from 'src/shared/utils/hash.util';
-import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { UtilHash } from '#src/shared/utils/hash.util.js';
+import { TokenType } from '#src/modules/user-token/enums/token-type.enum.js';
 
 // =============================================================================
 //                            MOCK DATA

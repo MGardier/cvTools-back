@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, Matches, MinLength } from 'class-validator';
-import { DtoErrorCodeEnum } from 'src/shared/enums/dto-error-codes.enum';
+import { DtoErrorCodeEnum } from '#src/shared/enums/dto-error-codes.enum.js';
 
 export class SignUpRequestDto {
   @IsEmail({}, { message: DtoErrorCodeEnum.EMAIL_INVALID })

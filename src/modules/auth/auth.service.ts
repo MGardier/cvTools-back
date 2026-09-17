@@ -5,19 +5,19 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from '../user/user.service';
-import { UserTokenService } from '../user-token/user-token.service';
-import { EmailService } from '../email/email.service';
+import { UserService } from '../user/user.service.js';
+import { UserTokenService } from '../user-token/user-token.service.js';
+import { EmailService } from '../email/email.service.js';
 import { ConfigService } from '@nestjs/config';
-import { SignUpRequestDto } from './dto/request/sign-up.dto';
-import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto';
-import { ResetPasswordRequestDto } from './dto/request/reset-password.dto';
-import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
-import { LoginMethod, User, UserStatus } from 'prisma/generated/client';
-import { IAuthSession, IAuthTokens } from './types';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { UtilHash } from 'src/shared/utils/hash.util';
-import { Response } from 'express';
+import { SignUpRequestDto } from './dto/request/sign-up.dto.js';
+import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto.js';
+import { ResetPasswordRequestDto } from './dto/request/reset-password.dto.js';
+import { TokenType } from '#src/modules/user-token/enums/token-type.enum.js';
+import { LoginMethod, User, UserStatus } from '#prisma/generated/client.js';
+import { IAuthSession, IAuthTokens } from './types.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { UtilHash } from '#src/shared/utils/hash.util.js';
+import type { Response } from 'express';
 
 @Injectable()
 export class AuthService {
