@@ -39,6 +39,12 @@ export interface IPrismaLogContext extends Omit<
   target?: string | string[];
 }
 
+export interface IPrismaDriverAdapterErrorMeta {
+  cause?: {
+    constraint?: { fields?: string[]; index?: string };
+  };
+}
+
 export interface IStructuredLog {
   level: 'error' | 'warn' | 'info';
   timestamp: string;

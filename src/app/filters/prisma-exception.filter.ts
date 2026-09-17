@@ -6,7 +6,11 @@ import { Request, Response } from 'express';
 
 import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
 import { PrismaErrorEnum } from 'src/shared/enums/prisma-error-codes.enum';
-import { IPrismaLogContext, IStructuredLog } from 'src/shared/types/api.types';
+import {
+  IPrismaDriverAdapterErrorMeta,
+  IPrismaLogContext,
+  IStructuredLog,
+} from 'src/shared/types/api.types';
 
 type LogFormat = 'json' | 'visual' | 'both';
 
@@ -42,7 +46,7 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     request: Request,
     response: Response,
   ): void {
-    const target = exception.meta?.target as string | string[] | undefined;
+    const target = this.__resolveUniqueTarget(exception);
     const isEmailConstraint =
       target === 'email' ||
       target === 'user_email_key' ||
@@ -126,10 +130,23 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
       message,
       prismaCode: exception.code,
       model: meta?.modelName as string | undefined,
-      target: meta?.target as string | string[] | undefined,
+      target: this.__resolveUniqueTarget(exception),
       userId: user?.id,
       errorCode: this.mapPrismaCodeToErrorCode(exception.code),
     };
+  }
+
+  private __resolveUniqueTarget(
+    exception: Prisma.PrismaClientKnownRequestError,
+  ): string | string[] | undefined {
+    const meta = exception.meta;
+    if (meta?.target) return meta.target as string | string[];
+
+    const constraint = (
+      meta?.driverAdapterError as IPrismaDriverAdapterErrorMeta | undefined
+    )?.cause?.constraint;
+
+    return constraint?.fields ?? constraint?.index;
   }
 
   private mapPrismaCodeToErrorCode(prismaCode: string): string {
