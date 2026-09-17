@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { UserRepository } from './user.repository';
 import { IUpdateUser, IFindOneByOauthId, ICreateUser } from './types';
-import { UserHomeResponseDto } from './dto/response/user-home-response.dto';
 
 @Injectable()
 export class UserService {
@@ -41,29 +40,5 @@ export class UserService {
 
   async findActiveAdmin(): Promise<User | null> {
     return await this.userRepository.findActiveAdmin();
-  }
-
-  // =============================================================================
-  //                               HOME
-  // =============================================================================
-
-  // TODO: rewire counts and recent items on ms-applications once the
-  // matching message patterns are implemented (application domain delegated);
-  // the authenticated userId will be needed again at that point.
-  async getHomeData(): Promise<UserHomeResponseDto> {
-    return await Promise.resolve({
-      applicationCounts: {
-        inProgress: 0,
-        toApply: 0,
-        interview: 0,
-        finished: 0,
-      },
-      todoCounts: {
-        toMake: 0,
-        inProgress: 0,
-      },
-      recentApplications: [],
-      recentTodos: [],
-    });
   }
 }

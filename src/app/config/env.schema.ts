@@ -39,26 +39,6 @@ export const envSchema = z.object({
         : 'API_POSTGRES_DB must be a string.',
   }),
 
-  // MS POSTGRES (Docker)
-  MS_POSTGRES_USER: z.string({
-    error: (iss) =>
-      iss.input === undefined
-        ? 'You must provide MS_POSTGRES_USER.'
-        : 'MS_POSTGRES_USER must be a string.',
-  }),
-  MS_POSTGRES_PASSWORD: z.string({
-    error: (iss) =>
-      iss.input === undefined
-        ? 'You must provide MS_POSTGRES_PASSWORD.'
-        : 'MS_POSTGRES_PASSWORD must be a string.',
-  }),
-  MS_POSTGRES_DB: z.string({
-    error: (iss) =>
-      iss.input === undefined
-        ? 'You must provide MS_POSTGRES_DB.'
-        : 'MS_POSTGRES_DB must be a string.',
-  }),
-
   // PGADMIN (Docker)
   PGADMIN_EMAIL: z.string({
     error: (iss) =>

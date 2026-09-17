@@ -1,5 +1,4 @@
 import { INestApplication } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
 import request from 'supertest';
 import { LoginMethod, User, UserRoles, UserStatus } from '@prisma/client';
 
@@ -124,16 +123,6 @@ export function extractTokenFromMockUrl(
   if (!tokenMatch) throw new Error(`No token found in URL: ${url}`);
 
   return tokenMatch[1];
-}
-
-// =============================================================================
-//                        APPLICATIONS RMQ MOCK HELPERS
-// =============================================================================
-
-export function getApplicationsRmqMock(
-  app: INestApplication,
-): jest.Mocked<ClientProxy> {
-  return app.get('APPLICATIONS_SERVICE');
 }
 
 // =============================================================================

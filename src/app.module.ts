@@ -16,7 +16,6 @@ import { SerializeInterceptor } from './app/interceptors/serialize.interceptor';
 import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
 import { CacheManagerModule } from './modules/cache/cache-manager.module';
 import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
-import { ApplicationModule } from './modules/application/application.module';
 import { ScraperModule } from './modules/scraper/scraper.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { OfferModule } from './modules/offer/offer.module';
@@ -40,7 +39,6 @@ import { HealthModule } from './modules/health/health.module';
     EmailModule,
     UserTokenModule,
     JwtManagerModule,
-    ApplicationModule,
     ScraperModule,
     OfferModule,
     CityModule,
