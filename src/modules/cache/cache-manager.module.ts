@@ -4,10 +4,7 @@ import KeyvRedis from '@keyv/redis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Keyv } from 'keyv';
-import type { Keyv as KeyvEsm } from 'keyv' with {
-  'resolution-mode': 'import',
-};
-import { CacheManagerService } from './cache-manager.service';
+import { CacheManagerService } from './cache-manager.service.js';
 
 // Le cache est une optimisation, pas une dépendance dure : si Redis est HS,
 // l'app doit dégrader gracieusement (cache miss) au lieu de se figer.
@@ -59,9 +56,7 @@ const REDIS_RECONNECT_MAX_ATTEMPTS = 5;
         });
 
         return {
-          // Same keyv package, but typed through its ESM declarations by the
-          // ESM-only @nestjs/cache-manager; runtime detection is duck-typed.
-          stores: [redisStore as unknown as KeyvEsm],
+          stores: [redisStore],
           ttl: configService.get<number>('CACHE_TTL', 300000),
           isGlobal: true,
         };
