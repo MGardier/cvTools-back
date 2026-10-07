@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { JinaReaderFetcher } from './fetchers/jina-reader.fetcher';
-import { LlmService } from '../llm/llm.service';
-import { TExtractedApplication } from '../llm/types';
-import { NotAJobPostingError } from '../llm/errors/not-a-job-posting.error';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { UtilHtmlParser } from 'src/shared/utils/html-parser.util';
+import { JinaReaderFetcher } from './fetchers/jina-reader.fetcher.js';
+import { LlmService } from '../llm/llm.service.js';
+import { TExtractedApplication } from '../llm/types.js';
+import { NotAJobPostingError } from '../llm/errors/not-a-job-posting.error.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { UtilHtmlParser } from '#src/shared/utils/html-parser.util.js';
 
 @Injectable()
 export class ScraperStrategies {

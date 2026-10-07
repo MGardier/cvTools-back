@@ -1,23 +1,25 @@
+import type {
+  IExperienceInfo,
+  ILocation,
+  IOfferListItem,
+  ISalary,
+  TProviderSearchFilters,
+} from '../../types.js';
 import {
   EContractType,
   EExperienceLevel,
   EOfferApiProvider,
   EOfferJobboardOrigin,
   EPublishedSince,
-  IExperienceInfo,
-  ILocation,
-  IOfferListItem,
-  ISalary,
-  TProviderSearchFilters,
-} from '../../types';
-import {
+} from '../../types.js';
+import type {
   IFranceTravailRawOffer,
   IFranceTravailQueryParams,
   TFTContractType,
   TFTExperience,
-} from './types';
+} from './types.js';
 import { v5 as uuidv5 } from 'uuid';
-import { OFFER_ID_NAMESPACE } from '../../constant';
+import { OFFER_ID_NAMESPACE } from '../../constant.js';
 
 // ═══════════════════════════════════════════
 //         QUERY PARAMS MAPPING

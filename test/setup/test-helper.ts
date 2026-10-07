@@ -1,10 +1,12 @@
-import { INestApplication } from '@nestjs/common';
+import type { Mock, Mocked } from 'vitest';
+import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { LoginMethod, User, UserRoles, UserStatus } from '@prisma/client';
+import type { LoginMethod, User } from '#prisma/generated/client.js';
+import { UserRoles, UserStatus } from '#prisma/generated/client.js';
 
-import { PrismaService } from 'prisma/prisma.service';
-import { EmailService } from 'src/modules/email/email.service';
-import { IAuthCookies, ITestCredentials } from './types';
+import type { PrismaService } from '#prisma/prisma.service.js';
+import { EmailService } from '#src/modules/email/email.service.js';
+import type { IAuthCookies, ITestCredentials } from './types.js';
 
 // =============================================================================
 //                               DEFAULT DATA
@@ -24,8 +26,7 @@ export function extractCookies(
 ): Record<string, string> {
   const cookies: Record<string, string> = {};
   const setCookieHeaders = response.headers['set-cookie'] as unknown as
-    | string[]
-    | undefined;
+    string[] | undefined;
 
   if (!setCookieHeaders) return cookies;
 
@@ -107,14 +108,11 @@ export async function authenticateUser(
 //                               EMAIL MOCK HELPERS
 // =============================================================================
 
-export function getEmailMock(app: INestApplication): jest.Mocked<EmailService> {
+export function getEmailMock(app: INestApplication): Mocked<EmailService> {
   return app.get(EmailService);
 }
 
-export function extractTokenFromMockUrl(
-  mockFn: jest.Mock,
-  callIndex = 0,
-): string {
+export function extractTokenFromMockUrl(mockFn: Mock, callIndex = 0): string {
   const calls = mockFn.mock.calls;
   if (!calls[callIndex]) throw new Error(`No mock call at index ${callIndex}`);
 

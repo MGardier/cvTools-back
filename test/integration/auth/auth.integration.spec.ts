@@ -1,12 +1,13 @@
-import { INestApplication } from '@nestjs/common';
+import type { Mock } from 'vitest';
+import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { UserStatus } from '@prisma/client';
+import { UserStatus } from '#prisma/generated/client.js';
 
-import { PrismaService } from 'prisma/prisma.service';
-import { setupTestApp } from '../../setup/setup-test-app';
-import { resetDatabase } from '../../setup/reset-database';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { DtoErrorCodeEnum } from 'src/shared/enums/dto-error-codes.enum';
+import { PrismaService } from '#prisma/prisma.service.js';
+import { setupTestApp } from '../../setup/setup-test-app.js';
+import { resetDatabase } from '../../setup/reset-database.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { DtoErrorCodeEnum } from '#src/shared/enums/dto-error-codes.enum.js';
 import {
   DEFAULT_CREDENTIALS,
   signUpUser,
@@ -16,7 +17,7 @@ import {
   parseAuthCookies,
   getEmailMock,
   extractTokenFromMockUrl,
-} from '../../setup/test-helper';
+} from '../../setup/test-helper.js';
 
 describe('Auth Integration', () => {
   let app: INestApplication;
@@ -29,7 +30,7 @@ describe('Auth Integration', () => {
 
   beforeEach(async () => {
     await resetDatabase(prisma);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(async () => {
@@ -437,7 +438,7 @@ describe('Auth Integration', () => {
 
       const emailMock = getEmailMock(app);
       const token = extractTokenFromMockUrl(
-        emailMock.sendAccountConfirmationLink as jest.Mock,
+        emailMock.sendAccountConfirmationLink as Mock,
       );
 
       const response = await request(app.getHttpServer())
@@ -521,7 +522,7 @@ describe('Auth Integration', () => {
 
       const emailMock = getEmailMock(app);
       const token = extractTokenFromMockUrl(
-        emailMock.sendResetPasswordLink as jest.Mock,
+        emailMock.sendResetPasswordLink as Mock,
       );
 
       const newPassword = 'NewStrongPass1!';

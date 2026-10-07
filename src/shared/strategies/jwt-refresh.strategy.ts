@@ -1,11 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { IPayloadJwt } from 'src/modules/jwt-manager/types';
-import { UserTokenService } from 'src/modules/user-token/user-token.service';
-import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
+import { IPayloadJwt } from '#src/modules/jwt-manager/types.js';
+import { UserTokenService } from '#src/modules/user-token/user-token.service.js';
+import { TokenType } from '#src/modules/user-token/enums/token-type.enum.js';
 
 export interface IRefreshTokenPayload extends IPayloadJwt {
   refreshToken: string;

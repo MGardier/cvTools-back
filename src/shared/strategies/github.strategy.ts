@@ -3,10 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, StrategyOptions } from 'passport-github2';
 import { VerifyCallback } from 'passport-oauth2';
-import { User } from 'prisma/generated/client';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { AuthService } from 'src/modules/auth/auth.service';
-import { IGithubProfile } from './types';
+import { User } from '#prisma/generated/client.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { AuthService } from '#src/modules/auth/auth.service.js';
+import { IGithubProfile } from './types.js';
 
 @Injectable()
 export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {

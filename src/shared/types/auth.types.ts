@@ -1,4 +1,4 @@
-import { LoginMethod } from 'prisma/generated/client';
+import type { LoginMethod } from '#prisma/generated/client.js';
 
 export type TOAuthRedirectType = 'success' | 'error';
 

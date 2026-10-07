@@ -1,5 +1,5 @@
-import { HttpStatus } from '@nestjs/common';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import type { HttpStatus } from '@nestjs/common';
+import type { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
 
 // ═══════════════════════════════════════════
 //    QUERY PARAMS

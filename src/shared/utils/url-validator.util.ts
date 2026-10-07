@@ -1,9 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
-import { ErrorCodeEnum } from '../enums/error-codes.enum';
+import { ErrorCodeEnum } from '../enums/error-codes.enum.js';
 import {
   ALLOWED_DOMAINS,
   BLOCKED_IP_PATTERNS,
-} from '../constants/url.constant';
+} from '../constants/url.constant.js';
 
 export abstract class UtilUrlValidator {
   private static MAX_URL_LENGTH = 2_048;

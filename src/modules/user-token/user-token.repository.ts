@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
-import { UserToken } from 'prisma/generated/client';
-import { ICreateUserToken } from './types';
+import { PrismaService } from '#prisma/prisma.service.js';
+import { UserToken } from '#prisma/generated/client.js';
+import { ICreateUserToken } from './types.js';
 
 @Injectable()
 export class UserTokenRepository {

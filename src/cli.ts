@@ -1,6 +1,8 @@
-import { CommandFactory } from 'nest-commander';
+// AppModule must load before nest-commander: the CJS package require()s the
+// ESM @nestjs/common, which must already be fully initialized.
+import { AppModule } from './app.module.js';
 
-import { AppModule } from './app.module';
+import { CommandFactory } from 'nest-commander';
 
 async function bootstrap(): Promise<void> {
   await CommandFactory.run(AppModule, ['warn', 'error']);

@@ -1,4 +1,8 @@
-import { LoginMethod, UserRoles, UserStatus } from 'prisma/generated/client';
+import type {
+  LoginMethod,
+  UserRoles,
+  UserStatus,
+} from '#prisma/generated/client.js';
 
 export interface ICreateUser {
   email: string;

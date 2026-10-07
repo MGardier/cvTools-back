@@ -1,7 +1,7 @@
 import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom, timeout } from 'rxjs';
-import { IEmailPayload } from '../email/types';
+import { IEmailPayload } from '../email/types.js';
 
 @Injectable()
 export class RabbitmqService implements OnModuleInit {

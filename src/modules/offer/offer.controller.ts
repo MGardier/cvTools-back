@@ -1,13 +1,13 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { OfferService } from './offer.service';
-import { SearchOfferRequestDto } from './dto/request/search-offer.dto';
-import { AggregatedSearchResponseDto } from './dto/response/aggregated-search.dto';
+import { OfferService } from './offer.service.js';
+import { SearchOfferRequestDto } from './dto/request/search-offer.dto.js';
+import { AggregatedSearchResponseDto } from './dto/response/aggregated-search.dto.js';
 import {
   SerializeWith,
   SkipSerialize,
-} from 'src/shared/decorators/serialize.decorator';
-import { Public } from 'src/shared/decorators/public.decorator';
-import { IProviderHealthCheck } from './types';
+} from '#src/shared/decorators/serialize.decorator.js';
+import { Public } from '#src/shared/decorators/public.decorator.js';
+import { IProviderHealthCheck } from './types.js';
 
 @Controller('offer')
 export class OfferController {

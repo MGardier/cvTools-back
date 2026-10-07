@@ -1,4 +1,4 @@
-import { Prisma } from 'prisma/generated/client';
+import type { Prisma } from '#prisma/generated/client.js';
 
 export interface IOptionRepository<TDataSelectedColumns> {
   tx?: Prisma.TransactionClient;

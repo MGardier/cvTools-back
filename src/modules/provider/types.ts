@@ -1,4 +1,8 @@
-import { ExternalProvider, HttpMethod, Prisma } from 'prisma/generated/client';
+import type {
+  ExternalProvider,
+  HttpMethod,
+  Prisma,
+} from '#prisma/generated/client.js';
 
 /********* INTERFACES *********/
 

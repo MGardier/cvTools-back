@@ -7,9 +7,9 @@ import {
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { IGoogleProfile } from './types';
-import { TAdminOAuthIdentity } from 'src/shared/types/request.types';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { IGoogleProfile } from './types.js';
+import { TAdminOAuthIdentity } from '#src/shared/types/request.types.js';
 
 @Injectable()
 export class GoogleAdminStrategy extends PassportStrategy(

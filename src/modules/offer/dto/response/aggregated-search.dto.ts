@@ -1,6 +1,6 @@
 import { Expose, Type } from 'class-transformer';
-import { EOfferApiProvider, EProviderStatus } from '../../types';
-import { OfferListItemResponseDto } from './offer-list-item.dto';
+import { EOfferApiProvider, EProviderStatus } from '../../types.js';
+import { OfferListItemResponseDto } from './offer-list-item.dto.js';
 
 class ProviderSourceStatusResponseDto {
   @Expose()

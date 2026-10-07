@@ -10,18 +10,18 @@ import {
   IOfferProvider,
   IProviderHealthCheck,
   TProviderSearchFilters,
-} from '../../types';
-import { FranceTravailAuthService } from './france-travail-auth.service';
-import { FranceTravailMapper } from './france-travail.mapper';
+} from '../../types.js';
+import { FranceTravailAuthService } from './france-travail-auth.service.js';
+import { FranceTravailMapper } from './france-travail.mapper.js';
 import {
   IAxiosLikeError,
   IFranceTravailQueryParams,
   IFranceTravailRawOffer,
   IFranceTravailSearchResponse,
   IMappedApiError,
-} from './types';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { FRANCE_TRAVAIL_ENDPOINTS } from './endpoint';
+} from './types.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { FRANCE_TRAVAIL_ENDPOINTS } from './endpoint.js';
 
 @Injectable()
 export class FranceTravailProvider implements IOfferProvider {

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { UserTokenService } from './user-token.service';
+import { UserTokenService } from './user-token.service.js';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtManagerModule } from '../jwt-manager/jwt-manager.module';
-import { UserTokenRepository } from './user-token.repository';
+import { JwtManagerModule } from '../jwt-manager/jwt-manager.module.js';
+import { UserTokenRepository } from './user-token.repository.js';
 
 @Module({
   imports: [

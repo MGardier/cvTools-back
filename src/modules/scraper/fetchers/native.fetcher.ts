@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { IFetchResult, IFetcher } from './types';
+import { IFetchResult, IFetcher } from './types.js';
 
 @Injectable()
 export class NativeFetcher implements IFetcher {

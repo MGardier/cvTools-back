@@ -5,7 +5,7 @@ import {
   EOfferApiProvider,
   EOfferJobboardOrigin,
   ERemotePolicy,
-} from '../../types';
+} from '../../types.js';
 
 class LocationResponseDto {
   @Expose()

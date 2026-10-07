@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { NativeFetcher } from './fetchers/native.fetcher';
-import { TExtractedApplication } from '../llm/types';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { ScraperStrategies } from './scraper.strategies';
-import { UtilUrlValidator } from 'src/shared/utils/url-validator.util';
-import { CacheManagerService } from '../cache/cache-manager.service';
+import { NativeFetcher } from './fetchers/native.fetcher.js';
+import { TExtractedApplication } from '../llm/types.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { ScraperStrategies } from './scraper.strategies.js';
+import { UtilUrlValidator } from '#src/shared/utils/url-validator.util.js';
+import { CacheManagerService } from '../cache/cache-manager.service.js';
 
 const NOT_A_JOB_RESULT = { isSuccess: false } as TExtractedApplication;
 

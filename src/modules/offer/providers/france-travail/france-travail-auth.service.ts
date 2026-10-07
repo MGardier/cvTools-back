@@ -10,10 +10,10 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
-import { CacheManagerService } from 'src/modules/cache/cache-manager.service';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { IFranceTravailTokenResponse } from './types';
-import { FRANCE_TRAVAIL_ENDPOINTS } from './endpoint';
+import { CacheManagerService } from '#src/modules/cache/cache-manager.service.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { IFranceTravailTokenResponse } from './types.js';
+import { FRANCE_TRAVAIL_ENDPOINTS } from './endpoint.js';
 
 @Injectable()
 export class FranceTravailAuthService {

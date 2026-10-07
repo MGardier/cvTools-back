@@ -1,17 +1,19 @@
 import type { Mocked } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
-import { PrismaTokenType, UserToken } from 'prisma/generated/client';
-import { UserTokenService } from './user-token.service';
-import { JwtManagerService } from '../jwt-manager/jwt-manager.service';
-import { UserTokenRepository } from './user-token.repository';
+import type { UserToken } from '#prisma/generated/client.js';
+import { PrismaTokenType } from '#prisma/generated/client.js';
+import { UserTokenService } from './user-token.service.js';
+import { JwtManagerService } from '../jwt-manager/jwt-manager.service.js';
+import { UserTokenRepository } from './user-token.repository.js';
 import { ConfigService } from '@nestjs/config';
-import { TokenType } from './enums/token-type.enum';
-import { UtilHash } from 'src/shared/utils/hash.util';
-import { UtilRepository } from 'src/shared/utils/repository.util';
-import { UtilDate } from 'src/shared/utils/date.util';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { IPayloadJwt } from 'src/modules/jwt-manager/types';
+import { TokenType } from './enums/token-type.enum.js';
+import { UtilHash } from '#src/shared/utils/hash.util.js';
+import { UtilRepository } from '#src/shared/utils/repository.util.js';
+import { UtilDate } from '#src/shared/utils/date.util.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import type { IPayloadJwt } from '#src/modules/jwt-manager/types.js';
 
 vi.mock('uuid', () => ({
   v4: vi.fn().mockReturnValue('mocked-uuid-123'),
