@@ -2,13 +2,13 @@ import { Expose } from 'class-transformer';
 
 export class CitySearchItemResponseDto {
   @Expose()
-  code: string;
+  code!: string;
 
   @Expose()
-  name: string;
+  name!: string;
 
   @Expose()
-  postalCodes: string[];
+  postalCodes!: string[];
 
   @Expose()
   departmentCode?: string;

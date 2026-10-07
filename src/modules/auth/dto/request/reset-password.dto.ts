@@ -1,5 +1,5 @@
 import { PickType } from '@nestjs/mapped-types';
-import { SignUpRequestDto } from './sign-up.dto';
+import { SignUpRequestDto } from './sign-up.dto.js';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class ResetPasswordRequestDto extends PickType(SignUpRequestDto, [
@@ -7,5 +7,5 @@ export class ResetPasswordRequestDto extends PickType(SignUpRequestDto, [
 ]) {
   @IsNotEmpty()
   @IsString()
-  token: string;
+  token!: string;
 }

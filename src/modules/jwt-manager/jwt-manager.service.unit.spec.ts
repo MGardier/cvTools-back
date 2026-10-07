@@ -1,10 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { Mocked } from 'vitest';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { JwtManagerService } from './jwt-manager.service';
-import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
-import { IPayloadJwt } from './types';
-
+import { JwtManagerService } from './jwt-manager.service.js';
+import { TokenType } from '#src/modules/user-token/enums/token-type.enum.js';
+import type { IPayloadJwt } from './types.js';
 
 // =============================================================================
 //                            MOCK DATA
@@ -22,15 +23,14 @@ const mockConfigValues: Record<string, string | number> = {
   JWT_CONFIRMATION_ACCOUNT_EXPIRATION: 86400,
 };
 
-
 // =============================================================================
 //                           DESCRIBE
 // =============================================================================
 
 describe('JwtManagerService', () => {
   let jwtManagerService: JwtManagerService;
-  let jwtService: jest.Mocked<JwtService>;
-  let configService: jest.Mocked<ConfigService>;
+  let jwtService: Mocked<JwtService>;
+  let configService: Mocked<ConfigService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -39,14 +39,14 @@ describe('JwtManagerService', () => {
         {
           provide: JwtService,
           useValue: {
-            signAsync: jest.fn().mockResolvedValue('signed_token'),
-            verifyAsync: jest.fn().mockResolvedValue(mockPayload),
+            signAsync: vi.fn().mockResolvedValue('signed_token'),
+            verifyAsync: vi.fn().mockResolvedValue(mockPayload),
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => mockConfigValues[key]),
+            get: vi.fn((key: string) => mockConfigValues[key]),
           },
         },
       ],
@@ -56,8 +56,10 @@ describe('JwtManagerService', () => {
     jwtService = module.get(JwtService);
     configService = module.get(ConfigService);
 
-    jest.clearAllMocks();
-    configService.get.mockImplementation((key: string) => mockConfigValues[key] as any);
+    vi.clearAllMocks();
+    configService.get.mockImplementation(
+      (key: string) => mockConfigValues[key] as never,
+    );
   });
 
   // =============================================================================
@@ -66,7 +68,10 @@ describe('JwtManagerService', () => {
 
   describe('generate', () => {
     it('should call signAsync with REFRESH secret and expiration', async () => {
-      const result = await jwtManagerService.generate(mockPayload, TokenType.REFRESH);
+      const result = await jwtManagerService.generate(
+        mockPayload,
+        TokenType.REFRESH,
+      );
 
       expect(jwtService.signAsync).toHaveBeenCalledWith(mockPayload, {
         secret: 'refresh-secret',
@@ -76,7 +81,10 @@ describe('JwtManagerService', () => {
     });
 
     it('should call signAsync with FORGOT_PASSWORD secret and expiration', async () => {
-      const result = await jwtManagerService.generate(mockPayload, TokenType.FORGOT_PASSWORD);
+      const result = await jwtManagerService.generate(
+        mockPayload,
+        TokenType.FORGOT_PASSWORD,
+      );
 
       expect(jwtService.signAsync).toHaveBeenCalledWith(mockPayload, {
         secret: 'forgot-password-secret',
@@ -86,7 +94,10 @@ describe('JwtManagerService', () => {
     });
 
     it('should call signAsync with CONFIRM_ACCOUNT secret (default) and expiration', async () => {
-      const result = await jwtManagerService.generate(mockPayload, TokenType.CONFIRM_ACCOUNT);
+      const result = await jwtManagerService.generate(
+        mockPayload,
+        TokenType.CONFIRM_ACCOUNT,
+      );
 
       expect(jwtService.signAsync).toHaveBeenCalledWith(mockPayload, {
         secret: 'default-secret',
@@ -96,7 +107,10 @@ describe('JwtManagerService', () => {
     });
 
     it('should call signAsync with default secret and ACCESS expiration for ACCESS type', async () => {
-      const result = await jwtManagerService.generate(mockPayload, TokenType.ACCESS);
+      const result = await jwtManagerService.generate(
+        mockPayload,
+        TokenType.ACCESS,
+      );
 
       expect(jwtService.signAsync).toHaveBeenCalledWith(mockPayload, {
         secret: 'default-secret',
@@ -112,7 +126,10 @@ describe('JwtManagerService', () => {
 
   describe('verify', () => {
     it('should call verifyAsync with the correct secret for REFRESH type', async () => {
-      const result = await jwtManagerService.verify('some_token', TokenType.REFRESH);
+      const result = await jwtManagerService.verify(
+        'some_token',
+        TokenType.REFRESH,
+      );
 
       expect(jwtService.verifyAsync).toHaveBeenCalledWith('some_token', {
         secret: 'refresh-secret',

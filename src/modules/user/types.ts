@@ -1,4 +1,8 @@
-import { LoginMethod, UserStatus } from '@prisma/client';
+import type {
+  LoginMethod,
+  UserRoles,
+  UserStatus,
+} from '#prisma/generated/client.js';
 
 export interface ICreateUser {
   email: string;
@@ -6,6 +10,7 @@ export interface ICreateUser {
   loginMethod: LoginMethod;
   oauthId?: string;
   status?: UserStatus;
+  roles?: UserRoles;
 }
 
 export interface IUpdateUser {
@@ -20,3 +25,8 @@ export interface IFindOneByOauthId {
   oauthId: string;
   loginMethod: LoginMethod;
 }
+
+export type THomeCountCategory =
+  'inProgress' | 'toApply' | 'interview' | 'finished';
+
+export type THomeTodoCategory = 'toMake' | 'inProgress';

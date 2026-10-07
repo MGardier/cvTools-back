@@ -1,11 +1,11 @@
 import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { ScraperService } from './scraper.service';
-import { ExtractOfferDto } from './dto/request/extract-offer.dto';
-import { SkipSerialize } from 'src/shared/decorators/serialize.decorator';
-import { IAuthenticatedRequest } from 'src/shared/types/request.types';
-import { TExtractedApplication } from '../llm/types';
-import { CustomThrottlerGuard } from 'src/shared/guards/custom-throttler.guard';
+import { ScraperService } from './scraper.service.js';
+import { ExtractOfferDto } from './dto/request/extract-offer.dto.js';
+import { SkipSerialize } from '#src/shared/decorators/serialize.decorator.js';
+import { IAuthenticatedRequest } from '#src/shared/types/request.types.js';
+import { TExtractedApplication } from '../llm/types.js';
+import { CustomThrottlerGuard } from '#src/shared/guards/custom-throttler.guard.js';
 
 @Controller('scraper')
 export class ScraperController {

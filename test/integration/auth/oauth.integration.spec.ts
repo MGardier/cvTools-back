@@ -1,16 +1,17 @@
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { LoginMethod, User } from '@prisma/client';
+import type { INestApplication } from '@nestjs/common';
+import request from 'supertest';
+import type { User } from '#prisma/generated/client.js';
+import { LoginMethod } from '#prisma/generated/client.js';
 
-import { PrismaService } from 'prisma/prisma.service';
-import { setupTestApp, oauthMockUserRef } from '../../setup/setup-test-app';
-import { resetDatabase } from '../../setup/reset-database';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import { PrismaService } from '#prisma/prisma.service.js';
+import { setupTestApp, oauthMockUserRef } from '../../setup/setup-test-app.js';
+import { resetDatabase } from '../../setup/reset-database.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
 import {
   createOAuthUser,
   createConfirmedUser,
   parseAuthCookies,
-} from '../../setup/test-helper';
+} from '../../setup/test-helper.js';
 
 describe('OAuth Integration', () => {
   let app: INestApplication;
@@ -29,22 +30,20 @@ describe('OAuth Integration', () => {
     await app.close();
   });
 
-
   // =============================================================================
   //                         GOOGLE CALLBACK
   // =============================================================================
 
-
   describe('GET /auth/google/callback', () => {
-
     /********* HAPPY PATH *********/
 
     it('should redirect to success URL and set auth cookies when user exists', async () => {
       const user = await createOAuthUser(prisma, LoginMethod.GOOGLE);
       oauthMockUserRef.current = user;
 
-      const response = await request(app.getHttpServer())
-        .get('/auth/google/callback');
+      const response = await request(app.getHttpServer()).get(
+        '/auth/google/callback',
+      );
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('loginMethod=GOOGLE');
@@ -59,8 +58,9 @@ describe('OAuth Integration', () => {
     it('should redirect to error URL when oauthId is missing', async () => {
       oauthMockUserRef.current = { oauthId: null } as Partial<User>;
 
-      const response = await request(app.getHttpServer())
-        .get('/auth/google/callback');
+      const response = await request(app.getHttpServer()).get(
+        '/auth/google/callback',
+      );
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain(
@@ -71,36 +71,35 @@ describe('OAuth Integration', () => {
     /********* USER NOT FOUND IN DB *********/
 
     it('should redirect to error URL when OAuth user does not exist in DB', async () => {
-      oauthMockUserRef.current = { oauthId: 'unknown-google-id' } as Partial<User>;
+      oauthMockUserRef.current = {
+        oauthId: 'unknown-google-id',
+      } as Partial<User>;
 
-      const response = await request(app.getHttpServer())
-        .get('/auth/google/callback');
+      const response = await request(app.getHttpServer()).get(
+        '/auth/google/callback',
+      );
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain(
         `errorCode=${ErrorCodeEnum.OAUTH_LOGIN_FAILED}`,
       );
     });
-
-
   });
-
 
   // =============================================================================
   //                         GITHUB CALLBACK
   // =============================================================================
 
-
   describe('GET /auth/github/callback', () => {
-
     /********* HAPPY PATH *********/
 
     it('should redirect to success URL and set auth cookies when user exists', async () => {
       const user = await createOAuthUser(prisma, LoginMethod.GITHUB);
       oauthMockUserRef.current = user;
 
-      const response = await request(app.getHttpServer())
-        .get('/auth/github/callback');
+      const response = await request(app.getHttpServer()).get(
+        '/auth/github/callback',
+      );
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('loginMethod=GITHUB');
@@ -115,8 +114,9 @@ describe('OAuth Integration', () => {
     it('should redirect to error URL when oauthId is missing', async () => {
       oauthMockUserRef.current = { oauthId: null } as Partial<User>;
 
-      const response = await request(app.getHttpServer())
-        .get('/auth/github/callback');
+      const response = await request(app.getHttpServer()).get(
+        '/auth/github/callback',
+      );
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain(

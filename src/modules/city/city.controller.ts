@@ -1,9 +1,9 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { CityService } from './city.service';
-import { SearchCityRequestDto } from './dto/request/search-city.dto';
-import { CitySearchItemResponseDto } from './dto/response/city-search-item.dto';
-import { Public } from 'src/shared/decorators/public.decorator';
-import { SerializeWith } from 'src/shared/decorators/serialize.decorator';
+import { CityService } from './city.service.js';
+import { SearchCityRequestDto } from './dto/request/search-city.dto.js';
+import { CitySearchItemResponseDto } from './dto/response/city-search-item.dto.js';
+import { Public } from '#src/shared/decorators/public.decorator.js';
+import { SerializeWith } from '#src/shared/decorators/serialize.decorator.js';
 
 @Controller('city')
 export class CityController {

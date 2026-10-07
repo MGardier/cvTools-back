@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { createHash } from 'crypto';
-import { CACHE_TTL } from './constant';
+import { CACHE_TTL } from './constant.js';
 
 @Injectable()
 export class CacheManagerService {

@@ -2,12 +2,14 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider     = "prisma-client"
+  output       = "./generated"
+  moduleFormat = "esm"
+  importFileExtension = "js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 
@@ -58,9 +60,6 @@ model User {
 
   // Relations
   tokens                UserToken[]
-  applications          Application[]
-  skills                Skill[]
-  contacts              Contact[]
   providerLogs          ProviderLogger[]
   providerUsageRecords  ProviderUsageRecord[]
 
@@ -103,6 +102,30 @@ model UserToken {
 
   //Relations
   user      User            @relation(fields: [userId], references: [id])
+}
+
+
+// ================================================
+//                  ADMIN INVITATION
+// ================================================
+
+model AdminInvitation {
+  @@map("admin_invitation")
+
+  // Int
+  id        Int       @id @default(autoincrement())
+
+  // String
+  email     String    @db.VarChar(100)
+  uuid      String    @unique @db.VarChar(150)
+  tokenHash String    @map("token_hash") @db.Text
+
+  // DateTime
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([email])
 }
 
 
@@ -185,338 +208,5 @@ model ProviderUsageRecord {
   @@index([userId])
   @@index([provider])
   @@unique([userId, provider, periodStartAt])
-}
-
-// ================================================
-//                  ADDRESS (polymorphic)
-// ================================================
-
-enum AddressTable {
-  APPLICATION
-}
-
-
-
-model Address {
-  @@map("address")
-
-  // Int
-  id           Int          @id @default(autoincrement())
-
-  // String
-  city         String       @db.VarChar(100)
-  postalCode   String       @map("postal_code") @db.VarChar(10)
-  street       String?      @db.VarChar(100)
-  complement   String?      @db.VarChar(100)
-  streetNumber String?      @map("street_number") @db.VarChar(10)
-
-  // DateTime
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime?    @updatedAt @map("updated_at")
-
-  // Relations
-  tableName    AddressTable @map("table_name")
-  tableId      Int          @map("table_id")
-
-  @@index([tableName, tableId])
-}
-
-// ================================================
-//                  APPLICATION
-// ================================================
-
-
-enum Jobboard {
-  LINKEDIN
-  INDEED
-  WTTJ
-  FRANCE_TRAVAIL
-  GLASSDOOR
-  APEC
-  HELLO_WORK
-  METEO_JOB
-  UNKNOW
-}
-
-enum ApiProvider {
-  ADZUNA
-  APIFY
-  FRANCE_TRAVAIL
-  UNKNOW
-}
-
-enum ContractType {
-  CDI
-  CDD
-  FREELANCE
-  ALTERNANCE
-}
-
-enum ExperienceLevel {
-  JUNIOR
-  MID
-  SENIOR
-}
-
-enum RemotePolicy {
-  FULL
-  HYBRID
-  ONSITE
-}
-
-enum ApplicationStatus {
-  TO_APPLY
-  APPLIED
-  FIRST_CONTACT
-  FIRST_INTERVIEW
-  FOLLOW_UP_INTERVIEW
-  OFFER_RECEIVED
-  ACCEPTED
-  REJECTED
-  GHOSTED
-  WITHDRAWN
-}
-
-enum CompatibilityJob {
-  PERFECT
-  ATTAINABLE
-  WHY_NOT
-}
-
- 
-
-model Application {
-  @@map("application")
-
-  // Int
-  id           Int       @id @default(autoincrement())
-
-  // String
-  apiOfferId   String?   @map("api_offer_id") @db.VarChar(150)
-  title        String    @db.VarChar(100)
-  company      String?   @db.VarChar(100)
-  url          String    @db.Text
-  description  String?   @db.Text
-
-  // DateTime
-  publishedAt  DateTime?  @map("published_at")
-  appliedAt    DateTime?  @map("applied_at")
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime?  @updatedAt @map("updated_at")
-
-  // Boolean
-  isFavorite   Boolean    @default(false) @map("is_favorite")
-
-  // Enum
-  jobboard       Jobboard
-  apiProvider    ApiProvider?       @map("api_provider")
-  contractType   ContractType       @map("contract_type")
-  experience     ExperienceLevel?
-  remotePolicy   RemotePolicy?      @map("remote_policy")
-  compatibility  CompatibilityJob?
-  currentStatus  ApplicationStatus  @default(TO_APPLY) @map("current_status")
-
-  // Decimal
-  salaryMin    Int?   @map("salary_min")
-  salaryMax    Int?   @map("salary_max")
-
-  // Foreign keys
-  userId       Int        @map("user_id")
-
-  // Relations
-  user                 User       @relation(fields: [userId], references: [id])
-  applicationContacts  ApplicationHasContact[]
-  applicationSkills    ApplicationHasSkill[]
-  activities           ApplicationHistory[]
-  todos                Todo[]
-  notes                Note[]
-
-  @@index([userId])
-  @@index([currentStatus])
-}
-
-// ================================================
-//                  CONTACT
-// ================================================
-
-model Contact {
-  @@map("contact")
-
-  // Int
-  id         Int       @id @default(autoincrement())
-  createdBy  Int       @map("created_by")
-
-  // String
-  firstname  String    @db.VarChar(100)
-  lastname   String    @db.VarChar(100)
-  email      String    @db.VarChar(100)
-  phone      String?   @db.VarChar(20)
-  profession String    @db.VarChar(50)
-
-  // DateTime
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime? @updatedAt @map("updated_at")
-
-  // Relations
-  user                User                    @relation(fields: [createdBy], references: [id])
-  applicationContacts ApplicationHasContact[]
-
-  @@index([createdBy])
-}
-
-// ================================================
-//        APPLICATION_HAS_CONTACT (junction table)
-// ================================================
-
-model ApplicationHasContact {
-  @@map("application_has_contact")
-
-  // Foreign keys
-  applicationId Int         @map("application_id")
-  contactId     Int         @map("contact_id")
-
-  //Relations
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  contact       Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
-
-  @@id([applicationId, contactId])
-  @@index([contactId])
-}
-
-// ================================================
-//                  SKILL
-// ================================================
-
-model Skill {
-  @@map("skill")
-
-  // Int
-  id        Int       @id @default(autoincrement())
-
-  // String
-  label     String    @unique @db.VarChar(100)
-
-  // DateTime
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime? @updatedAt @map("updated_at")
-
-  // Foreign keys
-  createdBy Int       @map("created_by")
-  
-
-  // Relations
-  creator   User      @relation(fields: [createdBy], references: [id])
-  applicationSkills ApplicationHasSkill[]
-}
-
-// ================================================
-//        APPLICATION_HAS_SKILL (junction table)
-// ================================================
-
-model ApplicationHasSkill {
-  @@map("application_has_skill")
-
-  // Foreign keys
-  applicationId Int         @map("application_id")
-  skillId       Int         @map("skill_id")
-  
-  //Relations
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  skill         Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade)
-
-  @@id([applicationId, skillId])
-  @@index([skillId])
-}
-
-// ================================================
-//                  APPLICATION HISTORY
-// ================================================
-
-model ApplicationHistory {
-  @@map("application_history")
-
-  // Int
-  id          Int               @id @default(autoincrement())
-
-  // String
-  description String            @db.VarChar(255)
-
-  // DateTime
-  doneAt      DateTime?         @map("done_at")
-  createdAt   DateTime          @default(now()) @map("created_at")
-  updatedAt   DateTime?         @updatedAt @map("updated_at")
-
-  // Enum
-  status      ApplicationStatus
-
-  // Foreign keys
-  applicationId Int         @map("application_id")
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-
-  @@index([applicationId])
-  @@index([doneAt])
-}
-
-// ================================================
-//                  TODO
-// ================================================
-
-enum StatusTodo {
-  TO_MAKE
-  IN_PROGRESS
-  DONE
-  ARCHIVED
-}
-
-
-model Todo {
-  @@map("todo")
-
-  // Int
-  id          Int        @id @default(autoincrement())
-
-  // String
-  description String     @db.VarChar(150)
-
-  // DateTime
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime?  @updatedAt @map("updated_at")
-
-  // Enum
-  status      StatusTodo @default(TO_MAKE)
-
-  // Foreign keys
-  applicationId Int         @map("application_id")
-
-  //Relations
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-
-  @@index([applicationId])
-}
-
-// ================================================
-//                  NOTE
-// ================================================
-
-model Note {
-  @@map("note")
-
-  // Int
-  id          Int       @id @default(autoincrement())
-
-  // String
-  description String    @db.Text
-
-  // DateTime
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime? @updatedAt @map("updated_at")
-
-  // Foreign keys
-  applicationId Int         @map("application_id")
-
-  //Relations
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-
-  @@index([applicationId])
 }
 

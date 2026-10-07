@@ -6,10 +6,10 @@ export class ParamsOptionsDto {
   @IsOptional()
   @Transform(({ value }) => (value ? Number(value) : undefined))
   @IsPositive()
-  page: number;
+  page!: number;
 
   @IsOptional()
   @Transform(({ value }) => (value ? Number(value) : undefined))
   @IsPositive()
-  limit: number;
+  limit!: number;
 }

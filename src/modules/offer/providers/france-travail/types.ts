@@ -1,39 +1,33 @@
-import { HttpStatus } from '@nestjs/common';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+import type { HttpStatus } from '@nestjs/common';
+import type { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
 
 // ═══════════════════════════════════════════
 //    QUERY PARAMS
 // ═══════════════════════════════════════════
 
-export type TFTContractType =   
-  'CDD' 
-  |'CDI' 
-  |'LIB' //Freelance
+export type TFTContractType = 'CDD' | 'CDI' | 'LIB'; //Freelance
 
-export type TFTExperience = 
-    |'1' // < 1 year
-    |'2' // 1 - 3 years
-    |'3' // > 3 years
-
+export type TFTExperience =
+  | '1' // < 1 year
+  | '2' // 1 - 3 years
+  | '3'; // > 3 years
 
 export interface IFranceTravailQueryParams {
-
   motsCles: string;
-  commune ?: string;
-  region ?: string;
-  typeContrat ?: TFTContractType
+  commune?: string;
+  departement?: string;
+  region?: string;
+  typeContrat?: TFTContractType;
 
   //Only use for alternance contract
-  natureContrat?: string
+  natureContrat?: string;
 
-  experience?: TFTExperience
-  minCreationDate ?: string
-  range ?: string // min-max 0-149
+  experience?: TFTExperience;
+  minCreationDate?: string;
+  range?: string; // min-max 0-149
 
   //FT doesnt have remote policy field
-
 }
-
 
 export interface IFranceTravailSearchResponse {
   resultats: IFranceTravailRawOffer[];
@@ -131,7 +125,8 @@ export interface IFranceTravailTokenResponse {
 // ═══════════════════════════════════════════
 
 export interface IAxiosLikeError {
-  response?: { status?: number };
+  response?: { status?: number; data?: unknown };
+  config?: { params?: Record<string, unknown> };
   message?: string;
 }
 

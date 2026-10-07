@@ -14,8 +14,8 @@ import {
   SERIALIZE_KEY,
   SKIP_SERIALIZE_KEY,
   TDtoClass,
-} from 'src/shared/decorators/serialize.decorator';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
+} from '#src/shared/decorators/serialize.decorator.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
 
 @Injectable()
 export class SerializeInterceptor implements NestInterceptor {

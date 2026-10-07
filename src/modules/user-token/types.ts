@@ -1,5 +1,5 @@
-import { PrismaTokenType, UserToken } from '@prisma/client';
-import { IPayloadJwt } from 'src/modules/jwt-manager/types';
+import type { PrismaTokenType, UserToken } from '#prisma/generated/client.js';
+import type { IPayloadJwt } from '#src/modules/jwt-manager/types.js';
 
 export interface ICreateUserToken {
   token: string;
@@ -7,7 +7,6 @@ export interface ICreateUserToken {
   expiresAt: Date;
   uuid?: string;
 }
-
 
 export interface ISavedToken {
   userToken: UserToken;
@@ -18,4 +17,3 @@ export interface IValidatedToken {
   userToken: UserToken;
   payload: IPayloadJwt;
 }
-

@@ -39,26 +39,6 @@ export const envSchema = z.object({
         : 'API_POSTGRES_DB must be a string.',
   }),
 
-  // MS POSTGRES (Docker)
-  MS_POSTGRES_USER: z.string({
-    error: (iss) =>
-      iss.input === undefined
-        ? 'You must provide MS_POSTGRES_USER.'
-        : 'MS_POSTGRES_USER must be a string.',
-  }),
-  MS_POSTGRES_PASSWORD: z.string({
-    error: (iss) =>
-      iss.input === undefined
-        ? 'You must provide MS_POSTGRES_PASSWORD.'
-        : 'MS_POSTGRES_PASSWORD must be a string.',
-  }),
-  MS_POSTGRES_DB: z.string({
-    error: (iss) =>
-      iss.input === undefined
-        ? 'You must provide MS_POSTGRES_DB.'
-        : 'MS_POSTGRES_DB must be a string.',
-  }),
-
   // PGADMIN (Docker)
   PGADMIN_EMAIL: z.string({
     error: (iss) =>
@@ -116,6 +96,32 @@ export const envSchema = z.object({
       iss.input === undefined
         ? 'You must provide GITHUB_CALLBACK_URL.'
         : 'GITHUB_CALLBACK_URL must be a valid URL.',
+  }),
+
+  // ADMIN OAUTH
+  GOOGLE_ADMIN_CALLBACK_URL: z.url({
+    error: (iss) =>
+      iss.input === undefined
+        ? 'You must provide GOOGLE_ADMIN_CALLBACK_URL.'
+        : 'GOOGLE_ADMIN_CALLBACK_URL must be a valid URL.',
+  }),
+  GITHUB_ADMIN_CLIENT_ID: z.string({
+    error: (iss) =>
+      iss.input === undefined
+        ? 'You must provide GITHUB_ADMIN_CLIENT_ID.'
+        : 'GITHUB_ADMIN_CLIENT_ID must be a string.',
+  }),
+  GITHUB_ADMIN_CLIENT_SECRET: z.string({
+    error: (iss) =>
+      iss.input === undefined
+        ? 'You must provide GITHUB_ADMIN_CLIENT_SECRET.'
+        : 'GITHUB_ADMIN_CLIENT_SECRET must be a string.',
+  }),
+  GITHUB_ADMIN_CALLBACK_URL: z.url({
+    error: (iss) =>
+      iss.input === undefined
+        ? 'You must provide GITHUB_ADMIN_CALLBACK_URL.'
+        : 'GITHUB_ADMIN_CALLBACK_URL must be a valid URL.',
   }),
 
   // JWT SECRET
@@ -189,6 +195,15 @@ export const envSchema = z.object({
         ? 'You must provide FRONT_URL_OAUTH_CALLBACK_ERROR.'
         : 'FRONT_URL_OAUTH_CALLBACK_ERROR must be a valid URL.',
   }),
+  FRONT_URL_ADMIN_REGISTER: z.url({
+    error: (iss) =>
+      iss.input === undefined
+        ? 'You must provide FRONT_URL_ADMIN_REGISTER.'
+        : 'FRONT_URL_ADMIN_REGISTER must be a valid URL.',
+  }),
+
+  // ADMIN INVITATION
+  ADMIN_INVITATION_EXPIRES_MINUTES: z.coerce.number().default(15),
 
   /* #################### EXTERNAL SERVICES  ########################### */
 

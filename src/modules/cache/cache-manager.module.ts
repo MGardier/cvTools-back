@@ -1,9 +1,10 @@
 import { Global, Module } from '@nestjs/common';
 
-import KeyvRedis, { Keyv } from '@keyv/redis';
+import KeyvRedis from '@keyv/redis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CacheManagerService } from './cache-manager.service';
+import { Keyv } from 'keyv';
+import { CacheManagerService } from './cache-manager.service.js';
 
 // Le cache est une optimisation, pas une dépendance dure : si Redis est HS,
 // l'app doit dégrader gracieusement (cache miss) au lieu de se figer.
@@ -28,7 +29,7 @@ const REDIS_RECONNECT_MAX_ATTEMPTS = 5;
               url: redisUrl,
               socket: {
                 connectTimeout: REDIS_CONNECT_TIMEOUT_MS,
-                reconnectStrategy: (attempts) => {
+                reconnectStrategy: (attempts: number) => {
                   if (attempts > REDIS_RECONNECT_MAX_ATTEMPTS) {
                     return new Error('Redis: max reconnect attempts reached');
                   }
@@ -44,7 +45,7 @@ const REDIS_RECONNECT_MAX_ATTEMPTS = 5;
               namespace: 'app',
               connectionTimeout: KEYV_CONNECT_TIMEOUT_MS,
               throwOnConnectError: true,
-              throwErrors: true,
+              throwOnErrors: true,
             },
           ),
           namespace: 'app',

@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
-import { GEO_API_ENDPOINTS } from './endpoint';
+import { GEO_API_ENDPOINTS } from './endpoint.js';
 import {
   cityApiResponseSchema,
   TRawCityApiItem,
-} from './validation/city-api-response.schema';
-import { SearchCityRequestDto } from './dto/request/search-city.dto';
-import { CitySearchItemResponseDto } from './dto/response/city-search-item.dto';
+} from './validation/city-api-response.schema.js';
+import { SearchCityRequestDto } from './dto/request/search-city.dto.js';
+import { CitySearchItemResponseDto } from './dto/response/city-search-item.dto.js';
 
 @Injectable()
 export class CityService {
@@ -16,7 +16,9 @@ export class CityService {
 
   constructor(private readonly httpService: HttpService) {}
 
-  async search(dto: SearchCityRequestDto): Promise<CitySearchItemResponseDto[]> {
+  async search(
+    dto: SearchCityRequestDto,
+  ): Promise<CitySearchItemResponseDto[]> {
     const params: Record<string, string | number> = {
       boost: 'population',
       limit: dto.limit,
@@ -32,7 +34,10 @@ export class CityService {
     const result = cityApiResponseSchema.safeParse(data);
 
     if (!result.success) {
-      this.logger.warn('Geo API response validation failed', result.error.issues);
+      this.logger.warn(
+        'Geo API response validation failed',
+        result.error.issues,
+      );
       return [];
     }
 

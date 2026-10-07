@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { IFetchResult, IFetcher } from './types';
+import { IFetchResult, IFetcher } from './types.js';
 
 @Injectable()
 export class JinaReaderFetcher implements IFetcher {

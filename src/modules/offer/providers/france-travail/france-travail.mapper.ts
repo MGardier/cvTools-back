@@ -1,23 +1,25 @@
+import type {
+  IExperienceInfo,
+  ILocation,
+  IOfferListItem,
+  ISalary,
+  TProviderSearchFilters,
+} from '../../types.js';
 import {
   EContractType,
   EExperienceLevel,
   EOfferApiProvider,
   EOfferJobboardOrigin,
   EPublishedSince,
-  IExperienceInfo,
-  ILocation,
-  IOfferListItem,
-  ISalary,
-  TProviderSearchFilters,
-} from '../../types';
-import {
+} from '../../types.js';
+import type {
   IFranceTravailRawOffer,
   IFranceTravailQueryParams,
   TFTContractType,
   TFTExperience,
-} from './types';
+} from './types.js';
 import { v5 as uuidv5 } from 'uuid';
-import { OFFER_ID_NAMESPACE } from '../../constant';
+import { OFFER_ID_NAMESPACE } from '../../constant.js';
 
 // ═══════════════════════════════════════════
 //         QUERY PARAMS MAPPING
@@ -33,19 +35,20 @@ export abstract class FranceTravailMapper {
   ): IFranceTravailQueryParams {
     const {
       keyword,
-      city,
-      postalCode,
+      cityCode,
+      departmentCode,
+      regionCode,
       contractType,
       experience,
       publishedSince,
     } = filters;
-    const regionCode = postalCode ? postalCode.slice(0, 2) : undefined;
 
     const params: IFranceTravailQueryParams = {
       motsCles: keyword,
-      /* Address  fields */
-      ...(city && { commune: city }),
-      ...(regionCode && { region: regionCode }),
+      // FT expects INSEE codes. Only the most specific scope is sent —
+      // commune already implies its department/region; sending all three
+      // is redundant and FT may reject the payload.
+      ...this.toLocationParams(cityCode, departmentCode, regionCode),
 
       /* Contract fields */
       ...this.toContractParams(contractType),
@@ -58,6 +61,33 @@ export abstract class FranceTravailMapper {
     };
 
     return params;
+  }
+
+  // INSEE consolidated codes for Paris/Lyon/Marseille that FT's commune
+  // referential rejects (FT only accepts the per-arrondissement codes).
+  // Per FT doc, searching by département returns all offers of these cities.
+  private static readonly FT_COMMUNE_TO_DEPARTMENT_FALLBACK: Record<
+    string,
+    string
+  > = {
+    '75056': '75', // Paris
+    '69123': '69', // Lyon
+    '13055': '13', // Marseille
+  };
+
+  private static toLocationParams(
+    cityCode?: string,
+    departmentCode?: string,
+    regionCode?: string,
+  ): Pick<IFranceTravailQueryParams, 'commune' | 'departement' | 'region'> {
+    if (cityCode) {
+      const fallbackDept = this.FT_COMMUNE_TO_DEPARTMENT_FALLBACK[cityCode];
+      if (fallbackDept) return { departement: departmentCode ?? fallbackDept };
+      return { commune: cityCode };
+    }
+    if (departmentCode) return { departement: departmentCode };
+    if (regionCode) return { region: regionCode };
+    return {};
   }
 
   // ═══════════════════════════════════════════
@@ -176,9 +206,7 @@ export abstract class FranceTravailMapper {
   /**
    * Parse city name from FT libelle format: "75 - Paris 11e Arrondissement" → "Paris 11e Arrondissement"
    */
-  private static parseCityFromLibelle(
-    libelle?: string,
-  ): string | undefined {
+  private static parseCityFromLibelle(libelle?: string): string | undefined {
     if (!libelle) return undefined;
     // FT format: "XX - Ville" where XX is department code
     const match = libelle.match(/^\d+\s*-\s*(.+)$/);
@@ -237,7 +265,7 @@ export abstract class FranceTravailMapper {
   }
 
   /**
-   * Build a readable label from FT 
+   * Build a readable label from FT
    *   "0 An(s)" → "Débutant accepté"
    *   "3 An(s)" → "3 ans d'expérience"
    *   exige="D" (no libelle) → "Débutant accepté"

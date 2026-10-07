@@ -1,20 +1,21 @@
 // test/setup/setup-test-app.ts
-import { Test, TestingModule } from '@nestjs/testing';
-import {
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type {
   CanActivate,
   ExecutionContext,
   INestApplication,
-  ValidationPipe,
 } from '@nestjs/common';
-import { AppModule } from 'src/app.module';
-import { EmailService } from 'src/modules/email/email.service';
-import { GoogleOauthGuard } from 'src/shared/guards/google-oauth.guard';
-import { GithubOauthGuard } from 'src/shared/guards/github-oauth.guard';
-import { IMockUserRef } from './types';
+import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from '#src/app.module.js';
+import { EmailService } from '#src/modules/email/email.service.js';
+import { GoogleOauthGuard } from '#src/shared/guards/google-oauth.guard.js';
+import { GithubOauthGuard } from '#src/shared/guards/github-oauth.guard.js';
+import type { IMockUserRef } from './types.js';
 
-import * as session from 'express-session';
-import * as cookieParser from 'cookie-parser';
-import * as passport from 'passport';
+import session from 'express-session';
+import cookieParser from 'cookie-parser';
+import passport from 'passport';
 
 export const oauthMockUserRef: IMockUserRef = { current: {} };
 
@@ -32,9 +33,9 @@ export async function setupTestApp(): Promise<INestApplication> {
   })
     .overrideProvider(EmailService)
     .useValue({
-      sendAccountConfirmationLink: jest.fn(),
-      reSendAccountConfirmationLink: jest.fn(),
-      sendResetPasswordLink: jest.fn(),
+      sendAccountConfirmationLink: vi.fn(),
+      reSendAccountConfirmationLink: vi.fn(),
+      sendResetPasswordLink: vi.fn(),
     })
     .overrideGuard(GoogleOauthGuard)
     .useValue(mockOAuthGuard)

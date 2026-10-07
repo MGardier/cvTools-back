@@ -1,10 +1,10 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AuthGuard, IAuthModuleOptions } from '@nestjs/passport';
-import { Request, Response } from 'express';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { OAuthRedirectException } from 'src/shared/exceptions/oauth-redirect.exception';
-import { IOAuthUser } from 'src/shared/types/request.types';
+import { AuthGuard, AuthGuardAuthenticateOptions } from '@nestjs/passport';
+import type { Request, Response } from 'express';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { OAuthRedirectException } from '#src/shared/exceptions/oauth-redirect.exception.js';
+import { IOAuthUser } from '#src/shared/types/request.types.js';
 
 @Injectable()
 export class GithubOauthGuard extends AuthGuard('github') {
@@ -12,7 +12,7 @@ export class GithubOauthGuard extends AuthGuard('github') {
     super();
   }
 
-  override getAuthenticateOptions(): IAuthModuleOptions {
+  override getAuthenticateOptions(): AuthGuardAuthenticateOptions {
     return { session: false };
   }
 
@@ -51,6 +51,6 @@ export class GithubOauthGuard extends AuthGuard('github') {
       throw new OAuthRedirectException();
     }
 
-    return user as TUser;
+    return user;
   }
 }

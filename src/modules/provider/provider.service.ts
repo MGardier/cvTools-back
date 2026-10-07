@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ProviderRepository } from './provider.repository';
-import { ICreateProviderLog, IUpdateProviderUsage } from './types';
+import { ProviderRepository } from './provider.repository.js';
+import { ICreateProviderLog, IUpdateProviderUsage } from './types.js';
 
 @Injectable()
 export class ProviderService {

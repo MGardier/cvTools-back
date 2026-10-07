@@ -1,17 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
-import { User, UserRoles, UserStatus } from '@prisma/client';
-import { IUpdateUser, ICreateUser, IFindOneByOauthId } from './types';
+import { PrismaService } from '#prisma/prisma.service.js';
+import {
+  Prisma,
+  User,
+  UserRoles,
+  UserStatus,
+} from '#prisma/generated/client.js';
+import { IUpdateUser, ICreateUser, IFindOneByOauthId } from './types.js';
 
 @Injectable()
 export class UserRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(data: ICreateUser): Promise<User> {
-    return await this.prismaService.user.create({
+  async create(
+    data: ICreateUser,
+    tx?: Prisma.TransactionClient,
+  ): Promise<User> {
+    const client = tx ?? this.prismaService;
+
+    return await client.user.create({
       data: {
         ...data,
-        roles: UserRoles.USER,
+        roles: data.roles ?? UserRoles.USER,
         status: data.status ?? UserStatus.PENDING,
       },
     });
@@ -50,6 +60,15 @@ export class UserRepository {
         unique_oauth_user: {
           ...data,
         },
+      },
+    });
+  }
+
+  async findActiveAdmin(): Promise<User | null> {
+    return await this.prismaService.user.findFirst({
+      where: {
+        roles: UserRoles.ADMIN,
+        status: UserStatus.ALLOWED,
       },
     });
   }

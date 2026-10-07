@@ -1,16 +1,16 @@
 import { Expose, Type } from 'class-transformer';
-import { EOfferApiProvider, EProviderStatus } from '../../types';
-import { OfferListItemResponseDto } from './offer-list-item.dto';
+import { EOfferApiProvider, EProviderStatus } from '../../types.js';
+import { OfferListItemResponseDto } from './offer-list-item.dto.js';
 
 class ProviderSourceStatusResponseDto {
   @Expose()
-  apiProvider: EOfferApiProvider;
+  apiProvider!: EOfferApiProvider;
 
   @Expose()
-  status: EProviderStatus;
+  status!: EProviderStatus;
 
   @Expose()
-  count: number;
+  count!: number;
 
   @Expose()
   message?: string;
@@ -18,25 +18,25 @@ class ProviderSourceStatusResponseDto {
 
 class SearchMetaResponseDto {
   @Expose()
-  total: number;
+  total!: number;
 
   @Expose()
-  page: number;
+  page!: number;
 
   @Expose()
-  limit: number;
+  limit!: number;
 
   @Expose()
   @Type(() => ProviderSourceStatusResponseDto)
-  sources: ProviderSourceStatusResponseDto[];
+  sources!: ProviderSourceStatusResponseDto[];
 }
 
 export class AggregatedSearchResponseDto {
   @Expose()
   @Type(() => OfferListItemResponseDto)
-  offers: OfferListItemResponseDto[];
+  offers!: OfferListItemResponseDto[];
 
   @Expose()
   @Type(() => SearchMetaResponseDto)
-  meta: SearchMetaResponseDto;
+  meta!: SearchMetaResponseDto;
 }

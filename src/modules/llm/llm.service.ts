@@ -1,18 +1,18 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { ExternalProvider, HttpMethod } from '@prisma/client';
-import { ProviderService } from '../provider/provider.service';
-import { GeminiProvider } from './providers/gemini.provider';
-import { ILlmResponse } from './providers/types';
-import { TExtractedApplication, TExtractStructureTextParams } from './types';
-import { APPLICATION_JSON_SCHEMA } from './constants/json-schema';
+import { ExternalProvider, HttpMethod } from '#prisma/generated/client.js';
+import { ProviderService } from '../provider/provider.service.js';
+import { GeminiProvider } from './providers/gemini.provider.js';
+import { ILlmResponse } from './providers/types.js';
+import { TExtractedApplication, TExtractStructureTextParams } from './types.js';
+import { APPLICATION_JSON_SCHEMA } from './constants/json-schema.js';
 import {
   STRUCTURE_TEXT_PROMPT,
   FORMAT_FROM_URL_PROMPT,
   FETCH_AND_EXTRACT_PROMPT,
-} from './constants/extraction-prompts';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { extractedApplicationSchema } from './validation/extracted-application.schema';
-import { NotAJobPostingError } from './errors/not-a-job-posting.error';
+} from './constants/extraction-prompts.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { extractedApplicationSchema } from './validation/extracted-application.schema.js';
+import { NotAJobPostingError } from './errors/not-a-job-posting.error.js';
 
 @Injectable()
 export class LlmService {
@@ -21,7 +21,7 @@ export class LlmService {
   constructor(
     private readonly geminiProvider: GeminiProvider,
     private readonly providerService: ProviderService,
-  ) { }
+  ) {}
 
   // =============================================================================
   //                               STRUCTURE TEXT
@@ -31,7 +31,6 @@ export class LlmService {
     params: TExtractStructureTextParams,
     userId: number,
   ): Promise<TExtractedApplication> {
-
     if (!params.fetchText && !params.userRawText)
       throw new BadRequestException(
         ErrorCodeEnum.SCRAPER_EXTRACTION_FAILED_ERROR,
@@ -75,7 +74,7 @@ export class LlmService {
     url: string,
     userId: number,
   ): Promise<TExtractedApplication> {
-    const prompt = this.__buildPrompt('url_fetch',url);
+    const prompt = this.__buildPrompt('url_fetch', url);
     const request = {
       prompt,
       maxTokens: 4096,
@@ -139,7 +138,7 @@ export class LlmService {
       return null;
     }
 
-    return validated as TExtractedApplication;
+    return validated;
   }
 
   private async __logAndTrack(
@@ -173,7 +172,6 @@ export class LlmService {
     ]);
   }
 
-
   private __buildPrompt(
     type: 'raw' | 'url_content' | 'url_fetch',
     content: string,
@@ -200,7 +198,4 @@ export class LlmService {
 
     return prompt;
   }
-
 }
-
-

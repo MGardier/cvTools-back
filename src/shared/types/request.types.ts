@@ -1,7 +1,7 @@
-import { Request } from 'express';
-import { User } from '@prisma/client';
-import { IPayloadJwt } from 'src/modules/jwt-manager/types';
-import { IRefreshTokenPayload } from 'src/shared/strategies/jwt-refresh.strategy';
+import type { Request } from 'express';
+import type { User } from '#prisma/generated/client.js';
+import type { IPayloadJwt } from '#src/modules/jwt-manager/types.js';
+import type { IRefreshTokenPayload } from '#src/shared/strategies/jwt-refresh.strategy.js';
 
 export interface IAuthenticatedRequest extends Request {
   user: IPayloadJwt;
@@ -26,4 +26,10 @@ export interface IOAuthRequest extends Request {
 
 export interface IOAuthCallbackRequest extends Request {
   user: User;
+}
+
+export type TAdminOAuthIdentity = Required<IOAuthUser>;
+
+export interface IAdminOAuthCallbackRequest extends Request {
+  user: TAdminOAuthIdentity;
 }

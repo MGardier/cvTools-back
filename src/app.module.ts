@@ -1,32 +1,28 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './modules/user/user.module';
-import { PrismaModule } from 'prisma/prisma.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { EmailModule } from './modules/email/email.module';
-import { UserTokenModule } from './modules/user-token/user-token.module';
+import { UserModule } from './modules/user/user.module.js';
+import { PrismaModule } from '#prisma/prisma.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
+import { EmailModule } from './modules/email/email.module.js';
+import { UserTokenModule } from './modules/user-token/user-token.module.js';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { JwtManagerModule } from './modules/jwt-manager/jwt-manager.module';
-import { validateEnv } from './app/config/env.validation';
-import { GlobalExceptionFilter } from './app/filters/global-exception.filter';
-import { HttpExceptionFilter } from './app/filters/http-exception.filter';
-import { PrismaClientExceptionFilter } from './app/filters/prisma-exception.filter';
-import { ResponseInterceptor } from './app/interceptors/response.interceptor';
-import { SerializeInterceptor } from './app/interceptors/serialize.interceptor';
-import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
-import { CacheManagerModule } from './modules/cache/cache-manager.module';
-import { AddressModule } from './modules/address/address.module';
-import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module';
-import { ApplicationModule } from './modules/application/application.module';
-import { ContactModule } from './modules/contact/contact.module';
-import { SkillModule } from './modules/skill/skill.module';
-import { ScraperModule } from './modules/scraper/scraper.module';
-import { NoteModule } from './modules/note/note.module';
-import { TodoModule } from './modules/todo/todo.module';
-import { ApplicationHistoryModule } from './modules/application-history/application-history.module';
+import { JwtManagerModule } from './modules/jwt-manager/jwt-manager.module.js';
+import { validateEnv } from './app/config/env.validation.js';
+import { GlobalExceptionFilter } from './app/filters/global-exception.filter.js';
+import { HttpExceptionFilter } from './app/filters/http-exception.filter.js';
+import { PrismaClientExceptionFilter } from './app/filters/prisma-exception.filter.js';
+import { ResponseInterceptor } from './app/interceptors/response.interceptor.js';
+import { SerializeInterceptor } from './app/interceptors/serialize.interceptor.js';
+import { JwtAuthGuard } from './shared/guards/jwt-auth.guard.js';
+import { CacheManagerModule } from './modules/cache/cache-manager.module.js';
+import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module.js';
+import { ScraperModule } from './modules/scraper/scraper.module.js';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { OfferModule } from './modules/offer/offer.module';
-import { CityModule } from './modules/city/city.module';
+import { OfferModule } from './modules/offer/offer.module.js';
+import { CityModule } from './modules/city/city.module.js';
+import { AdminInvitationModule } from './modules/admin-invitation/admin-invitation.module.js';
+import { AdminModule } from './modules/admin/admin.module.js';
+import { HealthModule } from './modules/health/health.module.js';
 
 @Module({
   imports: [
@@ -43,16 +39,12 @@ import { CityModule } from './modules/city/city.module';
     EmailModule,
     UserTokenModule,
     JwtManagerModule,
-    AddressModule,
-    ApplicationModule,
-    ContactModule,
-    SkillModule,
     ScraperModule,
-    NoteModule,
-    TodoModule,
-    ApplicationHistoryModule,
     OfferModule,
     CityModule,
+    AdminInvitationModule,
+    AdminModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [

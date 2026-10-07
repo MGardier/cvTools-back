@@ -1,7 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { CityController } from './city.controller';
-import { CityService } from './city.service';
+import { CityController } from './city.controller.js';
+import { CityService } from './city.service.js';
 
 @Module({
   imports: [HttpModule],

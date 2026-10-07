@@ -2,15 +2,15 @@ import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ConfigService } from '@nestjs/config';
-import { TokenType } from 'src/modules/user-token/enums/token-type.enum';
-import { IGeneratedJwt, IPayloadJwt } from './types';
+import { TokenType } from '#src/modules/user-token/enums/token-type.enum.js';
+import { IGeneratedJwt, IPayloadJwt } from './types.js';
 
 @Injectable()
 export class JwtManagerService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
   async generate(
     payload: IPayloadJwt,
@@ -18,8 +18,11 @@ export class JwtManagerService {
   ): Promise<IGeneratedJwt> {
     const expiresIn = this.__getExpiration(type);
     const secret = this.__getSecret(type);
-    
-    const token = await this.jwtService.signAsync(payload,{ secret, expiresIn });
+
+    const token = await this.jwtService.signAsync(payload, {
+      secret,
+      expiresIn,
+    });
 
     return { token, expiresIn };
   }
@@ -29,7 +32,6 @@ export class JwtManagerService {
       secret: this.__getSecret(type),
     });
   }
-
 
   // =============================================================================
   //                               PRIVATE

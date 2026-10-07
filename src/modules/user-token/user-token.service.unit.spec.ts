@@ -1,27 +1,27 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { Mocked } from 'vitest';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
-import { PrismaTokenType, UserToken } from '@prisma/client';
-import { UserTokenService } from './user-token.service';
-import { JwtManagerService } from '../jwt-manager/jwt-manager.service';
-import { UserTokenRepository } from './user-token.repository';
+import type { UserToken } from '#prisma/generated/client.js';
+import { PrismaTokenType } from '#prisma/generated/client.js';
+import { UserTokenService } from './user-token.service.js';
+import { JwtManagerService } from '../jwt-manager/jwt-manager.service.js';
+import { UserTokenRepository } from './user-token.repository.js';
 import { ConfigService } from '@nestjs/config';
-import { TokenType } from './enums/token-type.enum';
-import { UtilHash } from 'src/shared/utils/hash.util';
-import { UtilRepository } from 'src/shared/utils/repository.util';
-import { UtilDate } from 'src/shared/utils/date.util';
-import { ErrorCodeEnum } from 'src/shared/enums/error-codes.enum';
-import { IPayloadJwt } from 'src/modules/jwt-manager/types';
+import { TokenType } from './enums/token-type.enum.js';
+import { UtilHash } from '#src/shared/utils/hash.util.js';
+import { UtilRepository } from '#src/shared/utils/repository.util.js';
+import { UtilDate } from '#src/shared/utils/date.util.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import type { IPayloadJwt } from '#src/modules/jwt-manager/types.js';
 
-
-
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('mocked-uuid-123'),
+vi.mock('uuid', () => ({
+  v4: vi.fn().mockReturnValue('mocked-uuid-123'),
 }));
 
 // =============================================================================
 //                            MOCK DATA
 // =============================================================================
-
 
 const makeUserToken = (overrides: Partial<UserToken> = {}): UserToken => ({
   id: 1,
@@ -36,16 +36,15 @@ const makeUserToken = (overrides: Partial<UserToken> = {}): UserToken => ({
 
 const mockPayload: IPayloadJwt = { sub: 1, email: 'test@test.com' };
 
-
 // =============================================================================
 //                           DESCRIBE
 // =============================================================================
 
 describe('UserTokenService', () => {
   let userTokenService: UserTokenService;
-  let jwtManagerService: jest.Mocked<JwtManagerService>;
-  let userTokenRepository: jest.Mocked<UserTokenRepository>;
-  let configService: jest.Mocked<ConfigService>;
+  let jwtManagerService: Mocked<JwtManagerService>;
+  let userTokenRepository: Mocked<UserTokenRepository>;
+  let configService: Mocked<ConfigService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -54,21 +53,21 @@ describe('UserTokenService', () => {
         {
           provide: JwtManagerService,
           useValue: {
-            generate: jest.fn(),
-            verify: jest.fn(),
+            generate: vi.fn(),
+            verify: vi.fn(),
           },
         },
         {
           provide: UserTokenRepository,
           useValue: {
-            create: jest.fn(),
-            findByUuid: jest.fn(),
+            create: vi.fn(),
+            findByUuid: vi.fn(),
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
         },
       ],
@@ -79,8 +78,7 @@ describe('UserTokenService', () => {
     userTokenRepository = module.get(UserTokenRepository);
     configService = module.get(ConfigService);
 
-    
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // =============================================================================
@@ -93,31 +91,42 @@ describe('UserTokenService', () => {
       const hashedToken = 'hashed_jwt_token';
       const expiresIn = 3600;
       const mockExpiresAt = new Date('2026-04-02T12:00:00Z');
-      const mockUuid =  'mocked-uuid-123';
-      const createdUserToken = makeUserToken({ token: hashedToken, type: PrismaTokenType.CONFIRM_ACCOUNT });
+      const mockUuid = 'mocked-uuid-123';
+      const createdUserToken = makeUserToken({
+        token: hashedToken,
+        type: PrismaTokenType.CONFIRM_ACCOUNT,
+      });
 
-      jwtManagerService.generate.mockResolvedValue({ token: rawToken, expiresIn });
+      jwtManagerService.generate.mockResolvedValue({
+        token: rawToken,
+        expiresIn,
+      });
       configService.get.mockReturnValue(12);
-      jest.spyOn(UtilHash, 'hash').mockResolvedValue(hashedToken);
-      jest.spyOn(UtilDate, '__convertExpiresToDate').mockReturnValue(mockExpiresAt);
-      jest.spyOn(UtilRepository, 'toPrismaTokenType').mockReturnValue(PrismaTokenType.CONFIRM_ACCOUNT);
- 
+      vi.spyOn(UtilHash, 'hash').mockResolvedValue(hashedToken);
+      vi.spyOn(UtilDate, '__convertExpiresToDate').mockReturnValue(
+        mockExpiresAt,
+      );
+      vi.spyOn(UtilRepository, 'toPrismaTokenType').mockReturnValue(
+        PrismaTokenType.CONFIRM_ACCOUNT,
+      );
 
       userTokenRepository.create.mockResolvedValue(createdUserToken);
 
-      const result = await userTokenService.generateAndSave(mockPayload, TokenType.CONFIRM_ACCOUNT);
+      const result = await userTokenService.generateAndSave(
+        mockPayload,
+        TokenType.CONFIRM_ACCOUNT,
+      );
 
       expect(jwtManagerService.generate).toHaveBeenCalledWith(
         {
           ...mockPayload,
-          uuid: mockUuid
+          uuid: mockUuid,
         },
         TokenType.CONFIRM_ACCOUNT,
       );
 
       expect(UtilHash.hash).toHaveBeenCalledWith(rawToken, 12);
 
-     
       expect(userTokenRepository.create).toHaveBeenCalledWith(
         {
           token: hashedToken,
@@ -128,7 +137,10 @@ describe('UserTokenService', () => {
         mockPayload.sub,
       );
 
-      expect(result).toEqual({ userToken: createdUserToken, rawToken: rawToken });
+      expect(result).toEqual({
+        userToken: createdUserToken,
+        rawToken: rawToken,
+      });
     });
   });
 
@@ -145,12 +157,18 @@ describe('UserTokenService', () => {
 
       jwtManagerService.verify.mockResolvedValue(payloadWithUuid);
       userTokenRepository.findByUuid.mockResolvedValue(userToken);
-      jest.spyOn(UtilHash, 'compare').mockResolvedValue(true);
+      vi.spyOn(UtilHash, 'compare').mockResolvedValue(true);
 
-      const result = await userTokenService.decodeAndGet(rawToken, TokenType.REFRESH);
+      const result = await userTokenService.decodeAndGet(
+        rawToken,
+        TokenType.REFRESH,
+      );
 
-      expect(jwtManagerService.verify).toHaveBeenCalledWith(rawToken, TokenType.REFRESH);
-    
+      expect(jwtManagerService.verify).toHaveBeenCalledWith(
+        rawToken,
+        TokenType.REFRESH,
+      );
+
       expect(userTokenRepository.findByUuid).toHaveBeenCalledWith('uuid-123');
 
       expect(UtilHash.compare).toHaveBeenCalledWith(rawToken, userToken.token);
@@ -159,20 +177,26 @@ describe('UserTokenService', () => {
     });
 
     it('should throw UnauthorizedException when payload has no uuid', async () => {
-      jwtManagerService.verify.mockResolvedValue({ ...mockPayload, uuid: undefined });
+      jwtManagerService.verify.mockResolvedValue({
+        ...mockPayload,
+        uuid: undefined,
+      });
 
-      await expect(userTokenService.decodeAndGet(rawToken, TokenType.REFRESH)).rejects.toThrow(
-        new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID),
-      );
+      await expect(
+        userTokenService.decodeAndGet(rawToken, TokenType.REFRESH),
+      ).rejects.toThrow(new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID));
     });
 
     it('should throw UnauthorizedException when token is not found by uuid', async () => {
-      jwtManagerService.verify.mockResolvedValue({ ...mockPayload, uuid: 'unknown-uuid' });
+      jwtManagerService.verify.mockResolvedValue({
+        ...mockPayload,
+        uuid: 'unknown-uuid',
+      });
       userTokenRepository.findByUuid.mockResolvedValue(null);
 
-      await expect(userTokenService.decodeAndGet(rawToken, TokenType.REFRESH)).rejects.toThrow(
-        new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID),
-      );
+      await expect(
+        userTokenService.decodeAndGet(rawToken, TokenType.REFRESH),
+      ).rejects.toThrow(new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID));
     });
 
     it('should throw UnauthorizedException when hash does not match', async () => {
@@ -181,11 +205,11 @@ describe('UserTokenService', () => {
 
       jwtManagerService.verify.mockResolvedValue(payloadWithUuid);
       userTokenRepository.findByUuid.mockResolvedValue(userToken);
-      jest.spyOn(UtilHash, 'compare').mockResolvedValue(false);
+      vi.spyOn(UtilHash, 'compare').mockResolvedValue(false);
 
-      await expect(userTokenService.decodeAndGet(rawToken, TokenType.REFRESH)).rejects.toThrow(
-        new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID),
-      );
+      await expect(
+        userTokenService.decodeAndGet(rawToken, TokenType.REFRESH),
+      ).rejects.toThrow(new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID));
     });
   });
 });
