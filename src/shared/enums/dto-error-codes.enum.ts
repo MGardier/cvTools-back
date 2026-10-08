@@ -1,25 +1,6 @@
-export enum DtoErrorCodeEnum {
-  /********* EMAIL *********/
-  EMAIL_INVALID = 'EMAIL_INVALID',
-  EMAIL_REQUIRED = 'EMAIL_REQUIRED',
+import { DtoErrorCode, type TDtoErrorCode } from '@cvtools/contracts';
 
-  /********* PASSWORD *********/
-  PASSWORD_REQUIRED = 'PASSWORD_REQUIRED',
-  PASSWORD_MIN_LENGTH = 'PASSWORD_MIN_LENGTH',
-  PASSWORD_WEAK = 'PASSWORD_WEAK',
-
-  /********* KEYWORD *********/
-  KEYWORD_REQUIRED = 'KEYWORD_REQUIRED',
-  KEYWORD_TOO_LONG = 'KEYWORD_TOO_LONG',
-
-  /********* CITY *********/
-  CITY_OR_POSTAL_CODE_REQUIRED = 'CITY_OR_POSTAL_CODE_REQUIRED',
-  CITY_TOO_LONG = 'CITY_TOO_LONG',
-  CITY_POSTAL_CODE_TOO_LONG = 'CITY_POSTAL_CODE_TOO_LONG',
-  CITY_LIMIT_INVALID = 'CITY_LIMIT_INVALID',
-
-  /********* GEO CODES (INSEE) *********/
-  CITY_CODE_INVALID = 'CITY_CODE_INVALID',
-  DEPARTMENT_CODE_INVALID = 'DEPARTMENT_CODE_INVALID',
-  REGION_CODE_INVALID = 'REGION_CODE_INVALID',
-}
+// Single source of truth: @cvtools/contracts. Kept under this name so existing
+// `DtoErrorCodeEnum.X` usages (value and type) stay unchanged.
+export const DtoErrorCodeEnum = DtoErrorCode;
+export type DtoErrorCodeEnum = TDtoErrorCode;
