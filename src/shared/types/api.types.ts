@@ -1,3 +1,5 @@
+import type { TErrorData } from '@cvtools/contracts';
+
 export interface IApiResponse<T = unknown> {
   success: boolean;
   status: number;
@@ -5,6 +7,27 @@ export interface IApiResponse<T = unknown> {
   data?: T;
   timestamp: string;
   path: string;
+}
+
+/** Route metadata carried by an oRPC contract procedure (`~orpc`). */
+export interface IOrpcRouteMeta {
+  route?: { successStatus?: number };
+}
+
+/** Result of mapping any exception to an HTTP error (status + code). */
+export interface IErrorDescriptor {
+  status: number;
+  code: string;
+  errors?: string[];
+}
+
+/** Error response body, oRPC error format (also used by Nest filters). */
+export interface IErrorResponseBody {
+  defined: false;
+  code: string;
+  status: number;
+  message: string;
+  data: TErrorData;
 }
 
 export interface ILogContext {

@@ -1,7 +1,7 @@
 import type { Request } from 'express';
 import type { User } from '#prisma/generated/client.js';
 import type { IPayloadJwt } from '#src/modules/jwt-manager/types.js';
-import type { IRefreshTokenPayload } from '#src/shared/strategies/jwt-refresh.strategy.js';
+import type { IRefreshTokenPayload } from '#src/app/strategies/jwt-refresh.strategy.js';
 
 export interface IAuthenticatedRequest extends Request {
   user: IPayloadJwt;
