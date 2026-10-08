@@ -2,10 +2,10 @@ import type { ConfigService } from '@nestjs/config';
 import type {
   IOAuthRedirectParams,
   TOAuthRedirectType,
-} from '../types/auth.types.js';
-import { ErrorCodeEnum } from '../enums/error-codes.enum.js';
+} from '#src/shared/types/auth.types.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
 
-export abstract class UtilOAuth {
+export abstract class OAuth {
   static buildRedirectUrl(
     configService: ConfigService,
     type: TOAuthRedirectType,

@@ -3,7 +3,7 @@ import { PrismaTokenType } from '#prisma/generated/client.js';
 import type { TSortItem } from '#src/shared/types/repository.types.js';
 import { TokenType } from '#src/modules/user-token/enums/token-type.enum.js';
 
-export abstract class UtilRepository {
+export abstract class Repository {
   static getSortedColumns<TData>(
     columns?: TSortItem<TData>[],
   ): Record<keyof TData, Prisma.SortOrder>[] {

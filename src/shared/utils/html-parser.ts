@@ -2,8 +2,8 @@ import * as cheerio from 'cheerio';
 import {
   HARD_BLOCK_PATTERNS,
   SOFT_BLOCK_PATTERNS,
-} from '../constants/url.constant.js';
-export abstract class UtilHtmlParser {
+} from '#src/shared/constants/url.constant.js';
+export abstract class HtmlParser {
   private static MAX_TEXT_LENGTH = 15_000;
 
   static extractJsonLd(html: string): Record<string, unknown> | null {

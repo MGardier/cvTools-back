@@ -1,11 +1,11 @@
 import { BadRequestException } from '@nestjs/common';
-import { ErrorCodeEnum } from '../enums/error-codes.enum.js';
+import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
 import {
   ALLOWED_DOMAINS,
   BLOCKED_IP_PATTERNS,
-} from '../constants/url.constant.js';
+} from '#src/shared/constants/url.constant.js';
 
-export abstract class UtilUrlValidator {
+export abstract class UrlValidator {
   private static MAX_URL_LENGTH = 2_048;
   static validateUrl(input: string): string {
     const trimmed = input.trim();

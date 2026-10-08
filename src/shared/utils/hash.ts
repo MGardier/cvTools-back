@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
 
-export abstract class UtilHash {
+export abstract class Hash {
   private static DEFAULT_SALT_ROUNDS = 12;
 
   static async hash(plainText: string, saltRounds?: number): Promise<string> {
