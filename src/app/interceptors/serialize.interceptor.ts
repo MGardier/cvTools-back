@@ -14,8 +14,9 @@ import {
   SERIALIZE_KEY,
   SKIP_SERIALIZE_KEY,
   TDtoClass,
-} from '#src/shared/decorators/serialize.decorator.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+} from '#shared/decorators/serialize.decorator.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import { ContractRoute } from '#shared/utils/contract-route.js';
 
 @Injectable()
 export class SerializeInterceptor implements NestInterceptor {
@@ -29,7 +30,11 @@ export class SerializeInterceptor implements NestInterceptor {
       [context.getHandler(), context.getClass()],
     );
 
-    if (skipSerialize) {
+    // oRPC contract routes are serialized by their output schema.
+    if (
+      skipSerialize ||
+      ContractRoute.isContractRoute(this.reflector, context)
+    ) {
       return next.handle();
     }
 

@@ -7,17 +7,26 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { Response, Request } from 'express';
-import { IApiResponse } from '#src/shared/types/api.types.js';
+import { Reflector } from '@nestjs/core';
+import { IApiResponse } from '#shared/types/api.types.js';
+import { ContractRoute } from '#shared/utils/contract-route.js';
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<
   T,
   IApiResponse<T>
 > {
+  constructor(private readonly reflector: Reflector) {}
+
   intercept(
     context: ExecutionContext,
     next: CallHandler<T>,
   ): Observable<IApiResponse<T>> {
+    // oRPC contract routes build their own envelope (ContractRoute.buildSuccessResponse()) and write the response.
+    if (ContractRoute.isContractRoute(this.reflector, context)) {
+      return next.handle() as Observable<IApiResponse<T>>;
+    }
+
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
