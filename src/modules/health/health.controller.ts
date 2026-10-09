@@ -6,8 +6,8 @@ import {
   PrismaHealthIndicator,
 } from '@nestjs/terminus';
 import { PrismaService } from '#prisma/prisma.service.js';
-import { Public } from '#src/shared/decorators/public.decorator.js';
-import { SkipSerialize } from '#src/shared/decorators/serialize.decorator.js';
+import { Public } from '#shared/decorators/public.decorator.js';
+import { SkipSerialize } from '#shared/decorators/serialize.decorator.js';
 
 @Controller('health')
 export class HealthController {
