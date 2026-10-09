@@ -3,7 +3,7 @@ import type { TErrorData } from '@cvtools/contracts';
 import type {
   IErrorDescriptor,
   IErrorResponseBody,
-} from '#src/shared/types/api.types.js';
+} from '#shared/types/api.types.js';
 
 /**
  * Builds the error response body shared by every route (oRPC error format):

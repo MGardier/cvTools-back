@@ -4,7 +4,7 @@ import type { Reflector } from '@nestjs/core';
 import { ImplementInterceptor } from '@orpc/nest';
 import type { TEnvelope } from '@cvtools/contracts';
 import type { Request } from 'express';
-import type { IOrpcRouteMeta } from '#src/shared/types/api.types.js';
+import type { IOrpcRouteMeta } from '#shared/types/api.types.js';
 
 /** Helpers for oRPC contract routes (@cvtools/contracts). */
 export abstract class ContractRoute {

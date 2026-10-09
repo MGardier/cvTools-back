@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import {
   HARD_BLOCK_PATTERNS,
   SOFT_BLOCK_PATTERNS,
-} from '#src/shared/constants/url.constant.js';
+} from '#shared/constants/url.constant.js';
 export abstract class HtmlParser {
   private static MAX_TEXT_LENGTH = 15_000;
 
