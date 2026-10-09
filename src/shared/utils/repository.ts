@@ -1,7 +1,7 @@
 import type { Prisma } from '#prisma/generated/client.js';
 import { PrismaTokenType } from '#prisma/generated/client.js';
 import type { TSortItem } from '#shared/types/repository.types.js';
-import { TokenType } from '#modules/user-token/enums/token-type.enum.js';
+import { TokenType } from '#modules/auth/user-token/enums/token-type.enum.js';
 
 export abstract class Repository {
   static getSortedColumns<TData>(

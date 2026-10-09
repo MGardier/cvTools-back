@@ -13,7 +13,7 @@ import { Hash } from '#shared/utils/hash.js';
 import { Repository } from '#shared/utils/repository.js';
 import { DateHelper } from '#shared/utils/date-helper.js';
 import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
-import type { IPayloadJwt } from '#modules/jwt-manager/types.js';
+import type { IPayloadJwt } from '#modules/auth/jwt-manager/types.js';
 
 vi.mock('uuid', () => ({
   v4: vi.fn().mockReturnValue('mocked-uuid-123'),

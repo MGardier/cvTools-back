@@ -16,12 +16,12 @@ import {
 } from '#prisma/generated/client.js';
 import { AuthService } from './auth.service.js';
 import { UserService } from '../user/user.service.js';
-import { UserTokenService } from '../user-token/user-token.service.js';
+import { UserTokenService } from './user-token/user-token.service.js';
 import { EmailService } from '../email/email.service.js';
 import { ConfigService } from '@nestjs/config';
 import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
 import { Hash } from '#shared/utils/hash.js';
-import { TokenType } from '#modules/user-token/enums/token-type.enum.js';
+import { TokenType } from '#modules/auth/user-token/enums/token-type.enum.js';
 
 // =============================================================================
 //                            MOCK DATA

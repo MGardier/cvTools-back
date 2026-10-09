@@ -5,7 +5,7 @@ import { JwtManagerService } from '../jwt-manager/jwt-manager.service.js';
 import { v4 as uuidv4 } from 'uuid';
 import { TokenType } from './enums/token-type.enum.js';
 import { UserTokenRepository } from './user-token.repository.js';
-import { IGeneratedJwt, IPayloadJwt } from '#modules/jwt-manager/types.js';
+import { IGeneratedJwt, IPayloadJwt } from '#modules/auth/jwt-manager/types.js';
 import { Repository } from '#shared/utils/repository.js';
 import { Hash } from '#shared/utils/hash.js';
 import { UserToken } from '#prisma/generated/client.js';
