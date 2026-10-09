@@ -10,7 +10,7 @@ import {
   FORMAT_FROM_URL_PROMPT,
   FETCH_AND_EXTRACT_PROMPT,
 } from './constants/extraction-prompts.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
 import { extractedApplicationSchema } from './validation/extracted-application.schema.js';
 import { NotAJobPostingError } from './errors/not-a-job-posting.error.js';
 

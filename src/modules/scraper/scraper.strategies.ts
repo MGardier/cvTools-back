@@ -3,8 +3,8 @@ import { JinaReaderFetcher } from './fetchers/jina-reader.fetcher.js';
 import { LlmService } from '../llm/llm.service.js';
 import { TExtractedApplication } from '../llm/types.js';
 import { NotAJobPostingError } from '../llm/errors/not-a-job-posting.error.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import { UtilHtmlParser } from '#src/shared/utils/html-parser.util.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import { HtmlParser } from '#shared/utils/html-parser.js';
 
 @Injectable()
 export class ScraperStrategies {
@@ -21,7 +21,7 @@ export class ScraperStrategies {
   ): Promise<TExtractedApplication | null> {
     if (!html) return null;
 
-    const jsonLd = UtilHtmlParser.extractJsonLd(html);
+    const jsonLd = HtmlParser.extractJsonLd(html);
     if (!jsonLd) return null;
 
     return this.tryLlmStructure(
@@ -38,9 +38,8 @@ export class ScraperStrategies {
   ): Promise<TExtractedApplication | null> {
     if (!html) return null;
 
-    const visibleText = UtilHtmlParser.extractVisibleText(html);
-    if (!visibleText || !UtilHtmlParser.isUsableContent(visibleText))
-      return null;
+    const visibleText = HtmlParser.extractVisibleText(html);
+    if (!visibleText || !HtmlParser.isUsableContent(visibleText)) return null;
 
     return this.tryLlmStructure(
       { fetchText: visibleText, sourceUrl: url },
@@ -58,7 +57,7 @@ export class ScraperStrategies {
     if (
       !jinaResult.success ||
       !jinaResult.data ||
-      !UtilHtmlParser.isUsableContent(jinaResult.data)
+      !HtmlParser.isUsableContent(jinaResult.data)
     ) {
       return null;
     }

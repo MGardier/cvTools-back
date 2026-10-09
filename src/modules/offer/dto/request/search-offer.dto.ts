@@ -17,7 +17,7 @@ import {
   EPublishedSince,
   ERemotePolicy,
 } from '../../types.js';
-import { DtoErrorCodeEnum } from '#src/shared/enums/dto-error-codes.enum.js';
+import { DtoErrorCodeEnum } from '#shared/enums/dto-error-codes.enum.js';
 
 export class SearchOfferRequestDto {
   @IsString()

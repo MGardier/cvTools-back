@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CacheManagerService } from '#src/modules/cache/cache-manager.service.js';
+import { CacheManagerService } from '#modules/cache/cache-manager.service.js';
 import { FranceTravailProvider } from './providers/france-travail/france-travail.provider.js';
 import {
   IAggregatedProviderResult,

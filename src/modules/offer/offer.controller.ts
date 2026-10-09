@@ -5,8 +5,8 @@ import { AggregatedSearchResponseDto } from './dto/response/aggregated-search.dt
 import {
   SerializeWith,
   SkipSerialize,
-} from '#src/shared/decorators/serialize.decorator.js';
-import { Public } from '#src/shared/decorators/public.decorator.js';
+} from '#shared/decorators/serialize.decorator.js';
+import { Public } from '#shared/decorators/public.decorator.js';
 import { IProviderHealthCheck } from './types.js';
 
 @Controller('offer')

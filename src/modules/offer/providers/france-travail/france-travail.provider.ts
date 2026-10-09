@@ -20,7 +20,7 @@ import {
   IFranceTravailSearchResponse,
   IMappedApiError,
 } from './types.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
 import { FRANCE_TRAVAIL_ENDPOINTS } from './endpoint.js';
 
 @Injectable()
