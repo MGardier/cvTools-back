@@ -3,10 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { AuthGuard, AuthGuardAuthenticateOptions } from '@nestjs/passport';
 import type { Request, Response } from 'express';
 
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import { OAuthRedirectException } from '#src/shared/exceptions/oauth-redirect.exception.js';
-import { TAdminOAuthIdentity } from '#src/shared/types/request.types.js';
-import { UtilOAuth } from '#src/shared/utils/oauth.util.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import { OAuthRedirectException } from '#app/exceptions/oauth-redirect.exception.js';
+import { TAdminOAuthIdentity } from '#shared/types/request.types.js';
+import { OAuth } from '#shared/utils/oauth.js';
 
 @Injectable()
 export class GoogleAdminOauthGuard extends AuthGuard('google-admin') {
@@ -27,7 +27,7 @@ export class GoogleAdminOauthGuard extends AuthGuard('google-admin') {
       if (typeof token !== 'string' || !token) {
         const response = context.switchToHttp().getResponse<Response>();
         response.redirect(
-          UtilOAuth.buildRedirectUrl(this.configService, 'error', {
+          OAuth.buildRedirectUrl(this.configService, 'error', {
             errorCode: ErrorCodeEnum.ADMIN_INVITATION_TOKEN_MISSING,
           }),
         );
@@ -56,8 +56,8 @@ export class GoogleAdminOauthGuard extends AuthGuard('google-admin') {
 
     if (err || !user) {
       response.redirect(
-        UtilOAuth.buildRedirectUrl(this.configService, 'error', {
-          errorCode: UtilOAuth.resolveErrorCode(err),
+        OAuth.buildRedirectUrl(this.configService, 'error', {
+          errorCode: OAuth.resolveErrorCode(err),
         }),
       );
       throw new OAuthRedirectException();

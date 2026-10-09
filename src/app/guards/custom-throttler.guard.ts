@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { ErrorCodeEnum } from '../enums/error-codes.enum.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
 
 @Injectable()
 export class CustomThrottlerGuard extends ThrottlerGuard {
