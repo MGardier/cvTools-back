@@ -18,8 +18,8 @@ import { ICreateUser } from '../user/types.js';
 import { AuthService } from '../auth/auth.service.js';
 import { IAuthSession } from '../auth/types.js';
 import { AdminInvitationService } from '../admin-invitation/admin-invitation.service.js';
-import { UtilHash } from '#src/shared/utils/hash.util.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { Hash } from '#shared/utils/hash.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
 
 @Injectable()
 export class AdminService {
@@ -41,7 +41,7 @@ export class AdminService {
 
     const user = await this.__createAdminAndConsume(invitation, {
       loginMethod: LoginMethod.CLASSIC,
-      password: await UtilHash.hash(password, this.__getSaltRound()),
+      password: await Hash.hash(password, this.__getSaltRound()),
     });
 
     return { tokens: await this.authService.signIn(user), user };

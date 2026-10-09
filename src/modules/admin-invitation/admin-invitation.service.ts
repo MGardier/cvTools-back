@@ -10,8 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { AdminInvitationRepository } from './admin-invitation.repository.js';
 import { UserService } from '../user/user.service.js';
-import { UtilHash } from '#src/shared/utils/hash.util.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { Hash } from '#shared/utils/hash.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
 
 @Injectable()
 export class AdminInvitationService {
@@ -38,7 +38,7 @@ export class AdminInvitationService {
       await this.adminInvitationRepository.findActiveByEmail(normalizedEmail);
 
     const rawToken = uuidv4();
-    const tokenHash = await UtilHash.hash(rawToken, this.__getSaltRound());
+    const tokenHash = await Hash.hash(rawToken, this.__getSaltRound());
 
     // Atomic: revoking the previous invitation and creating the new one must
     // not leave the email without a valid invitation on partial failure.
@@ -92,7 +92,7 @@ export class AdminInvitationService {
       throw new UnauthorizedException(ErrorCodeEnum.TOKEN_EXPIRED);
     }
 
-    const isValid = await UtilHash.compare(rawToken, invitation.tokenHash);
+    const isValid = await Hash.compare(rawToken, invitation.tokenHash);
     if (!isValid) {
       throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
     }
