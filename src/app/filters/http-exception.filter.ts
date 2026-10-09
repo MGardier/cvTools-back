@@ -41,7 +41,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     );
   }
 
-  /** Logs the exception and maps it to { status, code, errors? }. Must not send the response: also called by the oRPC error interceptor. */
+  /** Logs the exception and maps it to { status, code, errors? }. Must not send the response: also called by ContractErrorBoundary (oRPC routes). */
   logAndMapError(exception: HttpException, request: Request): IErrorDescriptor {
     const statusCode = exception.getStatus();
 

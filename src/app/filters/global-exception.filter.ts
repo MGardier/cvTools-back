@@ -50,7 +50,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     );
   }
 
-  /** Logs any exception and maps it to { status, code, errors? }. Must not send the response: also called by the oRPC error interceptor. */
+  /** Logs any exception and maps it to { status, code, errors? }. Must not send the response: also called by ContractErrorBoundary (oRPC routes). */
   logAndMapError(exception: unknown, request: Request): IErrorDescriptor {
     if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       return this.prismaFilter.logAndMapError(exception, request);
