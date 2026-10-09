@@ -11,14 +11,14 @@ import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 
 import { errorCodeSchema } from '@cvtools/contracts';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import { DtoErrorCodeEnum } from '#src/shared/enums/dto-error-codes.enum.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import { DtoErrorCodeEnum } from '#shared/enums/dto-error-codes.enum.js';
 import {
   IErrorDescriptor,
   IHttpLogContext,
   IStructuredLog,
-} from '#src/shared/types/api.types.js';
-import { ErrorResponse } from '#src/shared/utils/error-response.js';
+} from '#shared/types/api.types.js';
+import { ErrorResponse } from '#shared/utils/error-response.js';
 
 type LogFormat = 'json' | 'visual' | 'both';
 

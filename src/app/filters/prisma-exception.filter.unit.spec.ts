@@ -3,8 +3,8 @@ import type { ArgumentsHost } from '@nestjs/common';
 import { HttpStatus, Logger } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import { Prisma } from '#prisma/generated/client.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import { PrismaErrorEnum } from '#src/shared/enums/prisma-error-codes.enum.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import { PrismaErrorEnum } from '#shared/enums/prisma-error-codes.enum.js';
 import { PrismaClientExceptionFilter } from './prisma-exception.filter.js';
 
 // =============================================================================

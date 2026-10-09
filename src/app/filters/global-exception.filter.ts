@@ -10,14 +10,14 @@ import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { Prisma } from '#prisma/generated/client.js';
 
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import { OAuthRedirectException } from '#src/app/exceptions/oauth-redirect.exception.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import { OAuthRedirectException } from '#app/exceptions/oauth-redirect.exception.js';
 import {
   IErrorDescriptor,
   IHttpLogContext,
   IStructuredLog,
-} from '#src/shared/types/api.types.js';
-import { ErrorResponse } from '#src/shared/utils/error-response.js';
+} from '#shared/types/api.types.js';
+import { ErrorResponse } from '#shared/utils/error-response.js';
 import { HttpExceptionFilter } from './http-exception.filter.js';
 import { PrismaClientExceptionFilter } from './prisma-exception.filter.js';
 

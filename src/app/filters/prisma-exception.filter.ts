@@ -9,15 +9,15 @@ import { ConfigService } from '@nestjs/config';
 import { Prisma } from '#prisma/generated/client.js';
 import type { Request, Response } from 'express';
 
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import { PrismaErrorEnum } from '#src/shared/enums/prisma-error-codes.enum.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import { PrismaErrorEnum } from '#shared/enums/prisma-error-codes.enum.js';
 import {
   IErrorDescriptor,
   IPrismaDriverAdapterErrorMeta,
   IPrismaLogContext,
   IStructuredLog,
-} from '#src/shared/types/api.types.js';
-import { ErrorResponse } from '#src/shared/utils/error-response.js';
+} from '#shared/types/api.types.js';
+import { ErrorResponse } from '#shared/utils/error-response.js';
 
 type LogFormat = 'json' | 'visual' | 'both';
 
