@@ -7,8 +7,7 @@ import {
   cityApiResponseSchema,
   TRawCityApiItem,
 } from './validation/city-api-response.schema.js';
-import { SearchCityRequestDto } from './dto/request/search-city.dto.js';
-import { CitySearchItemResponseDto } from './dto/response/city-search-item.dto.js';
+import type { TCitySearchItem, TSearchCityQuery } from '@cvtools/contracts';
 
 @Injectable()
 export class CityService {
@@ -16,9 +15,7 @@ export class CityService {
 
   constructor(private readonly httpService: HttpService) {}
 
-  async search(
-    dto: SearchCityRequestDto,
-  ): Promise<CitySearchItemResponseDto[]> {
+  async search(dto: TSearchCityQuery): Promise<TCitySearchItem[]> {
     const params: Record<string, string | number> = {
       boost: 'population',
       limit: dto.limit,
@@ -44,7 +41,7 @@ export class CityService {
     return result.data.map(this.toResponseDto);
   }
 
-  private toResponseDto(raw: TRawCityApiItem): CitySearchItemResponseDto {
+  private toResponseDto(raw: TRawCityApiItem): TCitySearchItem {
     return {
       code: raw.code,
       name: raw.nom,

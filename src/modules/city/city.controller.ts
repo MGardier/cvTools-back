@@ -1,20 +1,23 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { Implement, implement } from '@orpc/nest';
+import { contract } from '@cvtools/contracts';
 import { CityService } from './city.service.js';
-import { SearchCityRequestDto } from './dto/request/search-city.dto.js';
-import { CitySearchItemResponseDto } from './dto/response/city-search-item.dto.js';
-import { Public } from '#src/shared/decorators/public.decorator.js';
-import { SerializeWith } from '#src/shared/decorators/serialize.decorator.js';
+import { Public } from '#shared/decorators/public.decorator.js';
+import { ContractRoute } from '#shared/utils/contract-route.js';
 
-@Controller('city')
+@Controller()
 export class CityController {
   constructor(private readonly cityService: CityService) {}
 
   @Public()
-  @Get('search')
-  @SerializeWith(CitySearchItemResponseDto)
-  async search(
-    @Query() dto: SearchCityRequestDto,
-  ): Promise<CitySearchItemResponseDto[]> {
-    return this.cityService.search(dto);
+  @Implement(contract.city.search)
+  search() {
+    return implement(contract.city.search).handler(async ({ input, context }) =>
+      ContractRoute.buildSuccessResponse(
+        contract.city.search,
+        await this.cityService.search(input),
+        context.request,
+      ),
+    );
   }
 }
