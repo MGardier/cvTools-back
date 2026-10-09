@@ -19,9 +19,9 @@ import { UserService } from '../user/user.service.js';
 import { UserTokenService } from '../user-token/user-token.service.js';
 import { EmailService } from '../email/email.service.js';
 import { ConfigService } from '@nestjs/config';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import { UtilHash } from '#src/shared/utils/hash.util.js';
-import { TokenType } from '#src/modules/user-token/enums/token-type.enum.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import { Hash } from '#shared/utils/hash.js';
+import { TokenType } from '#modules/user-token/enums/token-type.enum.js';
 
 // =============================================================================
 //                            MOCK DATA
@@ -122,7 +122,7 @@ describe('AuthService', () => {
     it('should return the user when credentials are valid', async () => {
       const user = makeUser();
       userService.findOneByEmail.mockResolvedValue(user);
-      vi.spyOn(UtilHash, 'compare').mockResolvedValue(true);
+      vi.spyOn(Hash, 'compare').mockResolvedValue(true);
 
       const result = await authService.validateUser(
         'test@test.com',
@@ -159,7 +159,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException when password is invalid', async () => {
       userService.findOneByEmail.mockResolvedValue(makeUser());
-      vi.spyOn(UtilHash, 'compare').mockResolvedValue(false);
+      vi.spyOn(Hash, 'compare').mockResolvedValue(false);
 
       await expect(
         authService.validateUser('test@test.com', 'wrong_password'),
@@ -174,7 +174,7 @@ describe('AuthService', () => {
           status: UserStatus.PENDING,
         }),
       );
-      vi.spyOn(UtilHash, 'compare').mockResolvedValue(true);
+      vi.spyOn(Hash, 'compare').mockResolvedValue(true);
 
       await expect(
         authService.validateUser('test@test.com', 'password'),
@@ -187,7 +187,7 @@ describe('AuthService', () => {
           status: UserStatus.BANNED,
         }),
       );
-      vi.spyOn(UtilHash, 'compare').mockResolvedValue(true);
+      vi.spyOn(Hash, 'compare').mockResolvedValue(true);
 
       await expect(
         authService.validateUser('test@test.com', 'password'),
@@ -443,7 +443,7 @@ describe('AuthService', () => {
         type: PrismaTokenType.CONFIRM_ACCOUNT,
       });
 
-      vi.spyOn(UtilHash, 'hash').mockResolvedValue(hashedPassword);
+      vi.spyOn(Hash, 'hash').mockResolvedValue(hashedPassword);
       configService.get.mockReturnValue(frontUrl);
       userService.create.mockResolvedValue(createdUser);
       userTokenService.generateAndSave.mockResolvedValue({
@@ -653,7 +653,7 @@ describe('AuthService', () => {
         userToken,
         payload: mockPayload,
       });
-      vi.spyOn(UtilHash, 'hash').mockResolvedValue(hashedPassword);
+      vi.spyOn(Hash, 'hash').mockResolvedValue(hashedPassword);
       userService.update.mockResolvedValue(makeUser());
       userTokenService.remove.mockResolvedValue(userToken);
 

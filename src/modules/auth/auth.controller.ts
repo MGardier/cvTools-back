@@ -1,45 +1,37 @@
 import {
   BadRequestException,
-  Body,
   Controller,
-  Delete,
   Get,
-  HttpCode,
-  Patch,
-  Post,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { Implement, implement } from '@orpc/nest';
+import { contract } from '@cvtools/contracts';
 import { AuthService } from './auth.service.js';
-import { SignUpRequestDto } from './dto/request/sign-up.dto.js';
-import { ForgotPasswordRequestDto } from './dto/request/forgot-password.dto.js';
-import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto.js';
-import { ResetPasswordRequestDto } from './dto/request/reset-password.dto.js';
-import { UserResponseDto } from './dto/response/user.dto.js';
 
-import { Public } from '#src/shared/decorators/public.decorator.js';
-import {
-  SerializeWith,
-  SkipSerialize,
-} from '#src/shared/decorators/serialize.decorator.js';
+import { Public } from '#shared/decorators/public.decorator.js';
+import { SkipSerialize } from '#shared/decorators/serialize.decorator.js';
 import { LoginMethod } from '#prisma/generated/client.js';
-import { GoogleOauthGuard } from '#src/shared/guards/google-oauth.guard.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import { GithubOauthGuard } from '#src/shared/guards/github-oauth.guard.js';
-import { CredentialsAuthGuard } from '#src/shared/guards/credentials-auth.guard.js';
-import { JwtRefreshGuard } from '#src/shared/guards/jwt-refresh.guard.js';
+import { GoogleOauthGuard } from '#app/guards/google-oauth.guard.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import { GithubOauthGuard } from '#app/guards/github-oauth.guard.js';
+import { CredentialsAuthGuard } from '#app/guards/credentials-auth.guard.js';
+import { JwtRefreshGuard } from '#app/guards/jwt-refresh.guard.js';
 import { ConfigService } from '@nestjs/config';
-import { UtilOAuth } from '#src/shared/utils/oauth.util.js';
+import { OAuth } from '#shared/utils/oauth.js';
+import { ContractRoute } from '#shared/utils/contract-route.js';
 import type { Response } from 'express';
 import {
   IAuthenticatedRequest,
   IRefreshTokenRequest,
   IOAuthCallbackRequest,
   ISignInRequest,
-} from '#src/shared/types/request.types.js';
+} from '#shared/types/request.types.js';
 
-@Controller('auth')
+// No prefix: contract routes carry their full path (@cvtools/contracts),
+// OAuth redirect routes are prefixed manually.
+@Controller()
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -51,57 +43,75 @@ export class AuthController {
   // =============================================================================
 
   @Public()
-  @Post('signUp')
-  @SerializeWith(UserResponseDto)
-  async signUp(@Body() signUpDto: SignUpRequestDto): Promise<UserResponseDto> {
-    return await this.authService.signUp(signUpDto);
+  @Implement(contract.auth.signUp)
+  signUp() {
+    return implement(contract.auth.signUp).handler(async ({ input, context }) =>
+      ContractRoute.buildSuccessResponse(
+        contract.auth.signUp,
+        await this.authService.signUp(input),
+        context.request,
+      ),
+    );
   }
 
   @Public()
-  @Post('signIn')
   @UseGuards(CredentialsAuthGuard)
-  @SerializeWith(UserResponseDto)
-  async signIn(
+  @Implement(contract.auth.signIn)
+  signIn(
     @Req() req: ISignInRequest,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<UserResponseDto> {
-    const tokens = await this.authService.signIn(req.user);
-    this.authService.setAuthCookies(res, tokens);
-    return req.user;
+  ) {
+    return implement(contract.auth.signIn).handler(async ({ context }) => {
+      const tokens = await this.authService.signIn(req.user);
+      this.authService.setAuthCookies(res, tokens);
+      return ContractRoute.buildSuccessResponse(
+        contract.auth.signIn,
+        req.user,
+        context.request,
+      );
+    });
   }
 
-  @Get('me')
-  @SerializeWith(UserResponseDto)
-  async me(@Req() req: IAuthenticatedRequest): Promise<UserResponseDto> {
-    return this.authService.getCurrentUser(req.user.sub);
-  }
-
-  @Public()
-  @UseGuards(JwtRefreshGuard)
-  @Delete('logout')
-  @HttpCode(204)
-  @SkipSerialize()
-  async logout(
-    @Req() req: IRefreshTokenRequest,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<void> {
-    await this.authService.logout(req.user.refreshToken);
-
-    this.authService.clearAuthCookies(res);
+  @Implement(contract.auth.me)
+  me(@Req() req: IAuthenticatedRequest) {
+    return implement(contract.auth.me).handler(async ({ context }) =>
+      ContractRoute.buildSuccessResponse(
+        contract.auth.me,
+        await this.authService.getCurrentUser(req.user.sub),
+        context.request,
+      ),
+    );
   }
 
   @Public()
   @UseGuards(JwtRefreshGuard)
-  @HttpCode(201)
-  @Post('refresh')
-  @SerializeWith(UserResponseDto)
-  async refresh(
+  @Implement(contract.auth.logout)
+  logout(
     @Req() req: IRefreshTokenRequest,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<UserResponseDto> {
-    const authSession = await this.authService.refresh(req.user.refreshToken);
-    this.authService.setAuthCookies(res, authSession.tokens);
-    return authSession.user;
+  ) {
+    return implement(contract.auth.logout).handler(async () => {
+      await this.authService.logout(req.user.refreshToken);
+      this.authService.clearAuthCookies(res);
+    });
+  }
+
+  @Public()
+  @UseGuards(JwtRefreshGuard)
+  @Implement(contract.auth.refresh)
+  refresh(
+    @Req() req: IRefreshTokenRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return implement(contract.auth.refresh).handler(async ({ context }) => {
+      const authSession = await this.authService.refresh(req.user.refreshToken);
+      this.authService.setAuthCookies(res, authSession.tokens);
+      return ContractRoute.buildSuccessResponse(
+        contract.auth.refresh,
+        authSession.user,
+        context.request,
+      );
+    });
   }
 
   // =============================================================================
@@ -109,23 +119,31 @@ export class AuthController {
   // =============================================================================
 
   @Public()
-  @Post('resendConfirmAccount')
-  @SerializeWith(UserResponseDto)
-  async reSendConfirmAccount(
-    @Body() resendConfirmAccountDto: ForgotPasswordRequestDto,
-  ): Promise<UserResponseDto> {
-    return await this.authService.reSendConfirmAccount(
-      resendConfirmAccountDto.email,
+  @Implement(contract.auth.resendConfirmAccount)
+  reSendConfirmAccount() {
+    return implement(contract.auth.resendConfirmAccount).handler(
+      async ({ input, context }) =>
+        ContractRoute.buildSuccessResponse(
+          contract.auth.resendConfirmAccount,
+          await this.authService.reSendConfirmAccount(input.email),
+          context.request,
+        ),
     );
   }
 
   @Public()
-  @Patch('confirmAccount')
-  @SkipSerialize()
-  async confirmAccount(
-    @Body() confirmAccountDto: ConfirmAccountRequestDto,
-  ): Promise<void> {
-    return await this.authService.confirmAccount(confirmAccountDto);
+  @Implement(contract.auth.confirmAccount)
+  confirmAccount() {
+    return implement(contract.auth.confirmAccount).handler(
+      async ({ input, context }) => {
+        await this.authService.confirmAccount(input);
+        return ContractRoute.buildSuccessResponse(
+          contract.auth.confirmAccount,
+          undefined,
+          context.request,
+        );
+      },
+    );
   }
 
   // =============================================================================
@@ -133,21 +151,31 @@ export class AuthController {
   // =============================================================================
 
   @Public()
-  @Post('forgotPassword')
-  @SerializeWith(UserResponseDto)
-  async forgotPassword(
-    @Body() forgotPasswordDTO: ForgotPasswordRequestDto,
-  ): Promise<UserResponseDto> {
-    return await this.authService.forgotPassword(forgotPasswordDTO.email);
+  @Implement(contract.auth.forgotPassword)
+  forgotPassword() {
+    return implement(contract.auth.forgotPassword).handler(
+      async ({ input, context }) =>
+        ContractRoute.buildSuccessResponse(
+          contract.auth.forgotPassword,
+          await this.authService.forgotPassword(input.email),
+          context.request,
+        ),
+    );
   }
 
   @Public()
-  @Patch('resetPassword')
-  @SkipSerialize()
-  async resetPassword(
-    @Body() resetPasswordDto: ResetPasswordRequestDto,
-  ): Promise<void> {
-    return await this.authService.resetPassword(resetPasswordDto);
+  @Implement(contract.auth.resetPassword)
+  resetPassword() {
+    return implement(contract.auth.resetPassword).handler(
+      async ({ input, context }) => {
+        await this.authService.resetPassword(input);
+        return ContractRoute.buildSuccessResponse(
+          contract.auth.resetPassword,
+          undefined,
+          context.request,
+        );
+      },
+    );
   }
 
   // =============================================================================
@@ -155,7 +183,7 @@ export class AuthController {
   // =============================================================================
 
   @Public()
-  @Get('google')
+  @Get('auth/google')
   @UseGuards(GoogleOauthGuard)
   @SkipSerialize()
   googleAuth() {
@@ -163,7 +191,7 @@ export class AuthController {
   }
 
   @Public()
-  @Get('google/callback')
+  @Get('auth/google/callback')
   @UseGuards(GoogleOauthGuard)
   @SkipSerialize()
   async googleAuthCallback(
@@ -184,14 +212,14 @@ export class AuthController {
       this.authService.setAuthCookies(res, authSession.tokens);
 
       res.redirect(
-        UtilOAuth.buildRedirectUrl(this.configService, 'success', {
+        OAuth.buildRedirectUrl(this.configService, 'success', {
           loginMethod: LoginMethod.GOOGLE,
         }),
       );
     } catch (error: unknown) {
       res.redirect(
-        UtilOAuth.buildRedirectUrl(this.configService, 'error', {
-          errorCode: UtilOAuth.resolveErrorCode(error),
+        OAuth.buildRedirectUrl(this.configService, 'error', {
+          errorCode: OAuth.resolveErrorCode(error),
         }),
       );
     }
@@ -202,7 +230,7 @@ export class AuthController {
   // =============================================================================
 
   @Public()
-  @Get('github')
+  @Get('auth/github')
   @UseGuards(GithubOauthGuard)
   @SkipSerialize()
   async githubAuth() {
@@ -210,7 +238,7 @@ export class AuthController {
   }
 
   @Public()
-  @Get('github/callback')
+  @Get('auth/github/callback')
   @UseGuards(GithubOauthGuard)
   @SkipSerialize()
   async githubAuthCallback(
@@ -231,14 +259,14 @@ export class AuthController {
       this.authService.setAuthCookies(res, authSession.tokens);
 
       res.redirect(
-        UtilOAuth.buildRedirectUrl(this.configService, 'success', {
+        OAuth.buildRedirectUrl(this.configService, 'success', {
           loginMethod: LoginMethod.GITHUB,
         }),
       );
     } catch (error: unknown) {
       res.redirect(
-        UtilOAuth.buildRedirectUrl(this.configService, 'error', {
-          errorCode: UtilOAuth.resolveErrorCode(error),
+        OAuth.buildRedirectUrl(this.configService, 'error', {
+          errorCode: OAuth.resolveErrorCode(error),
         }),
       );
     }

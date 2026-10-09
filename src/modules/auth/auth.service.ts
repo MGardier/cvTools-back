@@ -9,14 +9,16 @@ import { UserService } from '../user/user.service.js';
 import { UserTokenService } from '../user-token/user-token.service.js';
 import { EmailService } from '../email/email.service.js';
 import { ConfigService } from '@nestjs/config';
-import { SignUpRequestDto } from './dto/request/sign-up.dto.js';
-import { ConfirmAccountRequestDto } from './dto/request/confirm-account.dto.js';
-import { ResetPasswordRequestDto } from './dto/request/reset-password.dto.js';
-import { TokenType } from '#src/modules/user-token/enums/token-type.enum.js';
+import type {
+  TConfirmAccountBody,
+  TResetPasswordBody,
+  TSignUpBody,
+} from '@cvtools/contracts';
+import { TokenType } from '#modules/user-token/enums/token-type.enum.js';
 import { LoginMethod, User, UserStatus } from '#prisma/generated/client.js';
 import { IAuthSession, IAuthTokens } from './types.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import { UtilHash } from '#src/shared/utils/hash.util.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import { Hash } from '#shared/utils/hash.js';
 import type { Response } from 'express';
 
 @Injectable()
@@ -68,7 +70,7 @@ export class AuthService {
     return user;
   }
 
-  async signUp(data: SignUpRequestDto): Promise<User> {
+  async signUp(data: TSignUpBody): Promise<User> {
     const hashedPassword = await this.__hashPassword(data.password);
 
     const user = await this.userService.create({
@@ -173,9 +175,7 @@ export class AuthService {
     return user;
   }
 
-  async confirmAccount(
-    confirmAccountDto: ConfirmAccountRequestDto,
-  ): Promise<void> {
+  async confirmAccount(confirmAccountDto: TConfirmAccountBody): Promise<void> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       confirmAccountDto.token,
       TokenType.CONFIRM_ACCOUNT,
@@ -208,7 +208,7 @@ export class AuthService {
     return user;
   }
 
-  async resetPassword(data: ResetPasswordRequestDto): Promise<void> {
+  async resetPassword(data: TResetPasswordBody): Promise<void> {
     const { userToken, payload } = await this.userTokenService.decodeAndGet(
       data.token,
       TokenType.FORGOT_PASSWORD,
@@ -334,14 +334,14 @@ export class AuthService {
 
   private async __hashPassword(password: string): Promise<string> {
     const saltRound = Number(this.configService.get('HASH_SALT_ROUND')) || 12;
-    return UtilHash.hash(password, saltRound);
+    return Hash.hash(password, saltRound);
   }
 
   private async __comparePassword(
     password: string,
     hashedPassword: string,
   ): Promise<boolean> {
-    return UtilHash.compare(password, hashedPassword);
+    return Hash.compare(password, hashedPassword);
   }
 
   // =============================================================================
