@@ -9,11 +9,11 @@ import { JwtManagerService } from '../jwt-manager/jwt-manager.service.js';
 import { UserTokenRepository } from './user-token.repository.js';
 import { ConfigService } from '@nestjs/config';
 import { TokenType } from './enums/token-type.enum.js';
-import { UtilHash } from '#src/shared/utils/hash.util.js';
-import { UtilRepository } from '#src/shared/utils/repository.util.js';
-import { UtilDate } from '#src/shared/utils/date.util.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import type { IPayloadJwt } from '#src/modules/jwt-manager/types.js';
+import { Hash } from '#shared/utils/hash.js';
+import { Repository } from '#shared/utils/repository.js';
+import { DateHelper } from '#shared/utils/date-helper.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import type { IPayloadJwt } from '#modules/jwt-manager/types.js';
 
 vi.mock('uuid', () => ({
   v4: vi.fn().mockReturnValue('mocked-uuid-123'),
@@ -102,11 +102,11 @@ describe('UserTokenService', () => {
         expiresIn,
       });
       configService.get.mockReturnValue(12);
-      vi.spyOn(UtilHash, 'hash').mockResolvedValue(hashedToken);
-      vi.spyOn(UtilDate, '__convertExpiresToDate').mockReturnValue(
+      vi.spyOn(Hash, 'hash').mockResolvedValue(hashedToken);
+      vi.spyOn(DateHelper, '__convertExpiresToDate').mockReturnValue(
         mockExpiresAt,
       );
-      vi.spyOn(UtilRepository, 'toPrismaTokenType').mockReturnValue(
+      vi.spyOn(Repository, 'toPrismaTokenType').mockReturnValue(
         PrismaTokenType.CONFIRM_ACCOUNT,
       );
 
@@ -125,7 +125,7 @@ describe('UserTokenService', () => {
         TokenType.CONFIRM_ACCOUNT,
       );
 
-      expect(UtilHash.hash).toHaveBeenCalledWith(rawToken, 12);
+      expect(Hash.hash).toHaveBeenCalledWith(rawToken, 12);
 
       expect(userTokenRepository.create).toHaveBeenCalledWith(
         {
@@ -157,7 +157,7 @@ describe('UserTokenService', () => {
 
       jwtManagerService.verify.mockResolvedValue(payloadWithUuid);
       userTokenRepository.findByUuid.mockResolvedValue(userToken);
-      vi.spyOn(UtilHash, 'compare').mockResolvedValue(true);
+      vi.spyOn(Hash, 'compare').mockResolvedValue(true);
 
       const result = await userTokenService.decodeAndGet(
         rawToken,
@@ -171,7 +171,7 @@ describe('UserTokenService', () => {
 
       expect(userTokenRepository.findByUuid).toHaveBeenCalledWith('uuid-123');
 
-      expect(UtilHash.compare).toHaveBeenCalledWith(rawToken, userToken.token);
+      expect(Hash.compare).toHaveBeenCalledWith(rawToken, userToken.token);
 
       expect(result).toEqual({ userToken, payload: payloadWithUuid });
     });
@@ -205,7 +205,7 @@ describe('UserTokenService', () => {
 
       jwtManagerService.verify.mockResolvedValue(payloadWithUuid);
       userTokenRepository.findByUuid.mockResolvedValue(userToken);
-      vi.spyOn(UtilHash, 'compare').mockResolvedValue(false);
+      vi.spyOn(Hash, 'compare').mockResolvedValue(false);
 
       await expect(
         userTokenService.decodeAndGet(rawToken, TokenType.REFRESH),

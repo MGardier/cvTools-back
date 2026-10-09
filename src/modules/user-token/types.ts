@@ -1,5 +1,5 @@
 import type { PrismaTokenType, UserToken } from '#prisma/generated/client.js';
-import type { IPayloadJwt } from '#src/modules/jwt-manager/types.js';
+import type { IPayloadJwt } from '#modules/jwt-manager/types.js';
 
 export interface ICreateUserToken {
   token: string;

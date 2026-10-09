@@ -5,13 +5,13 @@ import { JwtManagerService } from '../jwt-manager/jwt-manager.service.js';
 import { v4 as uuidv4 } from 'uuid';
 import { TokenType } from './enums/token-type.enum.js';
 import { UserTokenRepository } from './user-token.repository.js';
-import { IGeneratedJwt, IPayloadJwt } from '#src/modules/jwt-manager/types.js';
-import { UtilRepository } from '#src/shared/utils/repository.util.js';
-import { UtilHash } from '#src/shared/utils/hash.util.js';
+import { IGeneratedJwt, IPayloadJwt } from '#modules/jwt-manager/types.js';
+import { Repository } from '#shared/utils/repository.js';
+import { Hash } from '#shared/utils/hash.js';
 import { UserToken } from '#prisma/generated/client.js';
 import { ISavedToken, IValidatedToken } from './types.js';
-import { UtilDate } from '#src/shared/utils/date.util.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { DateHelper } from '#shared/utils/date-helper.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
 
 @Injectable()
 export class UserTokenService {
@@ -39,12 +39,12 @@ export class UserTokenService {
     );
 
     const saltRounds = Number(this.configService.get('HASH_SALT_ROUND')) || 12;
-    const hashedToken = await UtilHash.hash(token, saltRounds);
+    const hashedToken = await Hash.hash(token, saltRounds);
 
     const data = {
       token: hashedToken,
-      type: UtilRepository.toPrismaTokenType(type),
-      expiresAt: UtilDate.__convertExpiresToDate(expiresIn),
+      type: Repository.toPrismaTokenType(type),
+      expiresAt: DateHelper.__convertExpiresToDate(expiresIn),
       uuid,
     };
 
@@ -71,7 +71,7 @@ export class UserTokenService {
     if (!userToken)
       throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
 
-    const isValidToken = await UtilHash.compare(token, userToken.token);
+    const isValidToken = await Hash.compare(token, userToken.token);
     if (!isValidToken)
       throw new UnauthorizedException(ErrorCodeEnum.TOKEN_INVALID);
 
