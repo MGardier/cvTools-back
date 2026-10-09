@@ -1,8 +1,7 @@
-import type { LoginMethod } from '#prisma/generated/client.js';
+import type { TOAuthErrorQuery, TOAuthSuccessQuery } from '@cvtools/contracts';
 
 export type TOAuthRedirectType = 'success' | 'error';
 
-export interface IOAuthRedirectParams {
-  loginMethod?: LoginMethod;
-  errorCode?: string;
-}
+// Query string of the OAuth return URL, defined by @cvtools/contracts.
+export type TOAuthRedirectParams<T extends TOAuthRedirectType> =
+  T extends 'success' ? TOAuthSuccessQuery : TOAuthErrorQuery;
