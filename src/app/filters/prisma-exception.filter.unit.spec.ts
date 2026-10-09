@@ -97,7 +97,8 @@ describe('PrismaClientExceptionFilter', () => {
       expect(response.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
       expect(response.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          statusCode: HttpStatus.CONFLICT,
+          status: HttpStatus.CONFLICT,
+          code: ErrorCodeEnum.EMAIL_ALREADY_EXISTS_ERROR,
           message: ErrorCodeEnum.EMAIL_ALREADY_EXISTS_ERROR,
         }),
       );

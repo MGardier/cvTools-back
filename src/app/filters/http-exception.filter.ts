@@ -1,5 +1,6 @@
 import {
   ArgumentsHost,
+  BadRequestException,
   Catch,
   ExceptionFilter,
   HttpException,
@@ -9,11 +10,15 @@ import {
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 
+import { errorCodeSchema } from '@cvtools/contracts';
 import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { DtoErrorCodeEnum } from '#src/shared/enums/dto-error-codes.enum.js';
 import {
+  IErrorDescriptor,
   IHttpLogContext,
   IStructuredLog,
 } from '#src/shared/types/api.types.js';
+import { ErrorResponse } from '#src/shared/utils/error-response.js';
 
 type LogFormat = 'json' | 'visual' | 'both';
 
@@ -28,6 +33,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+
+    ErrorResponse.send(
+      response,
+      request,
+      this.logAndMapError(exception, request),
+    );
+  }
+
+  /** Logs the exception and maps it to { status, code, errors? }. Must not send the response: also called by the oRPC error interceptor. */
+  logAndMapError(exception: HttpException, request: Request): IErrorDescriptor {
     const statusCode = exception.getStatus();
 
     const logContext = this.buildLogContext(exception, request, statusCode);
@@ -40,19 +55,48 @@ export class HttpExceptionFilter implements ExceptionFilter {
       'message' in exceptionResponse &&
       Array.isArray((exceptionResponse as Record<string, unknown>).message);
 
-    response.status(statusCode).json({
-      success: false,
-      statusCode,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      ...(isValidationError
-        ? {
-            message: ErrorCodeEnum.VALIDATION_ERROR,
-            errors: (exceptionResponse as Record<string, unknown>)
-              .message as string[],
-          }
-        : { message: exception.message }),
-    });
+    if (isValidationError) {
+      return {
+        status: statusCode,
+        code: ErrorCodeEnum.VALIDATION_ERROR,
+        errors: (exceptionResponse as Record<string, unknown>)
+          .message as string[],
+      };
+    }
+
+    // 400 without an error code (e.g. malformed JSON body rejected by the body
+    // parser): same format as a non-object payload rejected by the contract.
+    const isErrorCode = errorCodeSchema.safeParse(exception.message).success;
+    if (exception instanceof BadRequestException && !isErrorCode) {
+      return {
+        status: statusCode,
+        code: ErrorCodeEnum.VALIDATION_ERROR,
+        errors: [DtoErrorCodeEnum.INPUT_INVALID],
+      };
+    }
+
+    return {
+      status: statusCode,
+      code: this.resolveCode(exception, statusCode),
+    };
+  }
+
+  // =============================================================================
+  //                            PRIVATE METHOD
+  // =============================================================================
+
+  // Nest / Passport default messages ("Unauthorized", "Cannot GET /x") are not
+  // error codes: they are replaced by the contract code matching their status.
+  private resolveCode(exception: HttpException, statusCode: number): string {
+    const DEFAULT_CODE_BY_STATUS: Partial<Record<number, ErrorCodeEnum>> = {
+      [HttpStatus.UNAUTHORIZED]: ErrorCodeEnum.UNAUTHORIZED,
+      [HttpStatus.NOT_FOUND]: ErrorCodeEnum.ROUTE_NOT_FOUND,
+    };
+    const isErrorCode = errorCodeSchema.safeParse(exception.message).success;
+
+    return isErrorCode
+      ? exception.message
+      : (DEFAULT_CODE_BY_STATUS[statusCode] ?? exception.message);
   }
 
   private buildLogContext(

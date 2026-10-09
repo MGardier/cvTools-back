@@ -11,11 +11,13 @@ import type { Request, Response } from 'express';
 import { Prisma } from '#prisma/generated/client.js';
 
 import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import { OAuthRedirectException } from '#src/shared/exceptions/oauth-redirect.exception.js';
+import { OAuthRedirectException } from '#src/app/exceptions/oauth-redirect.exception.js';
 import {
+  IErrorDescriptor,
   IHttpLogContext,
   IStructuredLog,
 } from '#src/shared/types/api.types.js';
+import { ErrorResponse } from '#src/shared/utils/error-response.js';
 import { HttpExceptionFilter } from './http-exception.filter.js';
 import { PrismaClientExceptionFilter } from './prisma-exception.filter.js';
 
@@ -41,35 +43,44 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (response.headersSent) return;
 
+    ErrorResponse.send(
+      response,
+      request,
+      this.logAndMapError(exception, request),
+    );
+  }
+
+  /** Logs any exception and maps it to { status, code, errors? }. Must not send the response: also called by the oRPC error interceptor. */
+  logAndMapError(exception: unknown, request: Request): IErrorDescriptor {
     if (exception instanceof Prisma.PrismaClientKnownRequestError) {
-      return this.prismaFilter.catch(exception, host);
+      return this.prismaFilter.logAndMapError(exception, request);
     }
 
     if (exception instanceof HttpException) {
-      return this.httpFilter.catch(exception, host);
+      return this.httpFilter.logAndMapError(exception, request);
     }
 
-    this.handleUnknownException(exception, request, response);
+    return this.handleUnknownException(exception, request);
   }
+
+  // =============================================================================
+  //                            PRIVATE
+  // =============================================================================
 
   private handleUnknownException(
     exception: unknown,
     request: Request,
-    response: Response,
-  ): void {
+  ): IErrorDescriptor {
     const error =
       exception instanceof Error ? exception : new Error(String(exception));
 
     const logContext = this.buildLogContext(error, request);
     this.logStructuredError(logContext, error.stack);
 
-    response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: ErrorCodeEnum.INTERNAL_SERVER_ERROR,
-      path: request.url,
-      timestamp: new Date().toISOString(),
-    });
+    return {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      code: ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+    };
   }
 
   private buildLogContext(error: Error, request: Request): IHttpLogContext {
