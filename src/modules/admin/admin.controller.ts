@@ -6,7 +6,7 @@ import { Implement, implement } from '@orpc/nest';
 import { contract, type TOAuthLoginMethod } from '@cvtools/contracts';
 import { LoginMethod } from '#prisma/generated/client.js';
 import { AdminService } from './admin.service.js';
-import { AdminInvitationService } from '../admin-invitation/admin-invitation.service.js';
+import { AdminInvitationService } from './admin-invitation/admin-invitation.service.js';
 import { AuthService } from '../auth/auth.service.js';
 import { Public } from '#shared/decorators/public.decorator.js';
 import { SkipSerialize } from '#shared/decorators/serialize.decorator.js';

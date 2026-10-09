@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { PrismaService } from '#prisma/prisma.service.js';
 import { AdminInvitationRepository } from './admin-invitation.repository.js';
-import { UserService } from '../user/user.service.js';
+import { UserService } from '#modules/user/user.service.js';
 import { Hash } from '#shared/utils/hash.js';
 import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
 

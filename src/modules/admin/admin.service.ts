@@ -17,7 +17,7 @@ import { UserService } from '../user/user.service.js';
 import { ICreateUser } from '../user/types.js';
 import { AuthService } from '../auth/auth.service.js';
 import { IAuthSession } from '../auth/types.js';
-import { AdminInvitationService } from '../admin-invitation/admin-invitation.service.js';
+import { AdminInvitationService } from './admin-invitation/admin-invitation.service.js';
 import { Hash } from '#shared/utils/hash.js';
 import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
 

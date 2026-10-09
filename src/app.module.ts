@@ -4,9 +4,7 @@ import { UserModule } from './modules/user/user.module.js';
 import { PrismaModule } from '#prisma/prisma.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { EmailModule } from './modules/email/email.module.js';
-import { UserTokenModule } from './modules/user-token/user-token.module.js';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { JwtManagerModule } from './modules/jwt-manager/jwt-manager.module.js';
 import { validateEnv } from './app/config/env.validation.js';
 import { GlobalExceptionFilter } from './app/filters/global-exception.filter.js';
 import { FiltersModule } from './app/filters/filters.module.js';
@@ -20,7 +18,6 @@ import { ScraperModule } from './modules/scraper/scraper.module.js';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { OfferModule } from './modules/offer/offer.module.js';
 import { CityModule } from './modules/city/city.module.js';
-import { AdminInvitationModule } from './modules/admin-invitation/admin-invitation.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 
@@ -39,12 +36,9 @@ import { HealthModule } from './modules/health/health.module.js';
     PrismaModule,
     AuthModule,
     EmailModule,
-    UserTokenModule,
-    JwtManagerModule,
     ScraperModule,
     OfferModule,
     CityModule,
-    AdminInvitationModule,
     AdminModule,
     HealthModule,
   ],
