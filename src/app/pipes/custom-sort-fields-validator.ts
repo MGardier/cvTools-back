@@ -3,7 +3,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { TSortItem } from '#src/shared/types/repository.types.js';
+import { TSortItem } from '#shared/types/repository.types.js';
 
 @ValidatorConstraint({ name: 'customSortFields', async: false })
 export class CustomSortFieldsValidator<

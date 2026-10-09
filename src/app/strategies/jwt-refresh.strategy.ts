@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import type { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { IPayloadJwt } from '#src/modules/jwt-manager/types.js';
-import { UserTokenService } from '#src/modules/user-token/user-token.service.js';
-import { TokenType } from '#src/modules/user-token/enums/token-type.enum.js';
+import { IPayloadJwt } from '#modules/jwt-manager/types.js';
+import { UserTokenService } from '#modules/user-token/user-token.service.js';
+import { TokenType } from '#modules/user-token/enums/token-type.enum.js';
 
 export interface IRefreshTokenPayload extends IPayloadJwt {
   refreshToken: string;

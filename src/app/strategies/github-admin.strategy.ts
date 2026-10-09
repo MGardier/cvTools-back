@@ -4,9 +4,9 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, StrategyOptions } from 'passport-github2';
 import { VerifyCallback } from 'passport-oauth2';
 
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
 import { IGithubProfile } from './types.js';
-import { TAdminOAuthIdentity } from '#src/shared/types/request.types.js';
+import { TAdminOAuthIdentity } from '#shared/types/request.types.js';
 
 @Injectable()
 export class GithubAdminStrategy extends PassportStrategy(
