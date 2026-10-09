@@ -9,11 +9,11 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtManagerModule } from './modules/jwt-manager/jwt-manager.module.js';
 import { validateEnv } from './app/config/env.validation.js';
 import { GlobalExceptionFilter } from './app/filters/global-exception.filter.js';
-import { HttpExceptionFilter } from './app/filters/http-exception.filter.js';
-import { PrismaClientExceptionFilter } from './app/filters/prisma-exception.filter.js';
+import { FiltersModule } from './app/filters/filters.module.js';
+import { OrpcModule } from './app/orpc/orpc.module.js';
 import { ResponseInterceptor } from './app/interceptors/response.interceptor.js';
 import { SerializeInterceptor } from './app/interceptors/serialize.interceptor.js';
-import { JwtAuthGuard } from './shared/guards/jwt-auth.guard.js';
+import { JwtAuthGuard } from './app/guards/jwt-auth.guard.js';
 import { CacheManagerModule } from './modules/cache/cache-manager.module.js';
 import { RabbitmqModule } from './modules/rabbitmq/rabbitmq.module.js';
 import { ScraperModule } from './modules/scraper/scraper.module.js';
@@ -31,6 +31,8 @@ import { HealthModule } from './modules/health/health.module.js';
       validate: validateEnv,
     }),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 10 }]),
+    FiltersModule,
+    OrpcModule,
     RabbitmqModule,
     CacheManagerModule,
     UserModule,
@@ -48,15 +50,13 @@ import { HealthModule } from './modules/health/health.module.js';
   ],
   controllers: [],
   providers: [
-    PrismaClientExceptionFilter,
-    HttpExceptionFilter,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
     {
       provide: APP_FILTER,
-      useClass: GlobalExceptionFilter,
+      useExisting: GlobalExceptionFilter,
     },
     {
       provide: APP_INTERCEPTOR,
