@@ -112,15 +112,17 @@ src/
 │   ├── filters/                # Exception filters (global, HTTP, Prisma) + FiltersModule
 │   ├── guards/                 # Auth guards (JWT, refresh, credentials, OAuth, throttler)
 │   ├── interceptors/           # Response envelope + serialization (classic routes)
-│   ├── orpc/                   # oRPC wiring: OrpcModule, error interceptor, context types
+│   ├── orpc/                   # oRPC wiring: OrpcModule, ContractErrorBoundary, context types
 │   ├── pipes/                  # Custom pipes
 │   └── strategies/             # Passport strategies (local, JWT, refresh, Google, GitHub)
 │
 ├── modules/                    # Business modules (one folder per domain)
 │   ├── auth/                   # Contract routes (oRPC) + OAuth redirects
+│   │   ├── jwt-manager/        # Sub-domain: JWT signing / verification (+ its types.ts)
+│   │   ├── user-token/         # Sub-domain: refresh / confirm / reset tokens (+ its types.ts)
 │   │   ├── auth.controller.ts
 │   │   ├── auth.service.ts
-│   │   ├── auth.module.ts
+│   │   ├── auth.module.ts      # Single module: also provides the sub-domain services
 │   │   └── types.ts
 │   ├── offer/                  # Classic routes: class-validator DTOs
 │   │   ├── dto/
@@ -136,8 +138,9 @@ src/
 │   │   ├── user.repository.ts
 │   │   ├── user.module.ts
 │   │   └── types.ts
-│   ├── admin/  admin-invitation/  city/  scraper/  llm/  email/
-│   └── cache/  rabbitmq/  jwt-manager/  user-token/  provider/  health/
+│   ├── admin/                  # Admin registration (+ admin-invitation/ sub-domain, no own module)
+│   ├── city/  scraper/  llm/  email/
+│   └── cache/  rabbitmq/  provider/  health/
 │
 └── shared/                     # Reusable building blocks (no framework wiring)
     ├── constants/              # Cross-module constants
@@ -223,7 +226,7 @@ export class CityController {
 - **Output** is validated and stripped by the contract schema (no `@SerializeWith`).
 - `ContractRoute.buildSuccessResponse(procedure, data, request)` (`src/shared/utils/contract-route.ts`) builds the success envelope; the status comes from the contract `successStatus`.
 - Guards (`@Public`, `@UseGuards`, `@Throttle`) work as usual. Use `@Req()` / `@Res({ passthrough: true })` for `req.user` and cookies.
-- Errors thrown in a handler are mapped and logged by `GlobalExceptionFilter.logAndMapError()` (`src/app/orpc/orpc-error.interceptor.ts`).
+- Errors thrown in a handler are mapped and logged by `GlobalExceptionFilter.logAndMapError()` (`ContractErrorBoundary`, `src/app/orpc/contract-error-boundary.ts`).
 
 **Error format** (every route, contract or not):
 
@@ -288,7 +291,7 @@ Framework wiring applied globally or to routes: everything Nest/Passport/oRPC-sp
 | `filters/` | Exception filters (error format, logging) | `GlobalExceptionFilter`, `HttpExceptionFilter`, `PrismaClientExceptionFilter` |
 | `guards/` | Authentication / rate limiting | `JwtAuthGuard`, `JwtRefreshGuard`, `GoogleOauthGuard`, `CustomThrottlerGuard` |
 | `interceptors/` | Response transformation (classic routes) | `ResponseInterceptor`, `SerializeInterceptor` |
-| `orpc/` | oRPC contract routes wiring | `OrpcModule`, `orpc-error.interceptor.ts` |
+| `orpc/` | oRPC contract routes wiring | `OrpcModule`, `ContractErrorBoundary` |
 | `pipes/` | Validation & transformation | `custom-sort-fields-validator.ts` |
 | `strategies/` | Passport strategies | `JwtAccessStrategy`, `LocalStrategy`, `GoogleStrategy` |
 
@@ -305,7 +308,9 @@ Code used by 2+ modules, without framework wiring.
 | `utils/` | Helpers (abstract class with static methods, no `Util` prefix) | `Hash`, `OAuth`, `ErrorResponse`, `ContractRoute` |
 
 **Rules:**
-- Used by a single module → inside that module.
+- Used by a single module → inside that module (a sub-domain becomes a sub-folder of its parent
+  module, without its own `*.module.ts`: its providers are declared in the parent module, e.g.
+  `auth/user-token/`, `auth/jwt-manager/`, `admin/admin-invitation/`).
 - Framework wiring (guard, filter, interceptor, strategy, pipe) → `app/`.
 - Reusable, framework-agnostic code used by 2+ modules → `shared/`.
 

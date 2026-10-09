@@ -1,6 +1,28 @@
 # cvTools Backend — Project Conventions
 
-## DTOs
+## Contract routes (oRPC)
+
+Routes declared in `@cvtools/contracts` (`env-cvTools/contracts`) are implemented with
+`@Implement(contract.x)` + `implement(contract.x).handler(...)` and return `ContractRoute.buildSuccessResponse(contract.x, data, request)`.
+Never add a DTO, `@Body`/`@Query` or `@SerializeWith` on a contract route: the contract schemas
+validate the input and strip the output. Controllers holding contract routes use `@Controller()`
+(no prefix). Validation messages in the contract are error codes (`DtoErrorCode`), never text.
+
+After any change to the contract: `pnpm build` in `env-cvTools/contracts`, then `pnpm install` here.
+
+## Imports
+
+Use the Node.js subpath import aliases (`package.json` → `imports`): `#app/*`, `#shared/*`,
+`#modules/*`, `#prisma/*`, and `#src/*` only for files at the root of `src/` (e.g. `app.module.ts`).
+Never use a `../` relative path to reach another top-level folder. Keep the `.js` extension (ESM nodenext).
+
+## Utils
+
+Shared helpers live in `src/shared/utils/<name>.ts` (no sub-folder), as an
+**abstract class with static methods** whose name does not contain `Util`
+(e.g. `Hash.compare()`, `OAuth.buildRedirectUrl()`, `ErrorResponse.send()`, `ContractRoute.buildSuccessResponse()`).
+
+## DTOs (classic routes only: offer, scraper, OAuth)
 
 All DTO class properties must use the **definite assignment assertion** (`!`)
 between the property name and the colon.
