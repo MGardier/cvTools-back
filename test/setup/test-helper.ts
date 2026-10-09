@@ -5,7 +5,7 @@ import type { LoginMethod, User } from '#prisma/generated/client.js';
 import { UserRoles, UserStatus } from '#prisma/generated/client.js';
 
 import type { PrismaService } from '#prisma/prisma.service.js';
-import { EmailService } from '#src/modules/email/email.service.js';
+import { EmailService } from '#modules/email/email.service.js';
 import type { IAuthCookies, ITestCredentials } from './types.js';
 
 // =============================================================================

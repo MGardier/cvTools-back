@@ -6,8 +6,8 @@ import { UserStatus } from '#prisma/generated/client.js';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { setupTestApp } from '../../setup/setup-test-app.js';
 import { resetDatabase } from '../../setup/reset-database.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
-import { DtoErrorCodeEnum } from '#src/shared/enums/dto-error-codes.enum.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
+import { DtoErrorCodeEnum } from '#shared/enums/dto-error-codes.enum.js';
 import {
   DEFAULT_CREDENTIALS,
   signUpUser,
@@ -76,7 +76,7 @@ describe('Auth Integration', () => {
       const response = await signUpUser(app, { email: 'not-an-email' });
 
       expect(response.status).toBe(400);
-      expect(response.body.errors).toEqual(
+      expect(response.body.data.errors).toEqual(
         expect.arrayContaining([DtoErrorCodeEnum.EMAIL_INVALID]),
       );
     });
@@ -86,16 +86,14 @@ describe('Auth Integration', () => {
 
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
-        success: false,
-        statusCode: 400,
-        message: ErrorCodeEnum.VALIDATION_ERROR,
+        defined: false,
+        status: 400,
+        code: ErrorCodeEnum.VALIDATION_ERROR,
       });
-      expect(response.body.errors).toEqual(
-        expect.arrayContaining([
-          DtoErrorCodeEnum.EMAIL_REQUIRED,
-          DtoErrorCodeEnum.EMAIL_INVALID,
-        ]),
-      );
+      // Zod stops at the first failing step: an empty email is only "required".
+      expect(response.body.data.errors).toEqual([
+        DtoErrorCodeEnum.EMAIL_REQUIRED,
+      ]);
     });
 
     /********* PASSWORD INVALID *********/
@@ -105,11 +103,11 @@ describe('Auth Integration', () => {
 
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
-        success: false,
-        statusCode: 400,
-        message: ErrorCodeEnum.VALIDATION_ERROR,
+        defined: false,
+        status: 400,
+        code: ErrorCodeEnum.VALIDATION_ERROR,
       });
-      expect(response.body.errors).toEqual(
+      expect(response.body.data.errors).toEqual(
         expect.arrayContaining([
           DtoErrorCodeEnum.PASSWORD_WEAK,
           DtoErrorCodeEnum.PASSWORD_MIN_LENGTH,
@@ -125,9 +123,9 @@ describe('Auth Integration', () => {
 
       expect(response.status).toBe(409);
       expect(response.body).toMatchObject({
-        success: false,
-        statusCode: 409,
-        message: ErrorCodeEnum.EMAIL_ALREADY_EXISTS_ERROR,
+        defined: false,
+        status: 409,
+        code: ErrorCodeEnum.EMAIL_ALREADY_EXISTS_ERROR,
       });
     });
   });
@@ -170,9 +168,9 @@ describe('Auth Integration', () => {
 
       expect(response.status).toBe(401);
       expect(response.body).toMatchObject({
-        success: false,
-        statusCode: 401,
-        message: ErrorCodeEnum.INVALID_CREDENTIALS,
+        defined: false,
+        status: 401,
+        code: ErrorCodeEnum.INVALID_CREDENTIALS,
       });
     });
 
@@ -187,9 +185,9 @@ describe('Auth Integration', () => {
 
       expect(response.status).toBe(401);
       expect(response.body).toMatchObject({
-        success: false,
-        statusCode: 401,
-        message: ErrorCodeEnum.INVALID_CREDENTIALS,
+        defined: false,
+        status: 401,
+        code: ErrorCodeEnum.INVALID_CREDENTIALS,
       });
     });
 
@@ -204,9 +202,9 @@ describe('Auth Integration', () => {
 
       expect(response.status).toBe(403);
       expect(response.body).toMatchObject({
-        success: false,
-        statusCode: 403,
-        message: ErrorCodeEnum.ACCOUNT_PENDING,
+        defined: false,
+        status: 403,
+        code: ErrorCodeEnum.ACCOUNT_PENDING,
       });
     });
 
@@ -225,9 +223,9 @@ describe('Auth Integration', () => {
 
       expect(response.status).toBe(403);
       expect(response.body).toMatchObject({
-        success: false,
-        statusCode: 403,
-        message: ErrorCodeEnum.USER_BANNED,
+        defined: false,
+        status: 403,
+        code: ErrorCodeEnum.USER_BANNED,
       });
     });
   });
@@ -401,9 +399,9 @@ describe('Auth Integration', () => {
 
       expect(response.status).toBe(404);
       expect(response.body).toMatchObject({
-        success: false,
-        statusCode: 404,
-        message: ErrorCodeEnum.USER_NOT_FOUND_ERROR,
+        defined: false,
+        status: 404,
+        code: ErrorCodeEnum.USER_NOT_FOUND_ERROR,
       });
     });
 
@@ -418,9 +416,9 @@ describe('Auth Integration', () => {
 
       expect(response.status).toBe(401);
       expect(response.body).toMatchObject({
-        success: false,
-        statusCode: 401,
-        message: ErrorCodeEnum.ACCOUNT_ALREADY_CONFIRM,
+        defined: false,
+        status: 401,
+        code: ErrorCodeEnum.ACCOUNT_ALREADY_CONFIRM,
       });
     });
   });
@@ -499,9 +497,9 @@ describe('Auth Integration', () => {
 
       expect(response.status).toBe(404);
       expect(response.body).toMatchObject({
-        success: false,
-        statusCode: 404,
-        message: ErrorCodeEnum.USER_NOT_FOUND_ERROR,
+        defined: false,
+        status: 404,
+        code: ErrorCodeEnum.USER_NOT_FOUND_ERROR,
       });
     });
   });

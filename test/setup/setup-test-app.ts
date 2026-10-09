@@ -8,9 +8,9 @@ import type {
 } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from '#src/app.module.js';
-import { EmailService } from '#src/modules/email/email.service.js';
-import { GoogleOauthGuard } from '#src/shared/guards/google-oauth.guard.js';
-import { GithubOauthGuard } from '#src/shared/guards/github-oauth.guard.js';
+import { EmailService } from '#modules/email/email.service.js';
+import { GoogleOauthGuard } from '#app/guards/google-oauth.guard.js';
+import { GithubOauthGuard } from '#app/guards/github-oauth.guard.js';
 import type { IMockUserRef } from './types.js';
 
 import session from 'express-session';

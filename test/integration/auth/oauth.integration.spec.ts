@@ -6,7 +6,7 @@ import { LoginMethod } from '#prisma/generated/client.js';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { setupTestApp, oauthMockUserRef } from '../../setup/setup-test-app.js';
 import { resetDatabase } from '../../setup/reset-database.js';
-import { ErrorCodeEnum } from '#src/shared/enums/error-codes.enum.js';
+import { ErrorCodeEnum } from '#shared/enums/error-codes.enum.js';
 import {
   createOAuthUser,
   createConfirmedUser,
